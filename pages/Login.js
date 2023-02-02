@@ -6,83 +6,116 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    return (
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  return (
+    <ImageBackground
+      source={require("../assets/background.png")}
+      resizeMode="cover"
+      style={styles.imageBackground}
+    >
       <View style={styles.container}>
         <StatusBar style="auto" />
         <View style={styles.inputView}>
           <TextInput
             style={styles.TextInput}
-            placeholder={email}
+            placeholder="Email"
             placeholderTextColor="#003f5c"
             onChangeText={(email) => setEmail(email)}
           />
         </View>
-  
+
         <View style={styles.inputView}>
           <TextInput
             style={styles.TextInput}
-            placeholder={password}
+            placeholder="Password"
             placeholderTextColor="#003f5c"
             secureTextEntry={true}
             onChangeText={(password) => setPassword(password)}
           />
         </View>
-  
+
         <TouchableOpacity>
           <Text style={styles.forgot_button}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginBtn} onPress={(email) => setEmail('mogus')}>
-          <Text style={styles.loginText}>LOGIN</Text>
-        </TouchableOpacity>
+        <View style={styles.authBtns}>
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={(email) => setEmail("mogus")}
+          >
+            <Text style={styles.loginText}>LOGIN</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.loginBtn}
+            // onPress={(email) => setEmail("mogus")}
+          >
+            <Text style={styles.loginText}>SIGN UP</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    );
-  }
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#F7F7F7",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    image: {
-      marginBottom: 40,
-    },
-    loginText: {
-      color: "#fff",
-      fontWeight: "bold",
-    },
-    inputView: {
-      backgroundColor: "#fff",
-      borderRadius: 30,
-      width: "70%",
-      height: 45,
-      marginBottom: 20,
-      alignItems: "center",
-    },
-    TextInput: {
-      height: 50,
-      width: '100%',
-      flex: 1,
-      padding: 10,
-      paddingLeft: 20,
-      marginLeft: 20,
-    },
-    forgot_button: {
-      height: 30,
-      marginBottom: 30,
-    },
-    loginBtn: {
-      width: "80%",
-      borderRadius: 25,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 40,
-      backgroundColor: "#DB2624",
-    },
-  });
+    </ImageBackground>
+  );
+}
+const styles = StyleSheet.create({
+  imageBackground: {
+    height: "95%",
+    width: "100%",
+  },
+  container: {
+    // top: 500,
+    flex: 1,
+    // backgroundColor: "#F7F7F7",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    bottom: 100,
+  },
+  image: {
+    marginBottom: 40,
+  },
+  loginText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  inputView: {
+    // backgroundColor: "#fff",
+    borderRadius: 45,
+    // borderWidth: 1,
+    borderBottomWidth: 2,
+    width: "70%",
+    height: 45,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  TextInput: {
+    height: 50,
+    width: "100%",
+    flex: 1,
+    padding: 10,
+    paddingLeft: 20,
+    marginLeft: 20,
+    borderWidth: 0,
+  },
+  forgot_button: {
+    height: 20,
+    fontSize: 12,
+    // marginTop:
+    // marginBottom: 50,
+  },
+  authBtns: {
+    marginTop: 35,
+    width: "65%",
+  },
+  loginBtn: {
+    // width: "100%",
+    margin: 10,
+    borderRadius: 25,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#DB2624",
+  },
+});
