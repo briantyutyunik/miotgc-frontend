@@ -33,7 +33,6 @@ export default function App() {
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />
-
       </View>
       <TouchableOpacity>
         <Text style={styles.forgot_button}>Forgot Password?</Text>
