@@ -15,7 +15,7 @@ export default function App() {
   const [password, setPassword] = useState("");
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={require("./assets/log2.png")} />
+      <Image style={styles.image} source={require("./assets/joe.jpg")} />
       <StatusBar style="auto" />
       <View style={styles.inputView}>
         <TextInput
