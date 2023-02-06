@@ -1,6 +1,6 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import {
   StyleSheet,
   Text,
@@ -14,7 +14,7 @@ import {
 const MainComponent = () => {
   return (
     <View>
-      <Login />
+      <Signup />
     </View>
   );
 };
