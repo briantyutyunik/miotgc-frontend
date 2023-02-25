@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "miotgc-frontend",
-    "slug": "miotgc-frontend",
+    "name": "miotgc",
+    "slug": "miotgc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,13 +14,13 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.briantyutyunik.miotgc"
     },
     "android": {
+      "package": "com.briantyutyunik.miotgc",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -28,6 +28,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "99e53b98-96b2-4b5e-a249-c3ac5b65d579"
+      }
     }
   }
 }

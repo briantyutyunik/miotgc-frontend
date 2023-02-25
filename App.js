@@ -1,6 +1,5 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import Login from "./pages/Login";
+import React, { useEffect, useState } from "react";
+import LoginScreen from "./screens/Authentication/LoginScreen";
 import {
   StyleSheet,
   Text,
@@ -10,13 +9,20 @@ import {
   Button,
   TouchableOpacity,
 } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
 
-const MainComponent = () => {
+const Stack = createNativeStackNavigator();
+
+function App() {
   return (
-    <View>
-      <Login />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Authentication" component={AuthenticationScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-};
+}
 
-export default MainComponent;
+export default App;
