@@ -9,6 +9,9 @@ import {
   TouchableOpacity,
   Button,
 } from "react-native";
+import Background from "../components/Background";
+import AuthenticationButton from "./AuthenticationButton";
+import Line from "../components/Line";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -57,10 +60,36 @@ export default function AuthenticationScreen() {
     }
   }
 
+  const Seperator = () => {
+    return (
+      <View style={styles.seperatorContainer}>
+        <Line width={140} />
+        <Text style={styles.seperatorText}>or</Text>
+        <Line width={140} />
+      </View>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      {showUserInfo()}
-      {!userInfo && (
+    <Background additionalStyle={styles.container}>
+      {/* {showUserInfo()} */}
+      <View style={styles.buttonContainer}>
+        <AuthenticationButton
+          // additionalStyle={styles.signInWithGoogleButton}
+          title={"Sign in with Google"}
+          iconImageSource={require("../../assets/images/google-icon.png")}
+          onPressHandler={() => {
+            console.log("pressed");
+          }}
+        />
+        <Seperator />
+        <AuthenticationButton title={"Sign Up"} />
+      </View>
+      <TouchableOpacity style={styles.signInButtonContainer}>
+        <Text style={styles.signInButtonText}>Sign In</Text>
+        <Line width={65} />
+      </TouchableOpacity>
+      {/* {!userInfo && (
         <TouchableOpacity
           onPress={
             accessToken
@@ -72,19 +101,46 @@ export default function AuthenticationScreen() {
         >
           <Text>{accessToken ? "Get User Data" : "Login"}</Text>
           <Image
-            source={require("../../assets/google-icon.png")}
+            source={require("../../assets/images/google-icon.png")}
             style={{ width: 50, height: 50 }}
           />
         </TouchableOpacity>
-      )}
-    </View>
+      )} */}
+    </Background>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  buttonContainer: {
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    bottom: 250,
+  },
+  seperatorContainer: {
+    flexDirection: "row",
+    padding: 20,
+    marginTop: 3,
+  },
+  seperatorText: {
+    marginTop: -10,
+    fontSize: 16,
+    marginLeft: 8,
+    marginRight: 8,
+    color: "#fff",
+  },
+  signInButtonContainer: {
+    bottom: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signInButtonText: {
+    fontWeight: "bold",
+    color: "#fff",
+    fontSize: "18",
+    marginBottom: 5,
   },
 });
