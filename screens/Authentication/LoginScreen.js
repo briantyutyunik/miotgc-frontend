@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -7,19 +6,32 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
+  KeyboardAvoidingView,
 } from "react-native";
+import { auth } from "../../firebase";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleSignUp = () => {
+    auth
+      .createUserWithEmailAndPassword(auth.getAuth(), email, password)
+      .then((userCredentials) => {
+        const user = userCredentials.user;
+        console.log(user.email);
+      });
+  };
+
   return (
     <ImageBackground
-      source={require("../assets/background.png")}
+      source={require("../../assets/images/background.png")}
       resizeMode="cover"
       style={styles.imageBackground}
     >
-      <View style={styles.container}>
-        <StatusBar style="auto" />
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <View style={styles.inputView}>
           <TextInput
             style={styles.TextInput}
@@ -45,24 +57,21 @@ export default function Login() {
         <View style={styles.authBtns}>
           <TouchableOpacity
             style={styles.loginBtn}
-            onPress={(email) => setEmail("mogus")}
+            // onPress={(email) => setEmail("mogus")}
           >
             <Text style={styles.loginText}>LOGIN</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.loginBtn}
-            // onPress={(email) => setEmail("mogus")}
-          >
+          <TouchableOpacity style={styles.loginBtn} onPress={handleSignUp}>
             <Text style={styles.loginText}>SIGN UP</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
 const styles = StyleSheet.create({
   imageBackground: {
-    height: "95%",
+    height: "100%",
     width: "100%",
   },
   container: {
