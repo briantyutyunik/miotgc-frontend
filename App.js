@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-=======
 import React, { useEffect, useState } from "react";
 import LoginScreen from "./screens/Authentication/LoginScreen";
->>>>>>> 1d539ecc1e912dce582a32a34de33ee54076067c
 import {
   StyleSheet,
   Text,
