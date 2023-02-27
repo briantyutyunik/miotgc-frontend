@@ -12,7 +12,8 @@ import {
 import Background from "../components/Background";
 import AuthenticationButton from "./AuthenticationButton";
 import Line from "../components/Line";
-
+import Logo from "../components/Logo";
+import { GOOGLE_ICON } from "../../assets/icons/Logos";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthenticationScreen() {
@@ -63,21 +64,40 @@ export default function AuthenticationScreen() {
   const Seperator = () => {
     return (
       <View style={styles.seperatorContainer}>
-        <Line width={140} />
+        <Line width={120} />
         <Text style={styles.seperatorText}>or</Text>
-        <Line width={140} />
+        <Line width={120} />
+      </View>
+    );
+  };
+
+  const SignInButton = () => {
+    return (
+      <TouchableOpacity style={styles.signInButtonContainer}>
+        <Text style={styles.signInButtonText}>Sign In</Text>
+        <Line width={65} />
+      </TouchableOpacity>
+    );
+  };
+
+  const Slogan = () => {
+    return (
+      <View style={styles.sloganContainer}>
+        <Text style={styles.sloganText}>Make Any Place Feel Like Home</Text>
       </View>
     );
   };
 
   return (
     <Background additionalStyle={styles.container}>
+      <Logo additionalStyle={styles.logo} height={120} width={120} />
+      <Slogan />
       {/* {showUserInfo()} */}
       <View style={styles.buttonContainer}>
         <AuthenticationButton
           // additionalStyle={styles.signInWithGoogleButton}
           title={"Sign in with Google"}
-          iconImageSource={require("../../assets/images/google-icon.png")}
+          iconImageSource={GOOGLE_ICON}
           onPressHandler={() => {
             console.log("pressed");
           }}
@@ -85,10 +105,7 @@ export default function AuthenticationScreen() {
         <Seperator />
         <AuthenticationButton title={"Sign Up"} />
       </View>
-      <TouchableOpacity style={styles.signInButtonContainer}>
-        <Text style={styles.signInButtonText}>Sign In</Text>
-        <Line width={65} />
-      </TouchableOpacity>
+      <SignInButton />
       {/* {!userInfo && (
         <TouchableOpacity
           onPress={
@@ -118,7 +135,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 250,
+    bottom: 170,
   },
   seperatorContainer: {
     flexDirection: "row",
@@ -142,5 +159,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: "18",
     marginBottom: 5,
+  },
+  logo: {
+    position: "absolute",
+    top: 50,
+  },
+  sloganContainer: {
+    position: "absolute",
+    top: 275,
+    width: "80%",
+    left: 15,
+  },
+  sloganText: {
+    color: "#fff",
+    fontSize: "30%",
+    fontWeight: "bold",
   },
 });
