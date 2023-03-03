@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { Dimensions } from "react-native";
+const { height } = Dimensions.get("window");
 import {
   StyleSheet,
   View,
@@ -135,7 +137,8 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 170,
+    marginTop: height * 0.1,
+    marginBottom: height * 0.1
   },
   seperatorContainer: {
     flexDirection: "row",
