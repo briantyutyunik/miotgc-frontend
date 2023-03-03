@@ -62,7 +62,7 @@ export default function Login() {
             <Text style={styles.loginText}>LOGIN</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.loginBtn} onPress={handleSignUp}>
-            <Text style={styles.loginText}>SIGN UP</Text>
+            <Text style={styles.loginText}>wfewewef UP</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -125,6 +125,6 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DB2624",
+    backgroundColor: "black",
   },
 });

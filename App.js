@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LoginScreen from "./screens/Authentication/LoginScreen";
+import ProfileScreen from "./screens/ProfileScreen";
 import {
   StyleSheet,
   Text,
@@ -19,7 +20,7 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Authentication" component={AuthenticationScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
