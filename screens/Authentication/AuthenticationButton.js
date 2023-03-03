@@ -45,7 +45,8 @@ const styles = StyleSheet.create({
   },
   iconImage: {
     position: "absolute",
-    left: 10,
-    height: "80%",
+    left: 20,
+    height: "70%",
+    width: "10%",
   },
 });

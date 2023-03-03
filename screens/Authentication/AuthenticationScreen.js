@@ -92,7 +92,6 @@ export default function AuthenticationScreen() {
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
       <Slogan />
-      {/* {showUserInfo()} */}
       <View style={styles.buttonContainer}>
         <AuthenticationButton
           // additionalStyle={styles.signInWithGoogleButton}
@@ -139,11 +138,10 @@ const styles = StyleSheet.create({
   },
   seperatorContainer: {
     flexDirection: "row",
-    padding: 20,
-    marginTop: 3,
+    padding: 15,
+    alignItems: "center",
   },
   seperatorText: {
-    marginTop: -10,
     fontSize: 16,
     marginLeft: 8,
     marginRight: 8,
