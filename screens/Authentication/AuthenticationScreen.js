@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { Dimensions } from "react-native";
-const { height } = Dimensions.get("window");
 import {
   StyleSheet,
   View,
@@ -11,17 +9,19 @@ import {
   TouchableOpacity,
   Button,
 } from "react-native";
-import Background from "../components/Background";
-import AuthenticationButton from "./AuthenticationButton";
-import Line from "../components/Line";
-import Logo from "../components/Logo";
+import Background from "../../components/UI/Background";
+import Line from "../../components/UI/Line";
+import Logo from "../../components/UI/Logo";
 import { GOOGLE_ICON } from "../../assets/icons/Logos";
+import { useNavigation } from "@react-navigation/native";
+import AuthenticationButton from "../../components/Authentication/AuthenticationButton";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthenticationScreen() {
   const [accessToken, setAccessToken] = useState();
   const [userInfo, setUserInfo] = useState();
 
+  const navigation = useNavigation();
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
       "533468859580-vouienq6fgo6bsih4cpomf7i2br8m54a.apps.googleusercontent.com",
@@ -35,6 +35,7 @@ export default function AuthenticationScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       setAccessToken(response.authentication.accessToken);
+      navigation.navigate("Home", { name: "Profile" });
     }
   }, [response]);
 
@@ -96,11 +97,10 @@ export default function AuthenticationScreen() {
       <Slogan />
       <View style={styles.buttonContainer}>
         <AuthenticationButton
-          // additionalStyle={styles.signInWithGoogleButton}
           title={"Sign in with Google"}
           iconImageSource={GOOGLE_ICON}
           onPressHandler={() => {
-            console.log("pressed");
+            promptAsync({ showInRecents: true });
           }}
         />
         <Seperator />
@@ -136,8 +136,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: height * 0.1,
-    marginBottom: height * 0.1
+    bottom: 170,
   },
   seperatorContainer: {
     flexDirection: "row",
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
   signInButtonText: {
     fontWeight: "bold",
     color: "#fff",
-    fontSize: "18",
+    fontSize: 18,
     marginBottom: 5,
   },
   logo: {
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
   },
   sloganText: {
     color: "#fff",
-    fontSize: "30%",
+    fontSize: 30,
     fontWeight: "bold",
   },
 });

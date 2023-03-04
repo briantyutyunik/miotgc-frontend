@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: "bold",
-    fontSize: "20%",
+    fontSize: 20,
   },
   iconImage: {
     position: "absolute",
