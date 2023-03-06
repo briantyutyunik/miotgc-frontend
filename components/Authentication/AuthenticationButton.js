@@ -6,26 +6,34 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function AuthenticationButton({
   title,
   onPressHandler,
   iconImageSource,
+  iconImageStyle,
   additionalStyle,
+  iconName,
+  iconSize,
+  iconColor,
 }) {
   return (
-    <TouchableOpacity style={styles.buttonContainer} onPress={onPressHandler}>
+    <TouchableOpacity
+      style={
+        additionalStyle
+          ? [styles.buttonContainer, additionalStyle]
+          : styles.buttonContainer
+      }
+      onPress={onPressHandler}
+    >
       {iconImageSource && (
-        <Image
-          source={iconImageSource}
-          style={
-            additionalStyle
-              ? [styles.iconImage, additionalStyle]
-              : styles.iconImage
-          }
-        ></Image>
+        <Image source={iconImageSource} style={iconImageStyle}></Image>
       )}
-      <Text style={styles.buttonText}>{title}</Text>
+      {iconName && iconSize && (
+        <Ionicons name={iconName} size={iconSize} color={iconColor} />
+      )}
+      {title && <Text style={styles.buttonText}>{title}</Text>}
     </TouchableOpacity>
   );
 }
@@ -42,11 +50,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: "bold",
     fontSize: 20,
-  },
-  iconImage: {
-    position: "absolute",
-    left: 20,
-    height: "70%",
-    width: "10%",
   },
 });

@@ -3,10 +3,19 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { AuthenticationNavigator, HomeNavigator } from "./navigation";
+import { auth } from "./firebase";
 
 const Stack = createNativeStackNavigator();
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState();
+
+  // useEffect(() => {
+  //   // Check if the user is logged in
+  //   const userIsLoggedIn = auth.getAuth().currentUser;
+  //   console.log(userIsLoggedIn);
+  //   setIsLoggedIn(userIsLoggedIn);
+  // }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>

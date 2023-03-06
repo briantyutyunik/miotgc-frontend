@@ -15,6 +15,9 @@ import Logo from "../../components/UI/Logo";
 import { GOOGLE_ICON } from "../../assets/icons/Logos";
 import { useNavigation } from "@react-navigation/native";
 import AuthenticationButton from "../../components/Authentication/AuthenticationButton";
+import Slogan from "../../components/UI/Slogan";
+import Seperator from "../../components/UI/Seperator";
+import SignInButton from "../../components/Authentication/SignInButton";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthenticationScreen() {
@@ -35,6 +38,7 @@ export default function AuthenticationScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       setAccessToken(response.authentication.accessToken);
+      //save user data to firebase
       navigation.navigate("Home", { name: "Profile" });
     }
   }, [response]);
@@ -64,32 +68,10 @@ export default function AuthenticationScreen() {
     }
   }
 
-  const Seperator = () => {
-    return (
-      <View style={styles.seperatorContainer}>
-        <Line width={120} />
-        <Text style={styles.seperatorText}>or</Text>
-        <Line width={120} />
-      </View>
-    );
-  };
-
-  const SignInButton = () => {
-    return (
-      <TouchableOpacity style={styles.signInButtonContainer}>
-        <Text style={styles.signInButtonText}>Sign In</Text>
-        <Line width={65} />
-      </TouchableOpacity>
-    );
-  };
-
-  const Slogan = () => {
-    return (
-      <View style={styles.sloganContainer}>
-        <Text style={styles.sloganText}>Make Any Place Feel Like Home</Text>
-      </View>
-    );
-  };
+  function onSignIn() {
+    // console.log("HERE");
+    navigation.navigate("SignIn");
+  }
 
   return (
     <Background additionalStyle={styles.container}>
@@ -99,6 +81,7 @@ export default function AuthenticationScreen() {
         <AuthenticationButton
           title={"Sign in with Google"}
           iconImageSource={GOOGLE_ICON}
+          iconImageStyle={styles.googleImageIcon}
           onPressHandler={() => {
             promptAsync({ showInRecents: true });
           }}
@@ -106,24 +89,7 @@ export default function AuthenticationScreen() {
         <Seperator />
         <AuthenticationButton title={"Sign Up"} />
       </View>
-      <SignInButton />
-      {/* {!userInfo && (
-        <TouchableOpacity
-          onPress={
-            accessToken
-              ? getUserData
-              : () => {
-                  promptAsync({ showInRecents: true });
-                }
-          }
-        >
-          <Text>{accessToken ? "Get User Data" : "Login"}</Text>
-          <Image
-            source={require("../../assets/images/google-icon.png")}
-            style={{ width: 50, height: 50 }}
-          />
-        </TouchableOpacity>
-      )} */}
+      <SignInButton onPressHandler={onSignIn} />
     </Background>
   );
 }
@@ -138,41 +104,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     bottom: 170,
   },
-  seperatorContainer: {
-    flexDirection: "row",
-    padding: 15,
-    alignItems: "center",
-  },
-  seperatorText: {
-    fontSize: 16,
-    marginLeft: 8,
-    marginRight: 8,
-    color: "#fff",
-  },
-  signInButtonContainer: {
-    bottom: 25,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signInButtonText: {
-    fontWeight: "bold",
-    color: "#fff",
-    fontSize: 18,
-    marginBottom: 5,
-  },
   logo: {
     position: "absolute",
     top: 50,
   },
-  sloganContainer: {
+  googleImageIcon: {
     position: "absolute",
-    top: 275,
-    width: "80%",
-    left: 15,
-  },
-  sloganText: {
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: "bold",
+    left: 20,
+    height: "70%",
+    width: "10%",
   },
 });

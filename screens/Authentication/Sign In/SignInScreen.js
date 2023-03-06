@@ -1,129 +1,106 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-  KeyboardAvoidingView,
-} from "react-native";
-
+import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import { StyleSheet, Text, View, KeyboardAvoidingView } from "react-native";
+import { PRIMARY_COLOR } from "../../../assets/colors/Colors";
+import AuthenticationButton from "../../../components/Authentication/AuthenticationButton";
+import AuthInput from "../../../components/Authentication/Sign In/AuthInput";
+import Background from "../../../components/UI/Background";
+import Logo from "../../../components/UI/Logo";
+import { auth, userSignIn } from "../../../firebase";
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState(false);
 
-  // const handleSignUp = () => {
-  //   auth
-  //     .createUserWithEmailAndPassword(auth.getAuth(), email, password)
-  //     .then((userCredentials) => {
-  //       const user = userCredentials.user;
-  //       console.log(user.email);
-  //     });
-  // };
+  const navigator = useNavigation();
+
+  const handleSignUp = () => {
+    // auth
+    //   .createUserWithEmailAndPassword(auth.getAuth(), email, password)
+    //   .then((userCredentials) => {
+    //     const user = userCredentials.user;
+    //     console.log(user.email);
+    //   });
+  };
+
+  function SignInDirections() {
+    return (
+      <View style={styles.signInDirectionContainer}>
+        <Text style={styles.signInDirectionText}>Log in to Miotgc</Text>
+      </View>
+    );
+  }
+
+  function handleAuthenticationRequest() {
+    // use firebase function to sign in the user + handle error
+    userSignIn(email, password);
+  }
 
   return (
-    // <ImageBackground
-    //   source={require("../../assets/images/background.png")}
-    //   resizeMode="cover"
-    //   style={styles.imageBackground}
-    // >
-    //   <KeyboardAvoidingView style={styles.container} behavior="padding">
-    //     <View style={styles.inputView}>
-    //       <TextInput
-    //         style={styles.TextInput}
-    //         placeholder="Email"
-    //         placeholderTextColor="#003f5c"
-    //         onChangeText={(email) => setEmail(email)}
-    //       />
-    //     </View>
-
-    //     <View style={styles.inputView}>
-    //       <TextInput
-    //         style={styles.TextInput}
-    //         placeholder="Password"
-    //         placeholderTextColor="#003f5c"
-    //         secureTextEntry={true}
-    //         onChangeText={(password) => setPassword(password)}
-    //       />
-    //     </View>
-
-    //     <TouchableOpacity>
-    //       <Text style={styles.forgot_button}>Forgot Password?</Text>
-    //     </TouchableOpacity>
-    //     <View style={styles.authBtns}>
-    //       <TouchableOpacity
-    //         style={styles.loginBtn}
-    //         // onPress={(email) => setEmail("mogus")}
-    //       >
-    //         <Text style={styles.loginText}>LOGIN</Text>
-    //       </TouchableOpacity>
-    //       <TouchableOpacity style={styles.loginBtn} onPress={handleSignUp}>
-    //         <Text style={styles.loginText}>wfewewef UP</Text>
-    //       </TouchableOpacity>
-    //     </View>
-    //   </KeyboardAvoidingView>
-    // </ImageBackground>
-
-    <View></View>
+    <Background additionalStyle={styles.container}>
+      <Logo additionalStyle={styles.logo} height={120} width={120} />
+      <SignInDirections />
+      <KeyboardAvoidingView
+        style={styles.authInputContainer}
+        behavior="padding"
+      >
+        <AuthInput
+          placeholder="Email"
+          onChangeTextHandler={(text) => setEmail(text)}
+          inputType="email"
+        />
+        <AuthInput
+          placeholder="Password"
+          onChangeTextHandler={(text) => setPassword(text)}
+          secureTextEntry
+        />
+        {
+          //authError && <Error />
+        }
+        <AuthenticationButton
+          additionalStyle={styles.authenticationButtonContainer}
+          iconName="arrow-forward-outline"
+          iconSize={40}
+          iconStyle={styles.authIcon}
+          iconColor={PRIMARY_COLOR}
+          onPressHandler={handleAuthenticationRequest}
+        />
+      </KeyboardAvoidingView>
+    </Background>
   );
 }
 const styles = StyleSheet.create({
-  imageBackground: {
-    height: "100%",
-    width: "100%",
-  },
   container: {
-    // top: 500,
-    flex: 1,
-    // backgroundColor: "#F7F7F7",
     alignItems: "center",
     justifyContent: "flex-end",
-    bottom: 100,
   },
-  image: {
-    marginBottom: 40,
+  logo: {
+    position: "absolute",
+    top: 50,
   },
-  loginText: {
+  signInDirectionContainer: {
+    position: "absolute",
+    top: 220,
+    width: "75%",
+
+    // left: 15,
+  },
+  signInDirectionText: {
     color: "#fff",
+    fontSize: 30,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  inputView: {
-    // backgroundColor: "#fff",
-    borderRadius: 45,
-    // borderWidth: 1,
-    borderBottomWidth: 2,
-    width: "70%",
-    height: 45,
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  TextInput: {
-    height: 50,
+  authInputContainer: {
     width: "100%",
-    flex: 1,
-    padding: 10,
-    paddingLeft: 20,
-    marginLeft: 20,
-    borderWidth: 0,
+    alignItems: "center",
+    marginBottom: 300,
   },
-  forgot_button: {
-    height: 20,
-    fontSize: 12,
-    // marginTop:
-    // marginBottom: 50,
-  },
-  authBtns: {
-    marginTop: 35,
-    width: "65%",
-  },
-  loginBtn: {
-    // width: "100%",
-    margin: 10,
-    borderRadius: 25,
-    height: 50,
+  authenticationButtonContainer: {
+    width: "30%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "black",
+    alignContent: "center",
+    marginTop: 35,
   },
 });

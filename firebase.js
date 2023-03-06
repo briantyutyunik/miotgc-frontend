@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 import * as firebase from "firebase/app";
 import * as auth from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -22,4 +23,18 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 
-export { auth };
+export function userSignIn(email, password) {
+  auth
+    .signInWithEmailAndPassword(auth.getAuth(), email, password)
+    .then(() => {
+      // if valid sign in - navigate to profile screen (Use context or whatever you watch)
+      // ex: navigator.navigate("Home", { name: "Profile" });
+    })
+    .catch((error) => {
+      // indicate the user that there is an error logging in - pass the error.message to your
+      // <Error/> component in the way you want
+      console.log(error.message);
+    });
+}
+
+export { firebase, auth };
