@@ -1,6 +1,13 @@
-import { StyleSheet, Text, View, KeyboardAvoidingView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  KeyboardAvoidingView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import Button from "../../../components/UI/Button";
@@ -8,26 +15,27 @@ import Background from "../../../components/UI/Background";
 import Logo from "../../../components/UI/Logo";
 
 import { auth, userSignIn } from "Color../../../firebase";
+import { AuthContext } from "../../../store/auth-context";
+import { GOOGLE_ICON } from "../../../assets/icons/Logos";
+import Seperator from "../../../components/UI/Seperator";
 
 export default function SignInScreen() {
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const authCtx = useContext(AuthContext);
 
-  const [isAuthenticating, setIsAuthenticating] = useState(false)
-  const authCtx = useContext(AuthContext)
-
-
-  async function signUpHandler({email, password}){
-    setIsAuthenticating(true)
-    try{
-      await createUser(email, password)
-      authCtx.authenticate()
-    }catch(error){
+  async function signUpHandler({ email, password }) {
+    setIsAuthenticating(true);
+    try {
+      await createUser(email, password);
+      authCtx.authenticate();
+    } catch (error) {
       Alert.alert(
-        'Authentication failed',
-        'Could not create user, please check your input and try again.'
-      )
+        "Authentication failed",
+        "Could not create user, please check your input and try again."
+      );
     }
   }
-  
+
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -36,10 +44,7 @@ export default function SignInScreen() {
   const [authError, setAuthError] = useState(false);
   const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
 
-
-
   function SignInDirections() {
-
     const navigator = useNavigation();
 
     return (
@@ -61,8 +66,6 @@ export default function SignInScreen() {
     setEmail(text);
     setIsEmailValid(validateEmail(text));
   }
-
-
 
   const handlePasswordChange = (text) => {
     setPassword(text);
@@ -105,7 +108,7 @@ export default function SignInScreen() {
           disabled={isLoginButtonDisabled}
           iconStyle={styles.authIcon}
           iconColor={PRIMARY_COLOR}
-          onPressHandler={onSignIn}
+          onPressHandler={handleAuthenticationRequest}
         />
       </KeyboardAvoidingView>
       <View>

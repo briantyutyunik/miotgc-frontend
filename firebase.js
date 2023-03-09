@@ -6,7 +6,6 @@ import * as firebase from "firebase/app";
 import * as auth from "firebase/auth";
 import { useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
-import ProfileScreen from "./screens/Home/ProfileScreen";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries

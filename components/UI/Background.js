@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { PRIMARY_COLOR } from "../../assets/colors/Colors";
+import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function Background({ children, additionalStyle }) {
   return (

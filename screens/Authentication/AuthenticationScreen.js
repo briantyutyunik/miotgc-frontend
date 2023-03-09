@@ -14,13 +14,14 @@ import Line from "../../components/UI/Line";
 import Logo from "../../components/UI/Logo";
 import { GOOGLE_ICON } from "../../assets/icons/Logos";
 import { useNavigation } from "@react-navigation/native";
-import AuthenticationButton from "../../components/Authentication/AuthenticationButton";
 import Slogan from "../../components/UI/Slogan";
 import Seperator from "../../components/UI/Seperator";
-import SignInButton from "../../components/Authentication/SignInButton";
+import AuthenticationButton from "../../components/Auth/AuthenticationButton";
 WebBrowser.maybeCompleteAuthSession();
 
-export default function AuthenticationButton() {
+export default function AuthenticationScreen() {
+  const navigation = useNavigation();
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
       "533468859580-vouienq6fgo6bsih4cpomf7i2br8m54a.apps.googleusercontent.com",
@@ -89,7 +90,7 @@ export default function AuthenticationButton() {
         <Seperator />
         <AuthenticationButton title={"Sign Up"} onPressHandler={onSignUp} />
       </View>
-      <SignInButton onPressHandler={onSignIn} />
+      <Button title="Sign In" onPress={onSignIn} />
     </Background>
   );
 }
