@@ -20,11 +20,7 @@ import Seperator from "../../components/UI/Seperator";
 import SignInButton from "../../components/Authentication/SignInButton";
 WebBrowser.maybeCompleteAuthSession();
 
-export default function AuthenticationScreen() {
-  const [accessToken, setAccessToken] = useState();
-  const [userInfo, setUserInfo] = useState();
-
-  const navigation = useNavigation();
+export default function AuthenticationButton() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
       "533468859580-vouienq6fgo6bsih4cpomf7i2br8m54a.apps.googleusercontent.com",
@@ -73,6 +69,10 @@ export default function AuthenticationScreen() {
     navigation.navigate("SignIn");
   }
 
+  function onSignUp() {
+    navigation.navigate("SignUp");
+  }
+
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
@@ -87,7 +87,7 @@ export default function AuthenticationScreen() {
           }}
         />
         <Seperator />
-        <AuthenticationButton title={"Sign Up"} />
+        <AuthenticationButton title={"Sign Up"} onPressHandler={onSignUp} />
       </View>
       <SignInButton onPressHandler={onSignIn} />
     </Background>

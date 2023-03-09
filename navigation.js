@@ -24,7 +24,7 @@ export const AuthenticationNavigator = () => {
 export const HomeNavigator = () => {
   return (
     <HomeStack.Navigator>
-      <HomeStack.Screen name="Profile" component={ProfileScreen} />
+      <HomeStack.Screen name="Profile" component={UserProfileScreen} />
     </HomeStack.Navigator>
   );
 };
