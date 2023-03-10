@@ -4,8 +4,9 @@
 import { useNavigation } from "@react-navigation/native";
 import * as firebase from "firebase/app";
 import * as auth from "firebase/auth";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
+import { AuthContext } from "./store/auth-context";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,24 +28,23 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 
 export function userSignIn(email, password) {
-  const navigation = useNavigation();
-  const [error, setError] = setError();
+  // const [error, setError] = useState();
+  // const authCtx = useContext(AuthContext);
+  console.log(email, password);
   auth
-    .signInWithEmailAndPassword(auth.getAuth(), email, password)
-    .then(() => {
+    .signInWithEmailAndPassword(auth.getAuth(), "test@test.com", "testtest")
+    .then((userCredentials) => {
       // if valid sign in - navigate to profile screen (Use context or whatever you watch)
       // ex: navigator.navigate("Home", { name: "Profile" });
-      navigation.navigate("Home");
+      console.log(userCredentials.user.getIdToken);
+      // authCtx.authenticate(userCredentials.user.getIdToken);
     })
     .catch((error) => {
       // indicate the user that there is an error logging in - pass the error.message to your
       // <Error/> component in the way you want
-      setError("Invalid email or password.");
+      // setError("Invalid email or password.");
       console.log(error.code, error.message);
     });
-  // if (error) {
-  //   return <ErrorOverlay message={error} />;
-  // }
 }
 
 export { firebase, auth };

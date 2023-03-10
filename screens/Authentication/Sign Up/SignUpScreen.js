@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, KeyboardAvoidingView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  KeyboardAvoidingView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 
@@ -11,20 +18,18 @@ import { AuthContext } from "../../../store/auth-context";
 import { auth, userSignIn } from "../../../firebase";
 
 export default function SignUpScreen() {
-  const [isAuthenticating, setIsAuthenticating] = useState(false)
-  const authCtx = useContext(AuthContext)
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-
-  async function signUpHandler({email, password}){
-    setIsAuthenticating(true)
-    try{
-      await createUser(email, password)
-      authCtx.authenticate()
-    }catch(error){
+  async function signUpHandler({ email, password }) {
+    setIsAuthenticating(true);
+    try {
+      await createUser(email, password);
+      authCtx.authenticate();
+    } catch (error) {
       Alert.alert(
-        'Authentication failed',
-        'Could not create user, please check your input and try again.'
-      )
+        "Authentication failed",
+        "Could not create user, please check your input and try again."
+      );
     }
   }
   const [email, setEmail] = useState("");
@@ -75,8 +80,10 @@ export default function SignUpScreen() {
     setIsPasswordValid(validatePassword(text));
   };
 
+  function handleAuthenticationRequest() {}
 
-  
+  function toggleShowPassword() {}
+
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
@@ -107,15 +114,15 @@ export default function SignUpScreen() {
           </TouchableOpacity>
         </View>
 
-        <Button
+        {/* <Button
           additionalStyle={styles.signUpButton}
           iconName="arrow-forward-outline"
           iconSize={40}
           disabled={isSignUpButtonDisabled}
           iconStyle={styles.authIcon}
           iconColor={PRIMARY_COLOR}
-          onPressHandler={onSignUp}
-        />
+          onPress={onSignUp}
+        /> */}
       </KeyboardAvoidingView>
     </Background>
   );
@@ -147,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 300,
   },
-  authenticationButtonContainer: {
+  ButtonContainer: {
     width: "30%",
     alignItems: "center",
     justifyContent: "center",

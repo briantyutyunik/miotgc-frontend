@@ -1,25 +1,41 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Line from "../../UI/Line";
 
 export default function AuthInput({
   placeholder,
   onChangeTextHandler,
   inputType,
-  secureTextEntry,
+  secure,
 }) {
+  const [secureIcon, setSecureIcon] = useState(secure);
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.inputText}
         placeholder={placeholder}
-        placeholderTextColor="#524d4d"
+        placeholderTextColor="#708090"
         onChangeText={onChangeTextHandler}
         keyboardType={inputType === "email" ? "email-address" : "default"}
-        secureTextEntry={secureTextEntry}
+        secureTextEntry={secureIcon}
         autoCapitalize={false}
         // autoFocus={inputType === "email"}
       />
+      {inputType === "password" && (
+        <TouchableOpacity
+          style={styles.showIconContainer}
+          onPress={() => setSecureIcon(!secureIcon)}
+        >
+          <Ionicons name="eye-outline" size={20} color={"#fff"} />
+        </TouchableOpacity>
+      )}
       <Line />
     </View>
   );
@@ -36,5 +52,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     paddingLeft: 10,
+  },
+  showIconContainer: {
+    position: "absolute",
+    right: 5,
+    top: 2,
+  },
+  showIconPressed: {
+    color: "grey",
   },
 });

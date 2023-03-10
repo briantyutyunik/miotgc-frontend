@@ -12,40 +12,50 @@ import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
-function AuthNavigator() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Authentication" component={AuthenticationScreen} />
-      <Stack.Screen name="SignIn" component={SignInScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function HomeNavigator() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Profile" component={UserProfileScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function Navigation() {
-  const authCtx = useContext(AuthContext);
-  return (
-    <NavigationContainer>
-      {!authCtx.isAuthenticated && <AuthNavigator />}
-      {authCtx.isAuthenticated && <HomeNavigator />}
-    </NavigationContainer>
-  );
-}
-
 export default function App() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const unsubscribe = auth.getAuth().onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+    // Unsubscribe from the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
+
+  function AuthNavigator() {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Authentication" component={AuthenticationScreen} />
+        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  function HomeNavigator() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen name="Profile" component={UserProfileScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  function Navigation() {
+    return (
+      <NavigationContainer>
+        {!user && <AuthNavigator />}
+        {!!user && <HomeNavigator />}
+      </NavigationContainer>
+    );
+  }
+
   return (
     <>
-      <AuthContextProvider>
-        <Navigation />
-      </AuthContextProvider>
+      <Navigation />
     </>
   );
 }

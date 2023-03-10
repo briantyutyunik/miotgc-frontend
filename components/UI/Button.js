@@ -1,23 +1,45 @@
-import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Button({ children, onPress, booleanProp }) {
-  <Pressable
-    style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-  >
-    <View>
-      <Text style={styles.buttonText}>{children}</Text>
-    </View>
-  </Pressable>;
+export default function Button({
+  title,
+  onPress,
+  containerStyle,
+  iconName,
+  iconSize,
+  iconPositionStyle,
+  iconColor,
+  textStyle,
+}) {
+  return (
+    <TouchableOpacity
+      style={
+        containerStyle
+          ? [styles.buttonContainer, containerStyle]
+          : styles.buttonContainer
+      }
+      onPress={onPress}
+    >
+      {iconName && iconSize && (
+        <View style={iconPositionStyle}>
+          <Ionicons name={iconName} size={iconSize} color={iconColor} />
+        </View>
+      )}
+      {title && (
+        <Text
+          style={textStyle ? [styles.buttonText, textStyle] : styles.buttonText}
+        >
+          {title}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    height: 60,
-    width: "80%",
+  buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 100,
   },
   buttonText: {
     fontWeight: "bold",

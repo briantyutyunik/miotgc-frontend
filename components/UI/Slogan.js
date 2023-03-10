@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 275,
     width: "80%",
-    left: 15,
+    left: 30,
   },
   sloganText: {
     color: "#fff",

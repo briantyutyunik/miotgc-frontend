@@ -1,28 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Button,
-} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
 import Background from "../../components/UI/Background";
-import Line from "../../components/UI/Line";
 import Logo from "../../components/UI/Logo";
-import { GOOGLE_ICON } from "../../assets/icons/Logos";
 import { useNavigation } from "@react-navigation/native";
 import Slogan from "../../components/UI/Slogan";
 import Seperator from "../../components/UI/Seperator";
-import AuthenticationButton from "../../components/Auth/AuthenticationButton";
-import { AuthContext } from "../../store/auth-context";
+import Button from "../../components/UI/Button";
+import { auth, userSignIn } from "Color../../../firebase";
+import { PRIMARY_COLOR } from "../../constants/styles";
+import Line from "../../components/UI/Line";
+
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthenticationScreen() {
   const navigation = useNavigation();
-  const authCtx = useContext(AuthContext);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
@@ -37,8 +30,24 @@ export default function AuthenticationScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       // save user info
-      authCtx.authenticate(response.authentication.accessToken);
-      console.log(authCtx.token);
+      // authCtx.authenticate(response.authentication.accessToken);
+      // console.log(auth.getAuth().curr/entUser?.getIdToken);
+      const credential = auth.GoogleAuthProvider.credential(
+        response.authentication.idToken,
+        response.authentication.accessToken
+      );
+
+      auth
+        .signInWithCredential(auth.getAuth(), credential)
+        .then(() => {
+          console.log("User signed in with Google");
+          console.log(auth.getAuth().currentUser.email);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      console.log(response?.type);
     }
   }, [response]);
 
@@ -80,19 +89,33 @@ export default function AuthenticationScreen() {
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
       <Slogan />
-      <View style={styles.buttonContainer}>
-        <AuthenticationButton
+      <View style={styles.authButtonsContainer}>
+        <Button
+          containerStyle={styles.buttonContainer}
           title={"Sign in with Google"}
-          iconImageSource={GOOGLE_ICON}
-          iconImageStyle={styles.googleImageIcon}
-          onPressHandler={() => {
+          iconName="logo-google"
+          iconSize={35}
+          iconColor={PRIMARY_COLOR}
+          iconPositionStyle={styles.googleImageIcon}
+          onPress={() => {
             promptAsync({ showInRecents: true });
           }}
         />
         <Seperator />
-        <AuthenticationButton title={"Sign Up"} onPressHandler={onSignUp} />
+        <Button
+          containerStyle={styles.buttonContainer}
+          title={"Sign Up"}
+          onPress={onSignUp}
+        />
       </View>
-      <Button title="Sign In" onPress={onSignIn} />
+
+      <Button
+        containerStyle={styles.signInContainer}
+        textStyle={styles.signInText}
+        additionalStyle={{ color: { PRIMARY_COLOR } }}
+        title="Sign In"
+        onPress={onSignIn}
+      />
     </Background>
   );
 }
@@ -101,12 +124,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
   },
-  buttonContainer: {
+  authButtonsContainer: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     bottom: 170,
   },
+  buttonContainer: {
+    height: 60,
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 100,
+  },
+
   logo: {
     position: "absolute",
     top: 50,
@@ -114,7 +144,13 @@ const styles = StyleSheet.create({
   googleImageIcon: {
     position: "absolute",
     left: 20,
-    height: "70%",
-    width: "10%",
+  },
+  signInContainer: {
+    position: "absolute",
+    bottom: 20,
+  },
+  signInText: {
+    color: "#fff",
+    fontSize: 18,
   },
 });
