@@ -1,32 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { AuthenticationNavigator, HomeNavigator } from "./navigation";
 import { auth } from "./firebase";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
+import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
+import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
+import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
+import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
+
 const Stack = createNativeStackNavigator();
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState();
-
-  // useEffect(() => {
-  //   // Check if the user is logged in
-  //   const userIsLoggedIn = auth.getAuth().currentUser;
-  //   console.log(userIsLoggedIn);
-  //   setIsLoggedIn(userIsLoggedIn);
-  // }, []);
+function AuthNavigator() {
   return (
-    <AuthContextProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Auth" component={AuthenticationNavigator} />
-          <Stack.Screen name="Home" component={HomeNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </AuthContextProvider>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Authentication" component={AuthenticationScreen} />
+      <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+    </Stack.Navigator>
   );
 }
 
-export default App;
+function HomeNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Profile" component={UserProfileScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function Navigation() {
+  const authCtx = useContext(AuthContext);
+  return (
+    <NavigationContainer>
+      {!authCtx.isAuthenticated && <AuthNavigator />}
+      {authCtx.isAuthenticated && <HomeNavigator />}
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <AuthContextProvider>
+        <Navigation />
+      </AuthContextProvider>
+    </>
+  );
+}

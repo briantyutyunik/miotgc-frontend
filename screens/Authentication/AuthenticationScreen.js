@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import {
@@ -17,10 +17,12 @@ import { useNavigation } from "@react-navigation/native";
 import Slogan from "../../components/UI/Slogan";
 import Seperator from "../../components/UI/Seperator";
 import AuthenticationButton from "../../components/Auth/AuthenticationButton";
+import { AuthContext } from "../../store/auth-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthenticationScreen() {
   const navigation = useNavigation();
+  const authCtx = useContext(AuthContext);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
@@ -34,9 +36,9 @@ export default function AuthenticationScreen() {
   // apparently doesnt work in android most of the time ... response seems to return 'dismiss' most of the time
   useEffect(() => {
     if (response?.type === "success") {
-      setAccessToken(response.authentication.accessToken);
-      //save user data to firebase
-      navigation.navigate("Home", { name: "Profile" });
+      // save user info
+      authCtx.authenticate(response.authentication.accessToken);
+      console.log(authCtx.token);
     }
   }, [response]);
 
