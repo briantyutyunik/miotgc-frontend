@@ -7,15 +7,10 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-
 import { PRIMARY_COLOR } from "../../../constants/styles";
-
 import Background from "../../../components/UI/Background";
 import Logo from "../../../components/UI/Logo";
-
-import { auth, userSignIn } from "../../../firebase";
 import UserAvatar from "../../../components/UI/UserAvatar";
 import User from "../../../models/User";
 import AuthInput from "../../../components/Auth/Sign In/AuthInput";
