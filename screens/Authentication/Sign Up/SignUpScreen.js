@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
   signUpButtonContainer: {
     justifyContent: "flex-end",
     position: "absolute",
+    marginTop: 20,
     top: "90%",
     height: 50,
     width: "35%",
