@@ -19,8 +19,38 @@ import Card from "../../../components/UI/Card";
 import Line from "../../../components/UI/Line";
 
 export default function SignUpScreen() {
-  const [formValues, setFormValues] = useState(User);
+  const [formValues, setFormValues] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    userName: "",
+    phoneNumber: "",
+    birthDate: "",
+  });
 
+  // Add a state variable to keep track of whether all the required fields are filled in or not
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Update the state variable when a required field is filled in
+  const handleInputChange = (inputName, inputValue) => {
+    setFormValues({ ...formValues, [inputName]: inputValue });
+
+    // Check if all the required fields have been filled in
+    if (
+      formValues.firstName !== "" &&
+      formValues.lastName !== "" &&
+      formValues.email !== "" &&
+      formValues.password !== "" &&
+      formValues.userName !== "" &&
+      formValues.phoneNumber !== "" &&
+      formValues.birthDate !== ""
+    ) {
+      setIsFormValid(true);
+    } else {
+      setIsFormValid(false);
+    }
+  };
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={100} width={100} />
@@ -41,27 +71,79 @@ export default function SignUpScreen() {
           contentContainerStyle={styles.formValueContainer}
         >
           <View style={styles.nameViewContainer}>
-            <AuthInput
+            <TextInput
+              style={[styles.inputText, styles.nameInputFields]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
               placeholder="First Name"
+              onChangeText={(text) => handleInputChange("firstName", text)}
               containerStyle={[styles.nameContainerStyle, { marginRight: 5 }]}
             />
-            <AuthInput
+            <TextInput
+              style={[styles.inputText, styles.nameInputFields]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
               placeholder="Last Name"
+              onChangeText={(text) => handleInputChange("lastName", text)}
               containerStyle={[styles.nameContainerStyle, { marginLeft: 5 }]}
             />
           </View>
-          <AuthInput placeholder="User Name" />
-          <AuthInput placeholder="Phone Number" />
-          <AuthInput placeholder="Birthdate (mm/dd/yyyy)" />
-          <AuthInput placeholder="Email address" inputType="email" />
-          <AuthInput placeholder="Password" inputType="password" secure />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[styles.inputText, styles.inputField]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
+              placeholder="User Name"
+              onChangeText={(text) => handleInputChange("userName", text)}
+            />
+            <TextInput
+              style={[styles.inputText, styles.inputField]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
+              placeholder="Phone Number"
+              onChangeText={(text) => handleInputChange("phoneNumber", text)}
+            />
+            <TextInput
+              style={[styles.inputText, styles.inputField]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
+              placeholder="Birthdate (mm/dd/yyyy)"
+              onChangeText={(text) => handleInputChange("birthDate", text)}
+            />
+            <TextInput
+              style={[styles.inputText, styles.inputField]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
+              placeholder="Email address"
+              onChangeText={(text) => handleInputChange("email", text)}
+            />
+            <TextInput
+              style={[styles.inputText, styles.inputField]}
+              placeholderTextColor="#708090"
+              keyboardType={"default"}
+              autoCapitalize="none" // autoFocus={inputType === "email"}
+              placeholder="Password"
+              secure
+              onChangeText={(text) => handleInputChange("password", text)}
+            />
+          </View>
         </ScrollView>
       </Card>
       <Button
-        containerStyle={styles.signUpButtonContainer}
+        containerStyle={[
+          styles.signUpButtonContainer,
+          !isFormValid && styles.disabledButton,
+        ]}
+        disabled={!isFormValid}
         iconName={"arrow-forward-outline"}
         iconSize={40}
-        iconColor={PRIMARY_COLOR}
+        iconColor={isFormValid ? PRIMARY_COLOR : "grey"}
         // onPress={handleAuthenticationRequest}
       />
     </Background>
@@ -77,7 +159,8 @@ const styles = StyleSheet.create({
   },
   nameViewContainer: {
     flexDirection: "row",
-    width: "75%",
+    
+    width: 250,
     justifyContent: "space-between",
   },
   avatarContainerStyle: {
@@ -87,7 +170,7 @@ const styles = StyleSheet.create({
   },
   authInputContainer: {
     width: "90%",
-    top: "10%",
+    top: "15%",
     alignItems: "center",
     marginTop: 25,
   },
@@ -118,10 +201,58 @@ const styles = StyleSheet.create({
   signUpHeaderContainer: {
     marginBottom: 30,
   },
+  disabledButton: {
+    backgroundColor: "#595959",
+  },
   signUpHeader: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 5,
     color: PRIMARY_COLOR,
+  },
+  inputContainer:{
+
+  },
+  nameInputFields:{
+    width: 125,
+    marginRight:5,
+    justifyContent: "center",
+    alignItems:"start",
+    marginBottom: 25,
+    borderColor: PRIMARY_COLOR,
+    borderRadius: 10,
+    borderWidth: 2,
+  },
+  inputField: {
+    width: 250,
+    // height: "22%",
+    justifyContent: "center",
+    marginBottom: 25,
+    borderColor: PRIMARY_COLOR,
+    borderRadius: 10,
+    borderWidth: 2,
+  },
+  inputText: {
+    color: "#000",
+    fontSize: 16,
+    padding: 15,
+    // marginBottom: 10,
+    // paddingLeft: 10,
+  },
+  inputShowIconContainer: {
+    position: "absolute",
+    right: 5,
+    top: 2,
+  },
+  inputShowIconPressed: {
+    color: "grey",
+  },
+  inputError: {
+    color: "red",
+    marginBottom: 5,
+  },
+  inputErrorMessageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

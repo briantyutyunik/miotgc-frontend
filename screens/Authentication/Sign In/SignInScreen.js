@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   TextInput,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useState } from "react";
@@ -13,6 +14,7 @@ import { PRIMARY_COLOR } from "../../../constants/styles";
 // import Button from "../../../components/UI/Button";
 import Background from "../../../components/UI/Background";
 import Logo from "../../../components/UI/Logo";
+import { ActivityIndicator } from "react-native";
 
 import { auth, userSignIn } from "Color../../../firebase";
 import { AuthContext } from "../../../store/auth-context";
@@ -22,18 +24,23 @@ import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import Button from "../../../components/UI/Button";
 import Card from "../../../components/UI/Card";
 import Line from "../../../components/UI/Line";
-
+import ErrorOverlay from "../../../components/UI/ErrorOverlay";
 export default function SignInScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const authCtx = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
+  const [isEmailValid, setIsEmailValid] = useState(false);
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [authError, setAuthError] = useState(false);
   const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
+  // loading spinner and error overlay states
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   function SignInDirections() {
     const navigator = useNavigation();
@@ -47,13 +54,41 @@ export default function SignInScreen() {
 
   function handleAuthenticationRequest() {
     // use firebase function to sign in the user + handle error
-    userSignIn(email, password);
+
+    //commented out for testing
+    /*setLoading(true);
+    setError("");
+    const { isLoading, error } = await userSignIn(email, password);
+    setLoading(isLoading);*/
+
+    // setLoading(true);
+    setErrorMessage("Invalid email or password");
+    setIsError(true);
+    setLoading(false);
   }
 
+  const handleSignInButtonPress = () => {
+    if (!validateEmail(email)) {
+      setLoading(false);
+      setErrorMessage("Please enter a valid email address");
+      setIsError(true);
+      return;
+    }
+
+    setLoading(true);
+    setIsError(false);
+
+    handleAuthenticationRequest();
+  };
+
   function validateEmail(email) {
+    if (email === "") {
+      return true;
+    }
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   }
+
   function handleEmailChange(text) {
     setEmail(text);
     setIsEmailValid(validateEmail(text));
@@ -82,8 +117,9 @@ export default function SignInScreen() {
 
           <AuthInput
             placeholder="Email"
-            onChangeTextHandler={(text) => setEmail(text)}
+            onChangeTextHandler={handleEmailChange}
             inputType="email"
+            error={isEmailValid ? null : "Invalid email format"}
           />
           <AuthInput
             placeholder="Password"
@@ -100,6 +136,28 @@ export default function SignInScreen() {
         iconColor={PRIMARY_COLOR}
         onPress={handleAuthenticationRequest}
       />
+      {loading && <ActivityIndicator size="large" color={PRIMARY_COLOR} />}
+      {isError && (
+        <Modal
+          visible={true}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setIsError(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalErrorMessage}>{errorMessage}</Text>
+              <Button
+                containerStyle={styles.modalButtonContainer}
+                title="OK"
+                type="outline"
+                textStyle={styles.errorModalExitButton}
+                onPress={() => setIsError(false)}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </Background>
   );
 }
@@ -137,5 +195,40 @@ const styles = StyleSheet.create({
     top: "35%",
     backgroundColor: "#fff",
     borderRadius: 100,
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalErrorMessage: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: PRIMARY_COLOR,
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    marginTop: 20,
+    
+    borderColor: PRIMARY_COLOR,
+    borderRadius: 10,
+  },
+  errorModalExitButton: {
+    backgroundColor: PRIMARY_COLOR,
+    color: "#fff",
+    padding: 10,
+    borderColor: "black",
+    width:80,
+    textAlign: "center"
+
   },
 });

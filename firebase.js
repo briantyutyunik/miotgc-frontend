@@ -27,23 +27,24 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
-export function userSignIn(email, password) {
-  // const [error, setError] = useState();
-  // const authCtx = useContext(AuthContext);
-  auth
-    .signInWithEmailAndPassword(auth.getAuth(), "test@test.com", "testtest")
-    .then((userCredentials) => {
-      // if valid sign in - navigate to profile screen (Use context or whatever you watch)
-      // ex: navigator.navigate("Home", { name: "Profile" });
-      console.log(userCredentials.user.getIdToken);
-      // authCtx.authenticate(userCredentials.user.getIdToken);
-    })
-    .catch((error) => {
-      // indicate the user that there is an error logging in - pass the error.message to your
-      // <Error/> component in the way you want
-      // setError("Invalid email or password.");
-      console.log(error.code, error.message);
-    });
+export async function userSignIn(email, password) {
+  let isLoading = true;
+  let error = '';
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    console.log('Signed in:', user);
+  } catch (e) {
+    setIsError(true);
+    const errorCode = e.code;
+    const errorMessage = e.message;
+    console.log('Error:', errorCode, errorMessage);
+    error = errorMessage;
+  } finally {
+    isLoading = false;
+  }
+
+  return { isLoading, error };
 }
 
 export { firebase, auth, firestore };
