@@ -85,6 +85,10 @@ export default function AuthenticationScreen() {
     navigation.navigate("SignUp");
   }
 
+  function onTempScreen() {
+    navigation.navigate("TempScreen");
+  }
+
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
@@ -115,6 +119,13 @@ export default function AuthenticationScreen() {
         additionalStyle={{ color: { PRIMARY_COLOR } }}
         title="Sign In"
         onPress={onSignIn}
+      />
+      <Button
+        containerStyle={styles.signInContainer}
+        textStyle={styles.signInText}
+        additionalStyle={{ color: { PRIMARY_COLOR } }}
+        title="Temp Button"
+        onPress={onTempScreen}
       />
     </Background>
   );
