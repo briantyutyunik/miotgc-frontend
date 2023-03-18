@@ -19,5 +19,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 30,
     fontWeight: "bold",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
   },
 });

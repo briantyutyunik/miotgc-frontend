@@ -4,6 +4,7 @@
 import { useNavigation } from "@react-navigation/native";
 import * as firebase from "firebase/app";
 import * as auth from "firebase/auth";
+import * as firestore from "firebase/firestore";
 import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
 import { AuthContext } from "./store/auth-context";
@@ -26,11 +27,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
-
 export function userSignIn(email, password) {
   // const [error, setError] = useState();
   // const authCtx = useContext(AuthContext);
-  console.log(email, password);
   auth
     .signInWithEmailAndPassword(auth.getAuth(), "test@test.com", "testtest")
     .then((userCredentials) => {
@@ -47,4 +46,4 @@ export function userSignIn(email, password) {
     });
 }
 
-export { firebase, auth };
+export { firebase, auth, firestore };

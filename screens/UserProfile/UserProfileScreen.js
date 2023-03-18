@@ -1,8 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import { getAuth } from "firebase/auth";
-import * as React from "react";
+import { onSnapshot } from "firebase/firestore";
+import { useEffect } from "react";
 import { View, Text, Button } from "react-native";
-import { auth } from "../../firebase";
+import { auth, firestore } from "../../firebase";
 
 export default function UserProfileScreen() {
   const navigation = useNavigation();

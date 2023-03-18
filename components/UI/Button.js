@@ -40,6 +40,14 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
     fontWeight: "bold",

@@ -1,17 +1,18 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-export default function Line({ width }) {
-  const widthStyle = {
+export default function Line({ width, color, height }) {
+  const additionalStyle = {
     width: width,
+    backgroundColor: color,
+    height: height,
   };
-  return <View style={width ? [styles.line, widthStyle] : styles.line}></View>;
+  return <View style={[styles.line, additionalStyle]}></View>;
 }
 
 const styles = StyleSheet.create({
   line: {
-    backgroundColor: "#fff",
-    height: 2,
+    // height: 2,
     borderRadius: 10,
     // height: 20,
   },
