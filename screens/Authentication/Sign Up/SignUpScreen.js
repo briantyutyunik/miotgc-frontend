@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TextInput } from "react-native";
 import { useState } from "react";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import Background from "../../../components/UI/Background";
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   nameViewContainer: {
     flexDirection: "row",
-    
+
     width: 250,
     justifyContent: "space-between",
   },
@@ -202,14 +202,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: PRIMARY_COLOR,
   },
-  inputContainer:{
-
-  },
-  nameInputFields:{
+  inputContainer: {},
+  nameInputFields: {
     width: 125,
-    marginRight:5,
+    marginRight: 5,
     justifyContent: "center",
-    alignItems:"start",
     marginBottom: 25,
     borderColor: PRIMARY_COLOR,
     borderRadius: 10,

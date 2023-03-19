@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   modalButtonContainer: {
     marginTop: 20,
-    
+
     borderColor: PRIMARY_COLOR,
     borderRadius: 10,
   },
@@ -227,8 +227,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 10,
     borderColor: "black",
-    width:80,
-    textAlign: "center"
-
+    width: 80,
+    textAlign: "center",
   },
 });
