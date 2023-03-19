@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Avatar } from "@rneui/themed";
 import { auth, firestore } from "../../firebase";
 import { getFirestore, onSnapshot } from "firebase/firestore";
@@ -7,6 +7,7 @@ import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function UserAvatar({ size, rounded, containerStyle }) {
   const [userData, setUserData] = useState();
+  const [avatarPressed, setAvatarPressed] = useState(false);
 
   useEffect(() => {
     if (auth.getAuth().currentUser) {
@@ -25,16 +26,19 @@ export default function UserAvatar({ size, rounded, containerStyle }) {
 
   if (!userData) {
     // icon={{}} is the style for avatar icon
+    // onPress={isPressed && pressed}
     return (
       <Avatar
+        onPressIn={() => setAvatarPressed(!avatarPressed)}
+        onPressOut={() => setAvatarPressed(!avatarPressed)}
         rounded={rounded}
         size={size}
-        containerStyle={containerStyle}
+        containerStyle={
+          avatarPressed ? [containerStyle, { opacity: 0.5 }] : containerStyle
+        }
         icon={{}}
-        onPress={() => console.log("Pressed")}
       >
         <Avatar.Accessory
-          // backgroundColor={PRIMARY_COLOR}
           onPress={() => console.log("Accessory Pressed")}
           size={size / 4}
         />

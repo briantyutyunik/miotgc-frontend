@@ -43,7 +43,6 @@ export default function AuthInput({
 const styles = StyleSheet.create({
   container: {
     width: "95%",
-    // height: "22%",
     justifyContent: "center",
     marginBottom: 25,
     borderColor: PRIMARY_COLOR,
@@ -54,8 +53,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     padding: 15,
-    // marginBottom: 10,
-    // paddingLeft: 10,
   },
   showIconContainer: {
     position: "absolute",

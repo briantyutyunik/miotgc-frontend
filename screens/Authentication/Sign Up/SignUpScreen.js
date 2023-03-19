@@ -1,12 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  KeyboardAvoidingView,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { useState } from "react";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import Background from "../../../components/UI/Background";
