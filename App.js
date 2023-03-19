@@ -9,8 +9,7 @@ import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen"
 import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
-import HomeScreen from "./screens/HomeScreen/HomeScreen";
-
+import tempscreen from "./screens/tempscreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +33,6 @@ export default function App() {
         <Stack.Screen name="Authentication" component={AuthenticationScreen} />
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
       </Stack.Navigator>
     );
   }
