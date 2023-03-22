@@ -85,6 +85,10 @@ export default function AuthenticationScreen() {
     navigation.navigate("SignUp");
   }
 
+  function onTempScreen() {
+    navigation.navigate("TempScreen");
+  }
+
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={120} width={120} />
@@ -108,7 +112,7 @@ export default function AuthenticationScreen() {
           onPress={onSignUp}
         />
       </View>
-
+      <View style={styles.signInContainer}>
       <Button
         containerStyle={styles.signInContainer}
         textStyle={styles.signInText}
@@ -116,9 +120,11 @@ export default function AuthenticationScreen() {
         title="Sign In"
         onPress={onSignIn}
       />
+      </View>
     </Background>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
@@ -136,7 +142,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 100,
   },
-
   logo: {
     position: "absolute",
     top: 50,
@@ -147,7 +152,7 @@ const styles = StyleSheet.create({
   },
   signInContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 30,
   },
   signInText: {
     color: "#fff",
