@@ -112,31 +112,20 @@ export default function AuthenticationScreen() {
           onPress={onSignUp}
         />
       </View>
-      <View style={styles.signInTemp}>
-        <Button
-          containerStyle={[styles.signInContainer, { width: 120, marginRight: 10 }]}          
-          textStyle={styles.signInText}
-          additionalStyle={{ color: { PRIMARY_COLOR } }}
-          title="Sign In"
-          onPress={onSignIn}
-        />
-        <Button
-          containerStyle={[styles.signInContainer, { width: 120, marginRight: 10 }]}          
-          textStyle={styles.signInText}
-          additionalStyle={{ color: { PRIMARY_COLOR } }}
-          title="Temp Button"
-          onPress={onTempScreen}
-        />
+      <View style={styles.signInContainer}>
+      <Button
+        containerStyle={styles.signInContainer}
+        textStyle={styles.signInText}
+        additionalStyle={{ color: { PRIMARY_COLOR } }}
+        title="Sign In"
+        onPress={onSignIn}
+      />
       </View>
     </Background>
   );
 }
 
 const styles = StyleSheet.create({
-  signInTemp: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-  },
   container: {
     alignItems: "center",
     justifyContent: "flex-end",
@@ -153,7 +142,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 100,
   },
-
   logo: {
     position: "absolute",
     top: 50,
@@ -164,7 +152,7 @@ const styles = StyleSheet.create({
   },
   signInContainer: {
     position: "absolute",
-    bottom: 60,
+    bottom: 30,
   },
   signInText: {
     color: "#fff",

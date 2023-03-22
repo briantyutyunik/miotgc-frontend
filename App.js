@@ -9,7 +9,6 @@ import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen"
 import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
-import tempscreen from "./screens/tempscreen";
 
 const Stack = createNativeStackNavigator();
 
