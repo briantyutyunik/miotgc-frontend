@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View, ScrollView, TextInput } from "react-native";
 import { useState } from "react";
 import { PRIMARY_COLOR } from "../../../constants/styles";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 import Background from "../../../components/UI/Background";
 import Logo from "../../../components/UI/Logo";
 import UserAvatar from "../../../components/UI/UserAvatar";
@@ -20,6 +22,19 @@ export default function SignUpScreen() {
     phoneNumber: "",
     birthDate: "",
   });
+
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(Platform.OS === "ios");
+    setDate(currentDate);
+  };
+
+  const showDatepicker = () => {
+    setShowDatePicker(true);
+  };
 
   // Add a state variable to keep track of whether all the required fields are filled in or not
   const [isFormValid, setIsFormValid] = useState(false);
@@ -99,14 +114,17 @@ export default function SignUpScreen() {
               placeholder="Phone Number"
               onChangeText={(text) => handleInputChange("phoneNumber", text)}
             />
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
-              placeholder="Birthdate (mm/dd/yyyy)"
-              onChangeText={(text) => handleInputChange("birthDate", text)}
-            />
+            <View>
+              <Button onPress={showDatepicker} title="Select date" />
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode={"date"}
+                  display={"default"}
+                  onChange={onChange}
+                />
+              )}
+            </View>
             <TextInput
               style={[styles.inputText, styles.inputField]}
               placeholderTextColor="#708090"

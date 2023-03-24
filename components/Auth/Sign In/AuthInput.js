@@ -1,6 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Text,
+} from "react-native";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import Line from "../../UI/Line";
 
@@ -10,33 +16,41 @@ export default function AuthInput({
   inputType,
   secure,
   containerStyle,
+  error,
+  onBlurHandler,
 }) {
   const [secureIcon, setSecureIcon] = useState(secure);
+
   return (
-    <View
-      style={
-        containerStyle ? [containerStyle, styles.container] : styles.container
-      }
-    >
-      <TextInput
-        style={styles.inputText}
-        placeholder={placeholder}
-        placeholderTextColor="#708090"
-        onChangeText={onChangeTextHandler}
-        keyboardType={inputType === "email" ? "email-address" : "default"}
-        secureTextEntry={secureIcon}
-        autoCapitalize={false}
-        // autoFocus={inputType === "email"}
-      />
-      {inputType === "password" && (
-        <TouchableOpacity
-          style={styles.showIconContainer}
-          onPress={() => setSecureIcon(!secureIcon)}
-        >
-          <Ionicons name="eye-outline" size={20} color={"#fff"} />
-        </TouchableOpacity>
-      )}
-    </View>
+    <>
+      {error && <Text style={{ color: "red" }}>{error}</Text>}
+
+      <View
+        style={
+          containerStyle ? [containerStyle, styles.container] : styles.container
+        }
+      >
+        <TextInput
+          style={styles.inputText}
+          placeholder={placeholder}
+          onBlur={onBlurHandler}
+          placeholderTextColor="#708090"
+          onChangeText={onChangeTextHandler}
+          keyboardType={inputType === "email" ? "email-address" : "default"}
+          secureTextEntry={secureIcon}
+          autoCapitalize={false}
+          // autoFocus={inputType === "email"}
+        />
+        {inputType === "password" && (
+          <TouchableOpacity
+            style={styles.showIconContainer}
+            onPress={() => setSecureIcon(!secureIcon)}
+          >
+            <Ionicons name="eye-outline" size={20} color={"#fff"} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </>
   );
 }
 
