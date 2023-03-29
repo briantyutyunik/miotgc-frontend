@@ -112,7 +112,6 @@ export default function AuthenticationScreen() {
           onPress={onSignUp}
         />
       </View>
-      <View style={styles.signInContainer}>
       <Button
         containerStyle={styles.signInContainer}
         textStyle={styles.signInText}
@@ -120,7 +119,6 @@ export default function AuthenticationScreen() {
         title="Sign In"
         onPress={onSignIn}
       />
-      </View>
     </Background>
   );
 }

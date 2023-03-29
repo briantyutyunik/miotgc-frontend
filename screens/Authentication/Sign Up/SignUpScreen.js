@@ -9,6 +9,15 @@ import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import Button from "../../../components/UI/Button";
 import Card from "../../../components/UI/Card";
 import Line from "../../../components/UI/Line";
+import {
+  addUser,
+  auth,
+  generateImageName,
+  getImageUrl,
+  uploadImage,
+  userSignUp,
+} from "../../../firebase";
+import ImageSelect from "../../../components/UI/ImageSelect";
 
 export default function SignUpScreen() {
   const [formValues, setFormValues] = useState({
@@ -18,11 +27,13 @@ export default function SignUpScreen() {
     password: "",
     userName: "",
     phoneNumber: "",
-    birthDate: "",
+    dob: "",
   });
 
   // Add a state variable to keep track of whether all the required fields are filled in or not
   const [isFormValid, setIsFormValid] = useState(false);
+  const [image, setImage] = useState("");
+  const [openImageSelect, setOpenImageSelect] = useState(false);
 
   // Update the state variable when a required field is filled in
   const handleInputChange = (inputName, inputValue) => {
@@ -36,13 +47,37 @@ export default function SignUpScreen() {
       formValues.password !== "" &&
       formValues.userName !== "" &&
       formValues.phoneNumber !== "" &&
-      formValues.birthDate !== ""
+      formValues.dob !== ""
     ) {
       setIsFormValid(true);
     } else {
       setIsFormValid(false);
     }
   };
+
+  async function handleAuthenticationRequest() {
+    // generate image name for user's avatarUrl so that when
+    // they sign up a request doesn't go to firebase storage with no user id
+    // causing error
+    let imageName = "";
+    if (image) {
+      imageName = generateImageName();
+      await uploadImage(image, imageName);
+    }
+    const newUser = {
+      email: formValues.email,
+      firstName: formValues.firstName,
+      lastName: formValues.lastName,
+      phoneNumber: formValues.phoneNumber,
+      dob: formValues.dob,
+      userName: formValues.userName,
+      avatarUrl: imageName,
+      groupIds: [],
+    };
+
+    await userSignUp(formValues.email, formValues.password, newUser);
+  }
+
   return (
     <Background additionalStyle={styles.container}>
       <Logo additionalStyle={styles.logo} height={100} width={100} />
@@ -55,7 +90,19 @@ export default function SignUpScreen() {
         <UserAvatar
           rounded
           size={110}
+          imageUri={image}
           containerStyle={styles.avatarContainerStyle}
+          onPress={() => {
+            setOpenImageSelect(!openImageSelect);
+            console.log(openImageSelect);
+          }}
+        />
+        <ImageSelect
+          openImageSelect={openImageSelect}
+          setOpenImageSelect={(openImageSelect) =>
+            setOpenImageSelect(openImageSelect)
+          }
+          setImage={(image) => setImage(image)}
         />
         <ScrollView
           bounces
@@ -105,7 +152,7 @@ export default function SignUpScreen() {
               keyboardType={"default"}
               autoCapitalize="none" // autoFocus={inputType === "email"}
               placeholder="Birthdate (mm/dd/yyyy)"
-              onChangeText={(text) => handleInputChange("birthDate", text)}
+              onChangeText={(text) => handleInputChange("dob", text)}
             />
             <TextInput
               style={[styles.inputText, styles.inputField]}
@@ -136,7 +183,7 @@ export default function SignUpScreen() {
         iconName={"arrow-forward-outline"}
         iconSize={40}
         iconColor={isFormValid ? PRIMARY_COLOR : "grey"}
-        // onPress={handleAuthenticationRequest}
+        onPress={handleAuthenticationRequest}
       />
     </Background>
   );

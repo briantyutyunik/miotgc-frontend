@@ -68,17 +68,7 @@ export default function SignInScreen() {
   }
 
   const handleSignInButtonPress = () => {
-    if (!validateEmail(email)) {
-      setLoading(false);
-      setErrorMessage("Please enter a valid email address");
-      setIsError(true);
-      return;
-    }
-
-    setLoading(true);
-    setIsError(false);
-
-    handleAuthenticationRequest();
+    userSignIn(email, password);
   };
 
   function validateEmail(email) {
@@ -152,7 +142,7 @@ export default function SignInScreen() {
                 title="OK"
                 type="outline"
                 textStyle={styles.errorModalExitButton}
-                onPress={() => setIsError(false)}
+                onPress={handleSignInButtonPress}
               />
             </View>
           </View>
