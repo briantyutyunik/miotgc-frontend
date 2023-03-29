@@ -30,6 +30,7 @@ export default function SignInScreen() {
   const authCtx = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
+
   const [isEmailValid, setIsEmailValid] = useState(false);
 
   const [password, setPassword] = useState("");
@@ -41,6 +42,9 @@ export default function SignInScreen() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isError, setIsError] = useState(false);
+
+  const [emailErrorMessage, setEmailErrorMessage] = useState("");
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
   function SignInDirections() {
     const navigator = useNavigation();
@@ -75,8 +79,16 @@ export default function SignInScreen() {
     if (email === "") {
       return true;
     }
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+  
+
+    const re = /\S+@\S+\.\S+/;
+    if (!re.test(email)) {
+      setIsEmailValid(false);
+      setEmailErrorMessage("Please enter a valid email address");
+    } else {
+      setIsEmailValid(true);
+      setEmailErrorMessage("");
+    }
   }
 
   function handleEmailChange(text) {
@@ -84,12 +96,14 @@ export default function SignInScreen() {
     setIsEmailValid(validateEmail(text));
   }
 
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-  };
-
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleEmailBlur = () => {
+    if (isEmailValid === false) {
+      setEmailErrorMessage("Invalid email format");
+    }
   };
 
   return (
@@ -109,7 +123,8 @@ export default function SignInScreen() {
             placeholder="Email"
             onChangeTextHandler={handleEmailChange}
             inputType="email"
-            error={isEmailValid ? null : "Invalid email format"}
+            onBlurHandler={handleEmailBlur}
+            error={emailErrorMessage}
           />
           <AuthInput
             placeholder="Password"

@@ -20,16 +20,6 @@ export default function UserAvatar({
       const uid = auth.getAuth().currentUser?.uid;
       const user = getUser(uid);
       setUserData(user);
-      // Get user data and set state to a variable userData
-      // if user Avatar is there, use it. If not use FirstName initial for avatar title. If not use camera icon
-      // Example Query: const userRef = firestore.doc(
-      //   firestore.getFirestore(),
-      //   `users/${auth.getAuth().currentUser.uid}`
-      // );
-      //  onSnapshot(userRef, (doc) => {
-      //   console.log(doc.data().firstName);
-      // setUserData(doc.data();
-      // });
     }
   }, []);
 

@@ -78,13 +78,6 @@ export default function UserProfileScreen() {
           </View>
           <View style={styles.curve} />
         </View>
-        <ImageSelect
-          openImageSelect={openImageSelect}
-          setOpenImageSelect={(openImageSelect) =>
-            setOpenImageSelect(openImageSelect)
-          }
-          setImage={(image) => setImage(image)}
-        />
       </View>
     </Background>
   );
