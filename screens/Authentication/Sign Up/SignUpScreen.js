@@ -1,309 +1,229 @@
-import { StyleSheet, Text, View, ScrollView, TextInput } from "react-native";
-import { useState } from "react";
-import { PRIMARY_COLOR } from "../../../constants/styles";
-import DateTimePicker from "@react-native-community/datetimepicker";
-
-import Background from "../../../components/UI/Background";
-import Logo from "../../../components/UI/Logo";
-import UserAvatar from "../../../components/UI/UserAvatar";
-import User from "../../../models/User";
-import AuthInput from "../../../components/Auth/Sign In/AuthInput";
-import Button from "../../../components/UI/Button";
-import Card from "../../../components/UI/Card";
-import Line from "../../../components/UI/Line";
+import React, { useState, useEffect } from "react";
 import {
-  addUser,
-  auth,
-  generateImageName,
-  getImageUrl,
-  uploadImage,
-  userSignUp,
-} from "../../../firebase";
-import ImageSelect from "../../../components/UI/ImageSelect";
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
+import AuthInput from "../../../components/Auth/Sign In/AuthInput";
+import { PRIMARY_COLOR } from "../../../constants/styles";
+import DatePicker from "react-native-datepicker";
+import Card from "../../../components/UI/Card";
+import Logo from "../../../components/UI/Logo";
+import Button from "../../../components/UI/Button";
+import Background from "../../../components/UI/Background";
+import { userSignUp } from "../../../firebase";
 
-export default function SignUpScreen() {
-  const [formValues, setFormValues] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    userName: "",
-    phoneNumber: "",
-    dob: "",
-  });
+const SignUpScreen = () => {
+  const [error, setError] = useState("");
 
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState(null);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === "ios");
-    setDate(currentDate);
-  };
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(null); 
 
-  const showDatepicker = () => {
-    setShowDatePicker(true);
-  };
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState(null); 
 
-  // Add a state variable to keep track of whether all the required fields are filled in or not
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-  const [image, setImage] = useState("");
-  const [openImageSelect, setOpenImageSelect] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Update the state variable when a required field is filled in
-  const handleInputChange = (inputName, inputValue) => {
-    setFormValues({ ...formValues, [inputName]: inputValue });
+  const validateEmail = (email) => {
+    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return emailRegex.test(email);
+  };
 
-    // Check if all the required fields have been filled in
-    if (
-      formValues.firstName !== "" &&
-      formValues.lastName !== "" &&
-      formValues.email !== "" &&
-      formValues.password !== "" &&
-      formValues.userName !== "" &&
-      formValues.phoneNumber !== "" &&
-      formValues.dob !== ""
-    ) {
-      setIsFormValid(true);
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (!validateEmail(text)) {
+      setEmailError("Invalid email format");
     } else {
-      setIsFormValid(false);
+      setEmailError(null);
     }
   };
 
-  async function handleAuthenticationRequest() {
-    // generate image name for user's avatarUrl so that when
-    // they sign up a request doesn't go to firebase storage with no user id
-    // causing error
-    let imageName = "";
-    if (image) {
-      imageName = generateImageName();
-      await uploadImage(image, imageName);
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (!validatePassword(text)) {
+      setPasswordError(
+        "Password must be at least 8 characters, contain one uppercase letter, one lowercase letter, one digit, and one special character."
+      );
+    } else {
+      setPasswordError(null);
     }
-    const newUser = {
-      email: formValues.email,
-      firstName: formValues.firstName,
-      lastName: formValues.lastName,
-      phoneNumber: formValues.phoneNumber,
-      dob: formValues.dob,
-      userName: formValues.userName,
-      avatarUrl: imageName,
-      groupIds: [],
-    };
+  };
 
-    await userSignUp(formValues.email, formValues.password, newUser);
-  }
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    if (text !== password) {
+      setConfirmPasswordError("Passwords do not match");
+    } else {
+      setConfirmPasswordError(null);
+    }
+  };
+
+  useEffect(() => {
+    setIsFormValid(
+      firstName.length > 0 &&
+        lastName.length > 0 &&
+        validateEmail(email) && 
+        validatePassword(password) && 
+        confirmPassword.length > 0 &&
+        selectedDate !== null &&
+        phoneNumber.length > 0
+    );
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    confirmPassword,
+    selectedDate,
+    phoneNumber,
+  ]);
+
+  const handleSignUpButtonPress = async () => {
+    setIsLoading(true);
+    setError("");
+    const { error } = await userSignUp(email, password);
+    setIsLoading(false);
+    console.log(error);
+  };
 
   return (
     <Background additionalStyle={styles.container}>
-      <Logo additionalStyle={styles.logo} height={100} width={100} />
-
-      <Card additionalStyles={styles.authInputContainer}>
-        <View style={styles.signUpHeaderContainer}>
-          <Text style={styles.signUpHeader}>Sign up</Text>
-          <Line width={70} color={PRIMARY_COLOR} height={1} />
-        </View>
-        <UserAvatar
-          rounded
-          size={110}
-          imageUri={image}
-          containerStyle={styles.avatarContainerStyle}
-          onPress={() => {
-            setOpenImageSelect(!openImageSelect);
-            console.log(openImageSelect);
-          }}
-        />
-        <ImageSelect
-          openImageSelect={openImageSelect}
-          setOpenImageSelect={(openImageSelect) =>
-            setOpenImageSelect(openImageSelect)
-          }
-          setImage={(image) => setImage(image)}
-        />
-        <ScrollView
-          bounces
-          style={styles.scrollViewStyle}
-          contentContainerStyle={styles.formValueContainer}
-        >
-          <View style={styles.nameViewContainer}>
-            <TextInput
-              style={[styles.inputText, styles.nameInputFields]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
+      <Logo additionalStyle={styles.logo} height={120} width={120} />
+      <KeyboardAvoidingView
+        behavior="padding"
+        style={styles.authInputContainer}
+      >
+        <Card additionalStyles={styles.cardContainer}>
+          <ScrollView
+            contentContainerStyle={styles.scrollViewContainer}
+            style={{ width: "100%" }}
+          >
+            <AuthInput
               placeholder="First Name"
-              onChangeText={(text) => handleInputChange("firstName", text)}
-              containerStyle={[styles.nameContainerStyle, { marginRight: 5 }]}
+              onChangeTextHandler={(text) => setFirstName(text)}
             />
-            <TextInput
-              style={[styles.inputText, styles.nameInputFields]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
+            <AuthInput
               placeholder="Last Name"
-              onChangeText={(text) => handleInputChange("lastName", text)}
-              containerStyle={[styles.nameContainerStyle, { marginLeft: 5 }]}
+              onChangeTextHandler={(text) => setLastName(text)}
             />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
-              placeholder="User Name"
-              onChangeText={(text) => handleInputChange("userName", text)}
+            <AuthInput
+              placeholder="Email Address"
+              inputType="email"
+              secure={false}
+              onChangeTextHandler={handleEmailChange}
+              error={emailError} 
             />
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
-              placeholder="Phone Number"
-              onChangeText={(text) => handleInputChange("phoneNumber", text)}
-            />
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
-              placeholder="Birthdate (mm/dd/yyyy)"
-              onChangeText={(text) => handleInputChange("dob", text)}
-            />
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
-              placeholder="Email address"
-              onChangeText={(text) => handleInputChange("email", text)}
-            />
-            <TextInput
-              style={[styles.inputText, styles.inputField]}
-              placeholderTextColor="#708090"
-              keyboardType={"default"}
-              autoCapitalize="none" // autoFocus={inputType === "email"}
+            <AuthInput
               placeholder="Password"
-              secure
-              onChangeText={(text) => handleInputChange("password", text)}
+              inputType="password"
+              secure={true}
+              onChangeTextHandler={handlePasswordChange} 
+              error={passwordError} 
             />
-          </View>
-        </ScrollView>
-      </Card>
-      <Button
-        containerStyle={[
-          styles.signUpButtonContainer,
-          !isFormValid && styles.disabledButton,
-        ]}
-        disabled={!isFormValid}
-        iconName={"arrow-forward-outline"}
-        iconSize={40}
-        iconColor={isFormValid ? PRIMARY_COLOR : "grey"}
-        onPress={handleAuthenticationRequest}
-      />
+            <AuthInput
+              placeholder="Confirm Password"
+              inputType="password"
+              secure={true}
+              onChangeTextHandler={handleConfirmPasswordChange}
+              error={confirmPasswordError} 
+            />
+            <DatePicker
+              style={{ width: "95%", marginBottom: 25 }}
+              date={new Date()}
+              mode="date"
+              placeholder="Date of Birth"
+              format="YYYY-MM-DD"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              showIcon={false}
+              customStyles={{
+                dateInput: {
+                  borderColor: PRIMARY_COLOR,
+                  borderRadius: 10,
+                  borderWidth: 2,
+                },
+              }}
+              onDateChange={(selectedDate) => setSelectedDate(selectedDate)}
+            />
+            <AuthInput
+              placeholder="Phone Number"
+              keyboardType="number-pad"
+              secure={false}
+              onChangeTextHandler={(text) => setPhoneNumber(text)}
+            />
+          </ScrollView>
+        </Card>
+        {isLoading ? (
+          <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+        ) : (
+          <Button
+            containerStyle={styles.signUpButtonContainer}
+            iconName={"arrow-forward-outline"}
+            iconSize={40}
+            iconColor={PRIMARY_COLOR}
+            onPress={handleSignUpButtonPress}
+            disabled={!isFormValid}
+            disabledStyle={styles.disabledButton}
+          />
+        )}
+      </KeyboardAvoidingView>
     </Background>
   );
-}
+};
+
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
   logo: {
     position: "absolute",
-    top: 30,
-  },
-  nameViewContainer: {
-    flexDirection: "row",
-
-    width: 250,
-    justifyContent: "space-between",
-  },
-  avatarContainerStyle: {
-    backgroundColor: PRIMARY_COLOR,
-    marginBottom: 30,
-    // position: "absolute",
+    top: 10,
   },
   authInputContainer: {
+    alignItems: "center",
+    top: "17%",
     width: "90%",
-    top: "15%",
-    alignItems: "center",
-    marginTop: 25,
-  },
-  formValueContainer: {
-    alignItems: "center",
-  },
-  scrollViewStyle: {
-    width: "95%",
-  },
-
-  signUpButtonContainer: {
-    justifyContent: "flex-end",
-    position: "absolute",
-    marginTop: 20,
-    top: "90%",
-    height: 50,
-    width: "35%",
-    backgroundColor: "#fff",
-    borderRadius: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nameContainerStyle: {
-    flex: 2,
-    flexDirection: "row",
-    marginHorizontal: -35,
-  },
-  signUpHeaderContainer: {
-    marginBottom: 30,
   },
   disabledButton: {
-    backgroundColor: "#595959",
+    opacity: 0.5,
   },
-  signUpHeader: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: PRIMARY_COLOR,
+  scrollViewContainer: {
+    width: "100%",
   },
-  inputContainer: {},
-  nameInputFields: {
-    width: 125,
-    marginRight: 5,
+  cardContainer: {
+    paddingTop: 30,
+    paddingBottom: 0,
     justifyContent: "center",
-    marginBottom: 25,
-    borderColor: PRIMARY_COLOR,
-    borderRadius: 10,
-    borderWidth: 2,
+    alignItems: "center",
+    width: "100%",
+    maxHeight: "80%",
   },
-  inputField: {
-    width: 250,
-    // height: "22%",
-    justifyContent: "center",
-    marginBottom: 25,
-    borderColor: PRIMARY_COLOR,
-    borderRadius: 10,
-    borderWidth: 2,
-  },
-  inputText: {
-    color: "#000",
-    fontSize: 16,
-    padding: 15,
-    // marginBottom: 10,
-    // paddingLeft: 10,
-  },
-  inputShowIconContainer: {
-    position: "absolute",
-    right: 5,
-    top: 2,
-  },
-  inputShowIconPressed: {
-    color: "grey",
-  },
-  inputError: {
-    color: "red",
-    marginBottom: 5,
-  },
-  inputErrorMessageContainer: {
+  signUpButtonContainer: {
+    height: 50,
+    width: "35%",
+    top: 20,
+    backgroundColor: "#fff",
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
   },
 });
+
+export default SignUpScreen;

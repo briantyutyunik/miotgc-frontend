@@ -17,6 +17,8 @@ export default function AuthInput({
   secure,
   containerStyle,
   error,
+  keyboardType,
+
   onBlurHandler,
 }) {
   const [secureIcon, setSecureIcon] = useState(secure);
@@ -36,7 +38,7 @@ export default function AuthInput({
           onBlur={onBlurHandler}
           placeholderTextColor="#708090"
           onChangeText={onChangeTextHandler}
-          keyboardType={inputType === "email" ? "email-address" : "default"}
+          keyboardType={keyboardType}
           secureTextEntry={secureIcon}
           autoCapitalize={false}
           // autoFocus={inputType === "email"}
@@ -56,12 +58,12 @@ export default function AuthInput({
 
 const styles = StyleSheet.create({
   container: {
-    width: "95%",
     justifyContent: "center",
     marginBottom: 25,
     borderColor: PRIMARY_COLOR,
     borderRadius: 10,
     borderWidth: 2,
+    width: "95%",
   },
   inputText: {
     color: "#000",

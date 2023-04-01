@@ -10,15 +10,21 @@ export default function Button({
   iconPositionStyle,
   iconColor,
   textStyle,
+  disabled,
+  disabledStyle,
+  enabledStyle,
+  
+  
 }) {
+  const buttonStyle = disabled
+    ? [styles.buttonContainer, disabledStyle, containerStyle]
+    : [styles.buttonContainer, enabledStyle, containerStyle];
+
   return (
     <TouchableOpacity
-      style={
-        containerStyle
-          ? [styles.buttonContainer, containerStyle]
-          : styles.buttonContainer
-      }
+      style={buttonStyle}
       onPress={onPress}
+      disabled={disabled}
     >
       {iconName && iconSize && (
         <View style={iconPositionStyle}>
