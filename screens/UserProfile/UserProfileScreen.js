@@ -61,8 +61,14 @@ export default function UserProfileScreen() {
   const navigation = useNavigation();
   return (
     <Background additionalStyle={styles.container}>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Logo additionalStyle={styles.logo} height={120} width={120} />
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "15%",
+        }}
+      >
         <View style={styles.container}>
           <TouchableOpacity
             style={styles.photoContainer}
@@ -95,7 +101,7 @@ export default function UserProfileScreen() {
               title={"Log Out"}
             />
           </View>
-          <View style={styles.curve} />
+          {/* <View style={styles.curve} /> */}
         </View>
         <View style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={{ alignItems: "center" }}>
@@ -168,7 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   container: {
-    backgroundColor: "white",
+    // backgroundColor: "white",
   },
   photoContainer: {
     alignItems: "center",
