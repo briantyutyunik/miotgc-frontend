@@ -16,6 +16,9 @@ import Logo from "../../../components/UI/Logo";
 import Button from "../../../components/UI/Button";
 import Background from "../../../components/UI/Background";
 import { userSignUp } from "../../../firebase";
+import Line from "../../../components/UI/Line";
+import UserAvatar from "../../../components/UI/UserAvatar";
+import ImageSelect from "../../../components/UI/ImageSelect";
 
 const SignUpScreen = () => {
   const [error, setError] = useState("");
@@ -27,14 +30,19 @@ const SignUpScreen = () => {
   const [emailError, setEmailError] = useState(null);
 
   const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(null); 
+  const [passwordError, setPasswordError] = useState(null);
 
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState(null); 
+  const [confirmPasswordError, setConfirmPasswordError] = useState(null);
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [dob, setDob] = useState(new Date());
+
+  const [userName, setUserName] = useState("");
+
+  const [image, setImage] = useState("");
+  const [openImageSelect, setOpenImageSelect] = useState(false);
 
   const validateEmail = (email) => {
     const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -79,26 +87,37 @@ const SignUpScreen = () => {
     setIsFormValid(
       firstName.length > 0 &&
         lastName.length > 0 &&
-        validateEmail(email) && 
-        validatePassword(password) && 
+        validateEmail(email) &&
+        validatePassword(password) &&
         confirmPassword.length > 0 &&
-        selectedDate !== null &&
+        dob !== null &&
         phoneNumber.length > 0
     );
-  }, [
-    firstName,
-    lastName,
-    email,
-    password,
-    confirmPassword,
-    selectedDate,
-    phoneNumber,
-  ]);
+  }, [firstName, lastName, email, password, confirmPassword, dob, phoneNumber]);
 
   const handleSignUpButtonPress = async () => {
     setIsLoading(true);
     setError("");
-    const { error } = await userSignUp(email, password);
+    // generate image name for user's avatarUrl so that when
+    // they sign up a request doesn't go to firebase storage with no user id
+    // causing error
+    let imageName = "";
+    if (image) {
+      imageName = generateImageName();
+      await uploadImage(image, imageName);
+    }
+    const newUser = {
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      dob: dob.toString(),
+      userName: userName,
+      avatarUrl: imageName,
+      groupIds: [],
+    };
+
+    await userSignUp(formValues.email, formValues.password, newUser);
     setIsLoading(false);
     console.log(error);
   };
@@ -111,6 +130,27 @@ const SignUpScreen = () => {
         style={styles.authInputContainer}
       >
         <Card additionalStyles={styles.cardContainer}>
+          <View style={styles.signUpHeaderContainer}>
+            <Text style={styles.signUpHeader}>Sign up</Text>
+            <Line width={70} color={PRIMARY_COLOR} height={1} />
+          </View>
+          <UserAvatar
+            rounded
+            size={110}
+            imageUri={image}
+            containerStyle={styles.avatarContainerStyle}
+            onPress={() => {
+              setOpenImageSelect(!openImageSelect);
+              console.log(openImageSelect);
+            }}
+          />
+          <ImageSelect
+            openImageSelect={openImageSelect}
+            setOpenImageSelect={(openImageSelect) =>
+              setOpenImageSelect(openImageSelect)
+            }
+            setImage={(image) => setImage(image)}
+          />
           <ScrollView
             contentContainerStyle={styles.scrollViewContainer}
             style={{ width: "100%" }}
@@ -128,25 +168,25 @@ const SignUpScreen = () => {
               inputType="email"
               secure={false}
               onChangeTextHandler={handleEmailChange}
-              error={emailError} 
+              error={emailError}
             />
             <AuthInput
               placeholder="Password"
               inputType="password"
               secure={true}
-              onChangeTextHandler={handlePasswordChange} 
-              error={passwordError} 
+              onChangeTextHandler={handlePasswordChange}
+              error={passwordError}
             />
             <AuthInput
               placeholder="Confirm Password"
               inputType="password"
               secure={true}
               onChangeTextHandler={handleConfirmPasswordChange}
-              error={confirmPasswordError} 
+              error={confirmPasswordError}
             />
-            <DatePicker
+            {/* <DatePicker
               style={{ width: "95%", marginBottom: 25 }}
-              date={new Date()}
+              date={dob}
               mode="date"
               placeholder="Date of Birth"
               format="YYYY-MM-DD"
@@ -160,7 +200,12 @@ const SignUpScreen = () => {
                   borderWidth: 2,
                 },
               }}
-              onDateChange={(selectedDate) => setSelectedDate(selectedDate)}
+              onDateChange={(dob) => setDob(dob)}
+            /> */}
+            <AuthInput
+              placeholder="dob mm/dd/yyyy"
+              secure={false}
+              onChangeTextHandler={(text) => setDob(text)}
             />
             <AuthInput
               placeholder="Phone Number"
@@ -171,7 +216,12 @@ const SignUpScreen = () => {
           </ScrollView>
         </Card>
         {isLoading ? (
-          <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+          <ActivityIndicator
+            animating={true}
+            useNative
+            size="large"
+            color={PRIMARY_COLOR}
+          />
         ) : (
           <Button
             containerStyle={styles.signUpButtonContainer}
@@ -215,6 +265,11 @@ const styles = StyleSheet.create({
     width: "100%",
     maxHeight: "80%",
   },
+  avatarContainerStyle: {
+    backgroundColor: PRIMARY_COLOR,
+    marginBottom: 30,
+    // position: "absolute",
+  },
   signUpButtonContainer: {
     height: 50,
     width: "35%",
@@ -223,6 +278,15 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
+  },
+  signUpHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: PRIMARY_COLOR,
+  },
+  signUpHeaderContainer: {
+    marginBottom: 30,
   },
 });
 
