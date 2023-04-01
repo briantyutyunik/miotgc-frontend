@@ -44,7 +44,6 @@ export async function userSignIn(email, password) {
     const user = userCredential.user;
     console.log("Signed in:", user);
   } catch (e) {
-    setIsError(true);
     const errorCode = e.code;
     const errorMessage = e.message;
     console.log("Error:", errorCode, errorMessage);
@@ -69,7 +68,6 @@ export async function userSignUp(email, password, data) {
     addUser(data.uid, data);
     console.log("Signed up:", userCredential.user);
   } catch (e) {
-    setIsError(true);
     const errorCode = e.code;
     const errorMessage = e.message;
     console.log("Error:", errorCode, errorMessage);

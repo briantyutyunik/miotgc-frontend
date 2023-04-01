@@ -11,7 +11,7 @@ export default function Slogan() {
 const styles = StyleSheet.create({
   sloganContainer: {
     position: "absolute",
-    top: 275,
+    top: "30%",
     width: "80%",
     left: 30,
   },
