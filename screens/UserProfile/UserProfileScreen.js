@@ -20,7 +20,6 @@ export default function UserProfileScreen() {
   ];
   
   useEffect(() => {
-    // refactor later - onSnapshot is used for realtime updates
     const uid = auth.getAuth().currentUser.uid;
     let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
     const unsub = onSnapshot(docRef, (docSnap) => {
@@ -48,7 +47,7 @@ export default function UserProfileScreen() {
   const navigation = useNavigation();
   return (
     <Background additionalStyle={styles.container}>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View style={{  alignItems: "center", justifyContent: "center" }}>
         <Logo additionalStyle={styles.logo} height={120} width={120} />
         <View style={styles.container}>
           <TouchableOpacity
@@ -84,7 +83,7 @@ export default function UserProfileScreen() {
           </View>
           <View style={styles.curve} />
         </View>
-          <View style={{ flex: 1 }}>
+          
             <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
               <View style={{ width: '100%', height: 225, backgroundColor: '#FF5553'}}>
                 <Text style={{ marginLeft: 10, marginTop: 10, fontSize: 18, fontWeight: 'bold', color: "white" }}>Groups</Text>
@@ -108,7 +107,6 @@ export default function UserProfileScreen() {
                 />
               </View>
             </ScrollView>
-          </View>
       </View>
     </Background>
   );
@@ -131,7 +129,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   container: {
-    flex: 1,
     backgroundColor: "white",
   },
   photoContainer: {
