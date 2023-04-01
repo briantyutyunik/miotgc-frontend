@@ -2,7 +2,16 @@ import { useNavigation } from "@react-navigation/native";
 import { getAuth } from "firebase/auth";
 import { onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ScrollView, FlatList, StyleSheet, View, Text, Image, Button, TouchableOpacity, } from 'react-native';
+import {
+  ScrollView,
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import { auth, firestore, getUser, storage } from "../../firebase";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
@@ -13,12 +22,12 @@ export default function UserProfileScreen() {
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const data = [
-    { id: '1', name: 'Group 1', image: 'https://picsum.photos/201' },
-    { id: '2', name: 'Group 2', image: 'https://picsum.photos/202' },
-    { id: '3', name: 'Group 3', image: 'https://picsum.photos/204' },
-    { id: '4', name: 'Group 4', image: 'https://picsum.photos/206' },
+    { id: "1", name: "Group 1", image: "https://picsum.photos/201" },
+    { id: "2", name: "Group 2", image: "https://picsum.photos/202" },
+    { id: "3", name: "Group 3", image: "https://picsum.photos/204" },
+    { id: "4", name: "Group 4", image: "https://picsum.photos/206" },
   ];
-  
+
   useEffect(() => {
     // refactor later - onSnapshot is used for realtime updates
     const uid = auth.getAuth().currentUser.uid;
@@ -34,16 +43,20 @@ export default function UserProfileScreen() {
     });
     return unsub;
   }, []);
-  
+
   const renderGroupCard = ({ item }) => {
     return (
       <View style={{ marginHorizontal: 10 }}>
-        <Image source={{ uri: item.image }} style={{ width: 150, height: 150 }} />
-        <Text style={{ fontWeight: 'bold', marginTop: 10, color: 'white' }}>{item.name}</Text>
+        <Image
+          source={{ uri: item.image }}
+          style={{ width: 150, height: 150 }}
+        />
+        <Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>
+          {item.name}
+        </Text>
       </View>
     );
-    }
-  
+  };
 
   const navigation = useNavigation();
   return (
@@ -84,31 +97,55 @@ export default function UserProfileScreen() {
           </View>
           <View style={styles.curve} />
         </View>
-          <View style={{ flex: 1 }}>
-            <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-              <View style={{ width: '100%', height: 225, backgroundColor: '#FF5553'}}>
-                <Text style={{ marginLeft: 10, marginTop: 10, fontSize: 18, fontWeight: 'bold', color: "white" }}>Groups</Text>
-                <FlatList
-                  data={data}
-                  renderItem={renderGroupCard}
-                  keyExtractor={(item) => item.id}
-                  horizontal
-                  showsHorizontalScrollIndicator={true}
-                />
-              </View>
+        <View style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ alignItems: "center" }}>
+            <View
+              style={{ width: "100%", height: 225, backgroundColor: "#FF5553" }}
+            >
+              <Text
+                style={{
+                  marginLeft: 10,
+                  marginTop: 10,
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+              >
+                Groups
+              </Text>
+              <FlatList
+                data={data}
+                renderItem={renderGroupCard}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={true}
+              />
+            </View>
 
-              <View style={{ width: '100%', height: 225, backgroundColor: '#FF5553'}}>
-                <Text style={{ marginLeft: 10, marginTop: 10, fontSize: 18, fontWeight: 'bold', color: "white" }}>Trip Histories</Text>
-                <FlatList
-                  data={data}
-                  renderItem={renderGroupCard}
-                  keyExtractor={(item) => item.id}
-                  horizontal
-                  showsHorizontalScrollIndicator={true}
-                />
-              </View>
-            </ScrollView>
-          </View>
+            <View
+              style={{ width: "100%", height: 225, backgroundColor: "#FF5553" }}
+            >
+              <Text
+                style={{
+                  marginLeft: 10,
+                  marginTop: 10,
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+              >
+                Trip Histories
+              </Text>
+              <FlatList
+                data={data}
+                renderItem={renderGroupCard}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={true}
+              />
+            </View>
+          </ScrollView>
+        </View>
       </View>
     </Background>
   );
@@ -131,7 +168,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   container: {
-    flex: 1,
     backgroundColor: "white",
   },
   photoContainer: {
