@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../../constants/styles";
-import DatePicker from "react-native-datepicker";
 import Card from "../../../components/UI/Card";
 import Logo from "../../../components/UI/Logo";
 import Button from "../../../components/UI/Button";
