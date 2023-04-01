@@ -38,7 +38,7 @@ export default function App() {
 
   function HomeNavigator() {
     return (
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Profile" component={UserProfileScreen} />
       </Stack.Navigator>
     );
