@@ -99,6 +99,12 @@ export async function getUser(uid) {
   return docSnap.data();
 }
 
+export async function getUserAvatarUrl(avatarImageName) {
+  const ref = storage.ref(storage.getStorage(), avatarImageName);
+  const downloadUrl = await storage.getDownloadURL(ref);
+  return downloadUrl;
+}
+
 // Image
 export function generateImageName() {
   const imageName = `images/img-${new Date().getTime()}.jpg`;

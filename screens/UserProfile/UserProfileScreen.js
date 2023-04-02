@@ -18,6 +18,7 @@ import Card from "../../components/UI/Card";
 import Logo from "../../components/UI/Logo";
 import { Skeleton } from "@rneui/themed";
 import Itineraries from "../../screens/Groups/Itineraries";
+import UserAvatar from "../../components/UI/UserAvatar";
 
 export default function UserProfileScreen() {
   const [image, setImage] = useState();
@@ -29,20 +30,7 @@ export default function UserProfileScreen() {
     { id: "4", name: "Group 4", image: "https://picsum.photos/206" },
   ];
 
-  useEffect(() => {
-    const uid = auth.getAuth().currentUser.uid;
-    let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-    const unsub = onSnapshot(docRef, (docSnap) => {
-      const user = docSnap.data();
-      if (user.avatarUrl !== "") {
-        let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-        storage.getDownloadURL(ref).then((res) => {
-          setImage(res);
-        });
-      }
-    });
-    return unsub;
-  }, []);
+  useEffect(() => {}, []);
 
   const renderGroupCard = ({ item }) => {
     return (
@@ -59,7 +47,7 @@ export default function UserProfileScreen() {
       </View>
     );
   };
-  
+
   const navigation = useNavigation();
   return (
     <Background additionalStyle={styles.container}>
@@ -72,7 +60,7 @@ export default function UserProfileScreen() {
         }}
       >
         <View style={styles.container}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.photoContainer}
             onPress={() => {
               setOpenImageSelect(!openImageSelect);
@@ -94,7 +82,12 @@ export default function UserProfileScreen() {
                 />
               )}
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <UserAvatar
+            size={110}
+            rounded
+            containerStyle={styles.photoBackground}
+          />
           <View style={styles.profileContainer}>
             <Button
               onPress={() => {

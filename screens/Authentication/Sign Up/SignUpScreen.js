@@ -40,8 +40,7 @@ const SignUpScreen = () => {
 
   const [userName, setUserName] = useState("");
 
-  const [image, setImage] = useState("");
-  const [openImageSelect, setOpenImageSelect] = useState(false);
+  const [imageName, setImageName] = useState("");
 
   const validateEmail = (email) => {
     const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -100,12 +99,12 @@ const SignUpScreen = () => {
     // generate image name for user's avatarUrl so that when
     // they sign up a request doesn't go to firebase storage with no user id
     // causing error
-    let imageName = "";
-    if (image) {
-      imageName = generateImageName();
-      await uploadImage(image, imageName);
-    }
-    const newUser = {
+    // let imageName = "";
+    // if (image) {
+    //   imageName = generateImageName();
+    //   await uploadImage(image, imageName);
+    // }
+    const newUserData = {
       email: email,
       firstName: firstName,
       lastName: lastName,
@@ -116,7 +115,7 @@ const SignUpScreen = () => {
       groupIds: [],
     };
 
-    await userSignUp(formValues.email, formValues.password, newUser);
+    await userSignUp(email, password, newUserData);
     setIsLoading(false);
     console.log(error);
   };
@@ -136,20 +135,10 @@ const SignUpScreen = () => {
           <UserAvatar
             rounded
             size={110}
-            imageUri={image}
             containerStyle={styles.avatarContainerStyle}
-            onPress={() => {
-              setOpenImageSelect(!openImageSelect);
-              console.log(openImageSelect);
-            }}
+            setImageName={setImageName}
           />
-          <ImageSelect
-            openImageSelect={openImageSelect}
-            setOpenImageSelect={(openImageSelect) =>
-              setOpenImageSelect(openImageSelect)
-            }
-            setImage={(image) => setImage(image)}
-          />
+
           <ScrollView
             contentContainerStyle={styles.scrollViewContainer}
             style={{ width: "100%" }}
@@ -183,24 +172,7 @@ const SignUpScreen = () => {
               onChangeTextHandler={handleConfirmPasswordChange}
               error={confirmPasswordError}
             />
-            {/* <DatePicker
-              style={{ width: "95%", marginBottom: 25 }}
-              date={dob}
-              mode="date"
-              placeholder="Date of Birth"
-              format="YYYY-MM-DD"
-              confirmBtnText="Confirm"
-              cancelBtnText="Cancel"
-              showIcon={false}
-              customStyles={{
-                dateInput: {
-                  borderColor: PRIMARY_COLOR,
-                  borderRadius: 10,
-                  borderWidth: 2,
-                },
-              }}
-              onDateChange={(dob) => setDob(dob)}
-            /> */}
+
             <AuthInput
               placeholder="dob mm/dd/yyyy"
               secure={false}

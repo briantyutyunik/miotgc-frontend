@@ -23,6 +23,7 @@ export default function ImageSelect({
   openImageSelect,
   setOpenImageSelect,
   setImage,
+  handleImageUpload,
 }) {
   const handleCameraRollPress = async () => {
     // Code for selecting a photo from the camera roll
@@ -32,16 +33,10 @@ export default function ImageSelect({
       // set profile images
       const image = result.assets[0].uri;
       setImage(image);
+
       setOpenImageSelect(false);
 
-      const currUserUid = auth.getAuth().currentUser?.uid;
-      if (currUserUid) {
-        const imageName = generateImageName();
-        // upload image to firebase storage
-        await uploadImage(image, imageName);
-        // update user's avatar url
-        updateUser(currUserUid, { avatarUrl: imageName });
-      }
+      handleImageUpload(image);
     }
   };
 
@@ -51,15 +46,9 @@ export default function ImageSelect({
       const image = result.assets[0].uri;
       setImage(image);
 
-      const currUserUid = auth.getAuth().currentUser?.uid;
-      if (currUserUid) {
-        const imageName = generateImageName();
-        // upload image to firebase storage
-        await uploadImage(image, imageName);
-        // update user's avatar url
-        updateUser(currUserUid, { avatarUrl: imageName });
-      }
       setOpenImageSelect(false);
+
+      handleImageUpload(image);
     }
   };
 
@@ -69,7 +58,6 @@ export default function ImageSelect({
 
   return (
     <View style={styles.container}>
-      <Button title="Select a Photo" onPress={() => setOpenImageSelect(true)} />
       <Modal
         visible={openImageSelect}
         transparent={true}
@@ -117,10 +105,8 @@ export default function ImageSelect({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
   },
   overlay: {
     flex: 1,
