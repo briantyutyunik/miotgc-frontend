@@ -17,6 +17,7 @@ import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
 import Logo from "../../components/UI/Logo";
 import { Skeleton } from "@rneui/themed";
+import Itineraries from "../../screens/Groups/Itineraries";
 
 export default function UserProfileScreen() {
   const [image, setImage] = useState();
@@ -46,17 +47,19 @@ export default function UserProfileScreen() {
   const renderGroupCard = ({ item }) => {
     return (
       <View style={{ marginHorizontal: 10 }}>
-        <Image
-          source={{ uri: item.image }}
-          style={{ width: 150, height: 150 }}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate("Itineraries")}>
+          <Image
+            source={{ uri: item.image }}
+            style={{ width: 150, height: 150 }}
+          />
+        </TouchableOpacity>
         <Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>
           {item.name}
         </Text>
       </View>
     );
   };
-
+  
   const navigation = useNavigation();
   return (
     <Background additionalStyle={styles.container}>

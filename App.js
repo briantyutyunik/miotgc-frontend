@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { auth } from "./firebase";
+import Itineraries from "./screens/Groups/Itineraries";
+
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
 import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
@@ -40,6 +42,8 @@ export default function App() {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Profile" component={UserProfileScreen} />
+        <Stack.Screen name="Itineraries" component={Itineraries} />
+
       </Stack.Navigator>
     );
   }
