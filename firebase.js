@@ -79,6 +79,20 @@ export async function userSignUp(email, password, data) {
   return { isLoading, error };
 }
 
+
+export async function checkIfValueExists(collection, field, value) {
+  const db = firestore.getFirestore();
+  const query = firestore.query(
+    firestore.collection(db, collection),
+    firestore.where(field, "==", value)
+  );
+  const querySnapshot = await firestore.getDocs(query);
+  return querySnapshot.size > 0;
+}
+
+
+
+
 // user queries
 export async function addUser(uid, data) {
   const docRef = doc(firestore.getFirestore(), "users", uid);
