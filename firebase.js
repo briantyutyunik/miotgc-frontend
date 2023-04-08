@@ -10,7 +10,6 @@ import * as storage from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
-import { AuthContext } from "./store/auth-context";
 import { getBlobFromUri } from "./util/ImageUtils";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -55,17 +54,17 @@ export async function userSignIn(email, password) {
   return { isLoading, error };
 }
 
-export async function userSignUp(email, password, data) {
+export async function userSignUp(newUser) {
   let isLoading = true;
   let error = "";
   try {
     let userCredential = await auth.createUserWithEmailAndPassword(
       auth.getAuth(),
-      email,
-      password
+      newUser.email,
+      newUser.password
     );
-    data.uid = userCredential.user.uid;
-    addUser(data.uid, data);
+    newUser.uid = userCredential.user.uid;
+    addUser(newUser.uid, newUser);
     console.log("Signed up:", userCredential.user);
   } catch (e) {
     const errorCode = e.code;
@@ -77,6 +76,42 @@ export async function userSignUp(email, password, data) {
   }
 
   return { isLoading, error };
+}
+
+
+export async function getSections() {
+  const sections = [];
+  const db = firestore.getFirestore();
+  const querySnapshot = await firestore.getDocs(firestore.collection(db, "Itineraries"));
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    sections.push({
+      id: doc.id,
+      title: data.title,
+      content: data.content,
+      children: data.children || [], // If you have children array in your Firestore, otherwise you can remove this line.
+    });
+  });
+
+  return sections;
+}
+
+export async function fetchGroups() {
+  const groupData = [];
+  const db = firestore.getFirestore();
+  const querySnapshot = await firestore.getDocs(firestore.collection(db, "groups"));
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    groupData.push({
+      id: doc.id,
+      name: data.groupName,
+      image: data.groupAvatar,
+    });
+  });
+
+  return groupData;
 }
 
 

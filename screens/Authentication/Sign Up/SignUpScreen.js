@@ -189,6 +189,7 @@ const SignUpScreen = () => {
       email: email,
       firstName: firstName,
       lastName: lastName,
+      password: password,
       phoneNumber: phoneNumber,
       dob: dob.toString(),
       userName: userName,
@@ -196,7 +197,7 @@ const SignUpScreen = () => {
       groupIds: [],
     };
 
-    await userSignUp(formValues.email, formValues.password, newUser);
+    await userSignUp(newUser);
     setIsLoading(false);
     console.log(error);
   };

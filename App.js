@@ -1,16 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { auth } from "./firebase";
 import Itineraries from "./screens/Groups/Itineraries";
 
-import AuthContextProvider, { AuthContext } from "./store/auth-context";
 
 import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
 import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
+import Settings from "./screens/UserProfile/Settings";
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +43,8 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Profile" component={UserProfileScreen} />
         <Stack.Screen name="Itineraries" component={Itineraries} />
+        <Stack.Screen name="Settings" component={Settings} />
+
 
       </Stack.Navigator>
     );
@@ -63,3 +65,6 @@ export default function App() {
     </>
   );
 }
+
+
+
