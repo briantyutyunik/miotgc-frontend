@@ -67,7 +67,7 @@ const MyAccordionMenu = () => {
               {child}
             </Text>
           ))}
-        </View>        
+        </View>
     );
   };
 
