@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  Text,
-  TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
@@ -15,10 +13,9 @@ import Logo from "../../../components/UI/Logo";
 import Button from "../../../components/UI/Button";
 import Background from "../../../components/UI/Background";
 import { userSignUp } from "../../../firebase";
-import Line from "../../../components/UI/Line";
 import UserAvatar from "../../../components/UI/UserAvatar";
 import ImageSelect from "../../../components/UI/ImageSelect";
-
+import { checkIfValueExists } from "../../../firebase";
 const SignUpScreen = () => {
   const [error, setError] = useState("");
 
@@ -28,6 +25,11 @@ const SignUpScreen = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(null);
 
+  const [isUsernameValid, setIsUsernameValid] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
+
+  const [userNameError, setUserNameError] = useState(null);
+
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(null);
 
@@ -36,7 +38,9 @@ const SignUpScreen = () => {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-  const [dob, setDob] = useState(new Date());
+
+  const [dob, setDob] = useState("");
+  const [dobError, setDobError] = useState(null);
 
   const [userName, setUserName] = useState("");
 
@@ -53,14 +57,24 @@ const SignUpScreen = () => {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   };
-  const handleEmailChange = (text) => {
+  async function handleEmailChange(text) {
     setEmail(text);
+    const exists = await checkIfValueExists("users", "email", text);
+
+    console.log("TESTING...", exists);
     if (!validateEmail(text)) {
       setEmailError("Invalid email format");
+      setIsEmailValid(false);
+    } else if (exists) {
+      setEmailError(
+        "There's an account registered with this email address already. Sign in below if you already have an account."
+      );
+      setIsEmailValid(false);
     } else {
       setEmailError(null);
+      setIsEmailValid(true);
     }
-  };
+  }
 
   const handlePasswordChange = (text) => {
     setPassword(text);
@@ -82,6 +96,59 @@ const SignUpScreen = () => {
     }
   };
 
+  const validateUserName = (userName) => {
+    if (userName.length < 6) {
+      return false;
+    }
+    return true;
+  };
+
+  async function checkIfUserNameExists(username) {
+    const exists = await checkIfValueExists("users", "username", username);
+    if (exists) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async function checkIfEmailExists(email) {
+    const exists = await checkIfValueExists("users", "email", email);
+    setIsEmailValid(!exists);
+  }
+
+  async function handleUserNameChange(text) {
+    setUserName(text);
+
+    const exists = await checkIfValueExists("users", "userName", text);
+    console.log("TESTING...", exists);
+    if (!validateUserName(text)) {
+      setUserNameError("The user name must be at least 6 characters.");
+      setIsUsernameValid(false);
+    } else if (exists) {
+      setUserNameError("The username is already taken.");
+      setIsUsernameValid(false);
+    } else {
+      setUserNameError(null);
+      setIsUsernameValid(true);
+    }
+  }
+
+  const handleDobChange = (text) => {
+    setDob(text);
+    if (!validateDob(text)) {
+      setDobError("Please enter your date of birth as mm/dd/yyyy.");
+    } else {
+      setDobError(null);
+    }
+  };
+
+  const validateDob = (date) => {
+    const datePattern =
+      /^(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
+    return datePattern.test(date);
+  };
+
   useEffect(() => {
     setIsFormValid(
       firstName.length > 0 &&
@@ -89,10 +156,23 @@ const SignUpScreen = () => {
         validateEmail(email) &&
         validatePassword(password) &&
         confirmPassword.length > 0 &&
-        dob !== null &&
-        phoneNumber.length > 0
+        validateDob(dob) &&
+        phoneNumber.length > 0 &&
+        validateUserName(userName) &&
+        isUsernameValid === true &&
+        isEmailValid === true
     );
-  }, [firstName, lastName, email, password, confirmPassword, dob, phoneNumber]);
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    confirmPassword,
+    dob,
+    isUsernameValid,
+    isEmailValid,
+    phoneNumber,
+  ]);
 
   const handleSignUpButtonPress = async () => {
     setIsLoading(true);
@@ -130,8 +210,8 @@ const SignUpScreen = () => {
       >
         <Card additionalStyles={styles.cardContainer}>
           <View style={styles.signUpHeaderContainer}>
-            <Text style={styles.signUpHeader}>Sign up</Text>
-            <Line width={70} color={PRIMARY_COLOR} height={1} />
+            {/* <Text style={styles.signUpHeader}>Sign up</Text>
+            <Line width={70} color={PRIMARY_COLOR} height={1} /> */}
           </View>
           <UserAvatar
             rounded
@@ -163,6 +243,11 @@ const SignUpScreen = () => {
               onChangeTextHandler={(text) => setLastName(text)}
             />
             <AuthInput
+              placeholder="User Name"
+              onChangeTextHandler={handleUserNameChange}
+              error={userNameError}
+            />
+            <AuthInput
               placeholder="Email Address"
               inputType="email"
               secure={false}
@@ -183,28 +268,12 @@ const SignUpScreen = () => {
               onChangeTextHandler={handleConfirmPasswordChange}
               error={confirmPasswordError}
             />
-            {/* <DatePicker
-              style={{ width: "95%", marginBottom: 25 }}
-              date={dob}
-              mode="date"
-              placeholder="Date of Birth"
-              format="YYYY-MM-DD"
-              confirmBtnText="Confirm"
-              cancelBtnText="Cancel"
-              showIcon={false}
-              customStyles={{
-                dateInput: {
-                  borderColor: PRIMARY_COLOR,
-                  borderRadius: 10,
-                  borderWidth: 2,
-                },
-              }}
-              onDateChange={(dob) => setDob(dob)}
-            /> */}
+
             <AuthInput
               placeholder="dob mm/dd/yyyy"
               secure={false}
-              onChangeTextHandler={(text) => setDob(text)}
+              onChangeTextHandler={handleDobChange}
+              error={dobError}
             />
             <AuthInput
               placeholder="Phone Number"
@@ -257,12 +326,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   cardContainer: {
-    paddingTop: 30,
+    paddingTop: 0,
     paddingBottom: 0,
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    maxHeight: "80%",
+    maxHeight: "85%",
   },
   avatarContainerStyle: {
     backgroundColor: PRIMARY_COLOR,
