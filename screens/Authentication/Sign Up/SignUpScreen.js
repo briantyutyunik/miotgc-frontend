@@ -204,7 +204,7 @@ const SignUpScreen = () => {
 
   return (
     <Background additionalStyle={styles.container}>
-      <Logo additionalStyle={styles.logo} height={120} width={120} />
+      <Logo additionalStyle={styles.logo} height={90} width={120} />
       <KeyboardAvoidingView
         behavior="padding"
         style={styles.authInputContainer}
@@ -216,7 +216,7 @@ const SignUpScreen = () => {
           </View>
           <UserAvatar
             rounded
-            size={110}
+            size={80}
             imageUri={image}
             containerStyle={styles.avatarContainerStyle}
             onPress={() => {
@@ -333,6 +333,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     maxHeight: "85%",
+    marginTop: "-7%"
   },
   avatarContainerStyle: {
     backgroundColor: PRIMARY_COLOR,
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   signUpButtonContainer: {
     height: 50,
     width: "35%",
-    top: 20,
+    top: 10,
     backgroundColor: "#fff",
     borderRadius: 100,
     justifyContent: "center",

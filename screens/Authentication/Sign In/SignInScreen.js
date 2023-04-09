@@ -18,7 +18,7 @@ import Card from "../../../components/UI/Card";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import { userSignIn } from "../../../firebase";
 
-const SignInScreen = () => {
+const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,18 +68,34 @@ const SignInScreen = () => {
           {error !== "" && <Text style={styles.errorText}>{error}</Text>}
 
           <AuthInput
-            placeholder="Email Address"
+            placeholder="email or username"
             inputType="email"
             secure={false}
             onChangeTextHandler={(text) => setEmail(text)}
           />
           <AuthInput
-            placeholder="Password"
+            placeholder="password"
             inputType="password"
             secure={true}
             onChangeTextHandler={(text) => setPassword(text)}
           />
 
+          <View style={styles.signUpHereContainer}>
+            <Text style={styles.signUpHereText}>Not registered? Sign up </Text>
+            <Button
+              title="here"
+              onPress={() => navigation.navigate('SignUp')}
+              textStyle={{
+                color: PRIMARY_COLOR, // Custom text color
+                fontSize: 16, // Custom text size
+                textDecorationLine: "underline",
+                fontWeight: "normal",
+                shadowColor: "transparent"
+              }}
+                containerStyle={styles.noShadowSignUpHereButton}
+
+            />
+          </View>
           {isLoading ? (
             <ActivityIndicator size="large" color={PRIMARY_COLOR} />
           ) : (
@@ -239,6 +255,30 @@ const styles = StyleSheet.create({
     width: 80,
     textAlign: "center",
   },
+
+  signUpHereButton: {
+    color: PRIMARY_COLOR,
+    fontSize: 16,
+  },
+  signUpHereContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  signUpHereText: {
+    color: PRIMARY_COLOR,
+    fontSize: 16,
+  },
+  noShadowSignUpHereButton: {
+    shadowColor: "transparent",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  
 });
 
 export default SignInScreen;

@@ -11,7 +11,14 @@ import {
   Button,
   TouchableOpacity,
 } from "react-native";
-import { auth, firestore, getUser, storage, fetchGroups } from "../../firebase";
+import {
+  auth,
+  firestore,
+  getUser,
+  storage,
+  fetchGroups,
+  userSignOut,
+} from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -21,6 +28,7 @@ export default function UserProfileScreen() {
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
+
   const navigation = useNavigation();
 
   // const data = [
@@ -56,7 +64,10 @@ export default function UserProfileScreen() {
       <View style={{ marginHorizontal: 10 }}>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("Itineraries", { groupName: group.name, groupId: group.id })
+            navigation.navigate("Itineraries", {
+              groupName: group.name,
+              groupId: group.id,
+            })
           }
         >
           <Image
@@ -74,6 +85,15 @@ export default function UserProfileScreen() {
   return (
     <Background>
       <View style={styles.profileScreenContainer}>
+        <TouchableOpacity
+          onPress={async () => {
+            await userSignOut();
+            navigation.navigate("Sign In"); // Replace "SignIn" with the name of your sign-in screen in your navigation
+          }}
+          style={styles.logoutIcon}
+        >
+          <Ionicons name="log-out-outline" size={35} color="white" />
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Settings")}
           style={styles.settingsIcon}
@@ -175,8 +195,8 @@ const styles = StyleSheet.create({
   },
   settingsIcon: {
     position: "absolute",
-    top: -20, // Adjust this value if you need more or less spacing from the top
-    right: 20, // Adjus
+    top: "-5%", // Adjust this value if you need more or less spacing from the top
+    right: "5%", // Adjus
   },
   profilePictureContainer: {
     // backgroundColor: "white",
@@ -208,5 +228,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 100,
     borderTopRightRadius: 100,
     overflow: "hidden",
+  },
+
+  logoutIcon: {
+    position: "absolute",
+    top: "-5%", // Adjust this value if you need more or less spacing from the top
+    left: "5%", // Adjust this value if you need more or less spacing from the left
   },
 });
