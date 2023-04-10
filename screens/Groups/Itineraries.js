@@ -40,7 +40,7 @@ const MyAccordionMenu = () => {
   //   {
   //     title: "Transportation",
   //     content:
-  //       "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+  //       "Duis aute i rure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
   //     children: ["Section 3 Child 1", "Section 3 Child 2"],
   //   },
   // ];

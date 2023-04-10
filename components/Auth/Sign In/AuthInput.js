@@ -40,8 +40,8 @@ export default function AuthInput({
           onChangeText={onChangeTextHandler}
           keyboardType={keyboardType}
           secureTextEntry={secureIcon}
-          autoCapitalize={false}
-          // autoFocus={inputType === "email"}
+          autoCapitalize="none"
+         
         />
         {inputType === "password" && (
           <TouchableOpacity
