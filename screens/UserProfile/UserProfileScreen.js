@@ -21,8 +21,6 @@ import {
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
-import Itineraries from "../../screens/Groups/Itineraries";
-import UserAvatar from "../../components/UI/UserAvatar";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
@@ -31,6 +29,7 @@ export default function UserProfileScreen() {
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
 
+  const navigation = useNavigation();
 
   // const data = [
   //   { id: "1", name: "Group 1", image: "https://picsum.photos/201" },
@@ -83,21 +82,6 @@ export default function UserProfileScreen() {
     );
   };
 
-<<<<<<< HEAD
-  const navigation = useNavigation();
-  return (
-    <Background additionalStyle={styles.container}>
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: "15%",
-        }}
-      >
-        <View style={styles.container}>
-          {/* <TouchableOpacity
-=======
   return (
     <Background>
       <View style={styles.profileScreenContainer}>
@@ -119,7 +103,6 @@ export default function UserProfileScreen() {
 
         <View style={styles.profilePictureContainer}>
           <TouchableOpacity
->>>>>>> origin/tahir
             style={styles.photoContainer}
             onPress={() => {
               setOpenImageSelect(!openImageSelect);
@@ -141,25 +124,8 @@ export default function UserProfileScreen() {
                 />
               )}
             </View>
-<<<<<<< HEAD
-          </TouchableOpacity> */}
-          <UserAvatar
-            size={110}
-            rounded
-            containerStyle={styles.photoBackground}
-          />
-          <View style={styles.profileContainer}>
-            <Button
-              onPress={() => {
-                auth.getAuth().signOut();
-              }}
-              title={"Log Out"}
-            />
-          </View>
-=======
           </TouchableOpacity>
 
->>>>>>> origin/tahir
           {/* <View style={styles.curve} /> */}
         </View>
         <View style={{ flex: 1 }}>
