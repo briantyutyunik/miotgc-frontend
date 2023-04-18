@@ -10,7 +10,6 @@ import * as storage from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
-import { AuthContext } from "./store/auth-context";
 import { getBlobFromUri } from "./util/ImageUtils";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -32,10 +31,22 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 
-export async function userSignIn(email, password) {
+export async function userSignIn(input, password) {
   let isLoading = true;
   let error = "";
   try {
+    let email = input;
+
+    // Check if input is a username and get the corresponding email
+    if (!input.includes("@")) {
+      const userEmail = await getEmailByUsername(input);
+      if (userEmail) {
+        email = userEmail;
+      } else {
+        throw new Error("Username not found");
+      }
+    }
+
     const userCredential = await auth.signInWithEmailAndPassword(
       auth.getAuth(),
       email,
@@ -55,17 +66,53 @@ export async function userSignIn(email, password) {
   return { isLoading, error };
 }
 
-export async function userSignUp(email, password, data) {
+
+
+export async function getEmailByUsername(username) {
+  const db = firestore.getFirestore();
+  const query = firestore.query(
+    firestore.collection(db, "users"),
+    firestore.where("userName", "==", username)
+  );
+  const querySnapshot = await firestore.getDocs(query);
+
+  if (querySnapshot.size > 0) {
+    return querySnapshot.docs[0].data().email;
+  } else {
+    return null;
+  }
+}
+
+
+export async function userSignOut() {
+  try {
+    await auth.signOut(auth.getAuth());
+    console.log("User signed out");
+  } catch (e) {
+    console.error("Error signing out:", e);
+  }
+}
+
+
+
+export async function userSignUp(newUser) {
   let isLoading = true;
   let error = "";
+
   try {
+    // Step 1: Sign up the new user using Firebase Authentication
     let userCredential = await auth.createUserWithEmailAndPassword(
       auth.getAuth(),
-      email,
-      password
+      newUser.email,
+      newUser.password
     );
-    data.uid = userCredential.user.uid;
-    addUser(data.uid, data);
+
+    // Get the unique user ID (UID) from the user object
+    newUser.uid = userCredential.user.uid;
+
+    // Step 2: Use the UID to store additional user data in Firestore
+    addUser(newUser.uid, newUser);
+
     console.log("Signed up:", userCredential.user);
   } catch (e) {
     const errorCode = e.code;
@@ -79,10 +126,62 @@ export async function userSignUp(email, password, data) {
   return { isLoading, error };
 }
 
-// user queries
+export async function getSections() {
+  const sections = [];
+  const db = firestore.getFirestore();
+  const querySnapshot = await firestore.getDocs(
+    firestore.collection(db, "Itineraries")
+  );
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    sections.push({
+      id: doc.id,
+      title: data.title,
+      content: data.content,
+      children: data.children || [], // If you have children array in your Firestore, otherwise you can remove this line.
+    });
+  });
+
+  return sections;
+}
+
+export async function fetchGroups() {
+  const groupData = [];
+  const db = firestore.getFirestore();
+  const querySnapshot = await firestore.getDocs(
+    firestore.collection(db, "groups")
+  );
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    groupData.push({
+      id: doc.id,
+      name: data.groupName,
+      image: data.groupAvatar,
+    });
+  });
+
+  return groupData;
+}
+
+export async function checkIfValueExists(collection, field, value) {
+  const db = firestore.getFirestore();
+  const query = firestore.query(
+    firestore.collection(db, collection),
+    firestore.where(field, "==", value)
+  );
+  const querySnapshot = await firestore.getDocs(query);
+  return querySnapshot.size > 0;
+}
+
 export async function addUser(uid, data) {
+  // Remove the password field before storing user data in Firestore
+  const dataWithoutPassword = { ...data };
+  delete dataWithoutPassword.password;
+
   const docRef = doc(firestore.getFirestore(), "users", uid);
-  await setDoc(docRef, data);
+  await setDoc(docRef, dataWithoutPassword);
 }
 
 export async function updateUser(uid, data) {
