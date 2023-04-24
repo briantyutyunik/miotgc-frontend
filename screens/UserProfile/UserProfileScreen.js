@@ -10,6 +10,7 @@ import {
   Image,
   Button,
   TouchableOpacity,
+  SafeAreaView
 } from "react-native";
 import {
   auth,
@@ -83,6 +84,7 @@ export default function UserProfileScreen() {
   };
 
   return (
+    <SafeAreaView style={styles.safe}>
     <Background>
       <View style={styles.profileScreenContainer}>
         <TouchableOpacity
@@ -123,6 +125,7 @@ export default function UserProfileScreen() {
                   source={{ uri: `${image}` }}
                 />
               )}
+              <Text>Test</Text>
             </View>
           </TouchableOpacity>
 
@@ -155,10 +158,15 @@ export default function UserProfileScreen() {
         </View>
       </View>
     </Background>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#FF5553',
+  },
   buttonContainer: {
     height: 60,
     width: "80%",
