@@ -7,6 +7,8 @@ import { getSections, auth, firestore, storage } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
 import { Skeleton } from "@rneui/themed";
 import { onSnapshot } from "firebase/firestore";
+import * as firebase from "firebase/app";
+
 
 const MyAccordionMenu = () => {
   const [image, setImage] = useState();
@@ -14,6 +16,24 @@ const MyAccordionMenu = () => {
   const [SECTIONS, setSections] = useState([]);
   const route = useRoute();
   const { groupId, groupName } = route.params;
+  const SECTIONS2 = [
+    {
+      title: "Section 1",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      children: ["Section 1 Child 1", "Section 1 Child 2"],
+    },
+    {
+      title: "Section 2",
+      content:
+        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    },
+    {
+      title: "Section 3",
+      content:
+        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        children: ["Section 1 Child 1", "Section 1 Child 2"],
+      },
+  ];
 
   //     title: "Flight",
   //     title: "Stay",
@@ -21,6 +41,7 @@ const MyAccordionMenu = () => {
   //     title: "Checklist"
   //     title: "Transportation",
 
+  
   useEffect(() => {
     const uid = auth.getAuth().currentUser.uid;
     let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
@@ -32,7 +53,24 @@ const MyAccordionMenu = () => {
           setImage(res);
         });
       }
+      
     });
+
+    async function displaySections() {
+      const sections = await getSections();
+    
+      sections.forEach((section) => {
+        console.log(`ID: ${section.id}`);
+    
+        for (const key in section) {
+          if (key !== 'id') {
+            console.log(`${key}: ${section[key]}`);
+          }
+        }
+    
+        console.log('---');
+      });
+    }
 
     (async () => {
       const fetchedGroups = await fetchGroups();
@@ -79,18 +117,27 @@ const MyAccordionMenu = () => {
 
   const renderHeader = (section, index, isActive) => {
     return (
-      <TouchableOpacity
-        style={styles.header}
-        onPress={() => toggleSection(index)}
-      >
-        <Text style={styles.headerText}>{section.title}</Text>
+      <TouchableOpacity style={styles.header} onPress={() => setActiveSections(isActive ? [] : [index])}>
+        <Text style={styles.headerText}>{section.header}</Text>
       </TouchableOpacity>
     );
   };
-  const renderContent = (section) => {
+  
+  const renderContent = (section, index, isActive) => {
     return (
-      <View style={styles.content}>
-        <Text>{section.content}</Text>
+      <TouchableOpacity style={styles.content} onPress={() => setActiveSections(isActive ? [] : [index])}>
+        <Text style={styles.contentText}>Airline: {section.content.Airline}</Text>
+        <Text style={styles.contentText}>City: {section.content.City}</Text>
+        <Text style={styles.contentText}>Airport: {section.content.Airport}</Text>
+        {section.children && renderChildren(section)}
+      </TouchableOpacity>
+    );
+  };
+
+  
+  const renderChildren = (section) => {
+    return (
+      <View style={styles.children}>
         {section.children.map((child, index) => (
           <Text key={index} style={styles.childText}>
             {child}
@@ -99,6 +146,7 @@ const MyAccordionMenu = () => {
       </View>
     );
   };
+  
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -118,8 +166,8 @@ const MyAccordionMenu = () => {
               activeSections={activeSections}
               renderHeader={renderHeader}
               renderContent={renderContent}
+              renderChildren={renderChildren}
               onChange={setActiveSections}
-              underlayColor="transparent"
             />
           </Card>
         </View>

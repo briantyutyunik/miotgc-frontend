@@ -125,12 +125,11 @@ export async function userSignUp(newUser) {
 
   return { isLoading, error };
 }
-
-export async function getSections() {
+/* export async function getSections() {
   const sections = [];
   const db = firestore.getFirestore();
   const querySnapshot = await firestore.getDocs(
-    firestore.collection(db, "Itineraries")
+    firestore.collection(db, "Itinerary")
   );
 
   querySnapshot.forEach((doc) => {
@@ -144,7 +143,32 @@ export async function getSections() {
   });
 
   return sections;
+} */
+
+export async function getSections() {
+  const sections = [];
+  const db = firestore.getFirestore();
+  const querySnapshot = await firestore.getDocs(
+    firestore.collection(db, "Itinerary")
+  );
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    let section = {
+      id: doc.id,
+    };
+
+    for (const key in data) {
+      section[key] = data[key];
+    }
+    console.log("\n\n\n\n\nAAAAAAAAAAAA" + section);
+    sections.push(section);
+  });
+
+  return sections;
 }
+
+
 
 export async function fetchGroups() {
   const groupData = [];
