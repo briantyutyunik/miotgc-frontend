@@ -1,131 +1,125 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-import { getSections } from "../../firebase";
+import { getSectionsByGroupId } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-const MyAccordionMenu = () => {
-  const [activeSections, setActiveSections] = useState([]);
-  const [SECTIONS, setSections] = useState([]);
+import { getFirestore } from "firebase/firestore";
+import { firestore, updateGroupName } from "../../firebase";
+import AuthInput from "../../components/Auth/Sign In/AuthInput";
+import { PRIMARY_COLOR } from "../../constants/styles";
+
+export default function Itineraries() {
   const route = useRoute();
-  const groupName = route.params.groupName;
-  const { groupId } = route.params;
+  const initialGroupName = route.params.groupName;
+  const [updatedGroupName, setUpdatedGroupName] = useState(groupName);
 
-  // const SECTIONS = [
-  //   {
-  //     title: "Flight",
-  //     content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  //     children: ["Section 1 Child 1", "Section 1 Child 2"],
-  //   },
-  //   {
-  //     title: "Stay",
-  //     content:
-  //       "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  //     children: ["Section 2 Child 1", "Section 2 Child 2"],
-  //   },
-  //   {
-  //     title: "Activities",
-  //     content:
-  //       "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  //     children: ["Section 3 Child 1", "Section 3 Child 2"],
-  //   },
-  //   {
-  //     title: "Checklist",
-  //     content:
-  //       "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  //     children: ["Section 3 Child 1", "Section 3 Child 2"],
-  //   },
-  //   {
-  //     title: "Transportation",
-  //     content:
-  //       "Duis aute i rure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  //     children: ["Section 3 Child 1", "Section 3 Child 2"],
-  //   },
-  // ];
+  const isNewGroup = route.params?.isNewGroup || false;
+  const [isEditingGroupName, setIsEditingGroupName] = useState(false);
+  const [groupName, setGroupName] = useState(initialGroupName);
+  const groupId = route.params.groupId;
+  // TO RENDER CONTDITIONALLY
 
-  useEffect(() => {
-    const fetchGroupData = async () => {
-      const groupRef = firestore.doc(firestore.getFirestore(), "groups", groupId);
-      const groupSnap = await firestore.getDoc(groupRef);
+  // if (isNewGroup) {
+  //   return (
+  //     <View>
+  //       {/* Render the content for creating a new group */}
+  //       <Text>Create a new group</Text>
+  //     </View>
+  //   );
+  // } else {
+  //   return (
+  //     <View>
+  //       {/* Render the content for existing group details */}
+  //       <Text>Group details</Text>
+  //     </View>
+  //   );
+  // }
+  const handleEditGroupName = () => {
+    setIsEditingGroupName(!isEditingGroupName);
+  };
 
-      if (groupSnap.exists()) {
-        setGroupData(groupSnap.data());
-      } else {
-        console.log("No such group!");
-      }
-    };
+  const groupNameUpdate = async () => {
+    if (updatedGroupName === groupName) {
+      return;
+    }
 
-    fetchGroupData();
-  }, [groupId]);
-
-
-  useEffect(() => {
-    const fetchSections = async () => {
-      const fetchedSections = await getSections();
-      setSections(fetchedSections);
-      console.log(SECTIONS);
-    };
-
-    fetchSections();
-  }, []);
-
-  const toggleSection = (index) => {
-    const isActive = activeSections.includes(index);
-    if (isActive) {
-      setActiveSections(activeSections.filter((i) => i !== index));
-    } else {
-      setActiveSections([...activeSections, index]);
+    try {
+      // Assuming you have groupId available in the component
+      await updateGroupName(groupId, updatedGroupName);
+      console.log("Group name updated successfully");
+      setGroupName(updatedGroupName); // Add this line to update the groupName state variable
+    } catch (error) {
+      console.error("Error updating group name:", error);
     }
   };
 
-  const renderHeader = (section, index, isActive) => {
-    return (
-      <TouchableOpacity
-        style={styles.header}
-        onPress={() => toggleSection(index)}
-      >
-        <Text style={styles.headerText}>{section.title}</Text>
-      </TouchableOpacity>
-    );
-  };
-  const renderContent = (section) => {
-    return (
-      <View style={styles.content}>
-        <Text>{section.content}</Text>
-        {section.children.map((child, index) => (
-          <Text key={index} style={styles.childText}>
-            {child}
-          </Text>
-        ))}
-      </View>
-    );
-  };
-
+  console.log(groupName);
   return (
     <Background additionalStyle={styles.container}>
-      <View style={styles.top}>
-        <Text style={styles.itinerariesPadding}>{groupName}</Text>
-      </View>
-      <View style={styles.top}>
-        <Card additionalStyles={styles.cardContainerTwo}>
-          <Text>Placeholder for Members</Text>
-        </Card>
-        <Card additionalStyles={styles.cardContainer}>
-          <Accordion
-            sections={SECTIONS}
-            activeSections={activeSections}
-            renderHeader={renderHeader}
-            renderContent={renderContent}
-            onChange={setActiveSections}
-            underlayColor="transparent"
+      <View style={styles.groupNameContainer}>
+        {isEditingGroupName ? (
+          <TextInput
+            style={styles.groupName}
+            value={updatedGroupName}
+            onChangeText={(text) => setUpdatedGroupName(text)}
+            onSubmitEditing={() => setIsEditingGroupName(false)}
+            onBlur={() => {
+              groupNameUpdate();
+              setIsEditingGroupName(false);
+            }}
+            autoFocus={true}
           />
-        </Card>
+        ) : (
+          <Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
+            {isNewGroup ? "Undefined Group" : groupName}
+          </Text>
+        )}
+        <TouchableOpacity onPress={handleEditGroupName}>
+          <Ionicons name="pencil-outline" size={34} color="white" />
+        </TouchableOpacity>
       </View>
+
+      <Card additionalStyles={styles.cardContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Age Group</Text>
+        </View>
+        <AuthInput onChangeTextHandler={(text) => setFirstName(text)} />
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Date Of Travel</Text>
+        </View>
+
+        <AuthInput
+          onChangeTextHandler={(text) => setFirstName(text)}
+          textInputBackgroundColor="white"
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Number of people</Text>
+        </View>
+        <AuthInput onChangeTextHandler={(text) => setFirstName(text)} />
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Destination</Text>
+        </View>
+
+        <AuthInput
+          onChangeTextHandler={(text) => setFirstName(text)}
+          textInputBackgroundColor="white"
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Budget</Text>
+        </View>
+
+        <AuthInput
+          onChangeTextHandler={(text) => setFirstName(text)}
+          textInputBackgroundColor="white"
+        />
+      </Card>
     </Background>
   );
-};
+}
 
 const styles = {
   tripLengthPadding: {
@@ -135,6 +129,16 @@ const styles = {
     paddingLeft: 15,
     color: "white",
   },
+
+  textContainer: {
+    alignSelf: "stretch",
+  },
+  textStyle: {
+    color: PRIMARY_COLOR,
+    textAlign: "left",
+    marginBottom: 20,
+    fontSize: 24,
+  },
   itinerariesPadding: {
     marginLeft: 10,
     marginTop: 10,
@@ -143,8 +147,18 @@ const styles = {
     fontWeight: "bold",
     color: "white",
   },
-  top: {
-    marginTop: "15%",
+  groupNameContainer: {
+    marginTop: "10%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    flexDirection: "row", // Add this line
+  },
+  groupName: {
+    color: "white",
+    fontSize: 48,
+    fontWeight: "bold",
+    marginRight: "10%",
+    flexShrink: 1,
   },
   header: {
     backgroundColor: "#f2f2f2",
@@ -166,7 +180,7 @@ const styles = {
     padding: 10,
   },
   container: {
-    // backgroundColor: "white",
+    alignItems: "center",
   },
   cardContainer: {
     margin: "5%",
@@ -174,6 +188,7 @@ const styles = {
     alignItems: "center",
     width: "90%",
     maxHeight: "100%",
+    marginTop: 100,
   },
   cardContainerTwo: {
     justifyContent: "center",
@@ -182,4 +197,3 @@ const styles = {
     maxHeight: "100%",
   },
 };
-export default MyAccordionMenu;

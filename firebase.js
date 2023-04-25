@@ -1,11 +1,24 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+
 import { useNavigation } from "@react-navigation/native";
 import * as firebase from "firebase/app";
+import { initializeApp } from "firebase/app";
+
+import { getFirestore } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
-import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 import * as storage from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
@@ -30,7 +43,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
-
 export async function userSignIn(input, password) {
   let isLoading = true;
   let error = "";
@@ -66,7 +78,16 @@ export async function userSignIn(input, password) {
   return { isLoading, error };
 }
 
+export function getCurrentUser(callback) {
+  const authInstance = auth.getAuth();
+  return onAuthStateChanged(authInstance, callback);
+}
 
+export async function getUser(uid) {
+  const docRef = doc(firestore.getFirestore(), "users", uid);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+}
 
 export async function getEmailByUsername(username) {
   const db = firestore.getFirestore();
@@ -83,7 +104,6 @@ export async function getEmailByUsername(username) {
   }
 }
 
-
 export async function userSignOut() {
   try {
     await auth.signOut(auth.getAuth());
@@ -93,7 +113,10 @@ export async function userSignOut() {
   }
 }
 
-
+export async function updateGroupName(groupId, newGroupName) {
+  const docRef = doc(firestore.getFirestore(), "groups", groupId);
+  await updateDoc(docRef, { groupName: newGroupName });
+}
 
 export async function userSignUp(newUser) {
   let isLoading = true;
@@ -126,20 +149,58 @@ export async function userSignUp(newUser) {
   return { isLoading, error };
 }
 
-export async function getSections() {
-  const sections = [];
+export async function createGroup(groupName) {
+  const groupData = {
+    groupName: groupName,
+    createdAt: new Date(),
+    };
+
+  // Add the group to Firestore and get the auto-generated ID
+  const groupDocRef = await addDoc(
+    collection(firestore.getFirestore(), "groups"),
+    groupData
+  );
+  const groupId = groupDocRef.id;
+
+  return groupId;
+}
+
+export async function createInvite(groupId, inviterId) {
+  const inviteData = {
+    groupId: groupId,
+    inviterId: inviterId,
+    createdAt: new Date(),
+  };
+
+  // Add the invite to Firestore and get the auto-generated ID
+  const inviteDocRef = await addDoc(
+    collection(firestore.getFirestore(), "invites"),
+    inviteData
+  );
+  const inviteId = inviteDocRef.id;
+
+  return inviteId;
+}
+
+export async function getSectionsByGroupId(groupId) {
   const db = firestore.getFirestore();
   const querySnapshot = await firestore.getDocs(
-    firestore.collection(db, "Itineraries")
+    firestore.query(
+      firestore.collection(db, "Itineraries"),
+      firestore.where("groupId", "==", groupId)
+    )
   );
+  const sections = [];
+  // const db = firestore.getFirestore();
+  // const querySnapshot = await firestore.getDocs(
+  //   firestore.collection(db, "Itineraries")
+  // );
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
     sections.push({
       id: doc.id,
-      title: data.title,
-      content: data.content,
-      children: data.children || [], // If you have children array in your Firestore, otherwise you can remove this line.
+      ...data, // This will spread all the fields from the document into the new object
     });
   });
 
@@ -188,14 +249,6 @@ export async function updateUser(uid, data) {
   const docRef = doc(firestore.getFirestore(), "users", uid);
 
   await updateDoc(docRef, data);
-}
-
-export async function getUser(uid) {
-  const docRef = doc(firestore.getFirestore(), "users", uid);
-
-  const docSnap = await getDoc(docRef);
-
-  return docSnap.data();
 }
 
 // Image

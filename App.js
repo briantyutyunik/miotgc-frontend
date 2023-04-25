@@ -23,6 +23,7 @@
         } else {
           setUser(null);
         }
+
       });
       // Unsubscribe from the listener when the component unmounts
       return () => unsubscribe();

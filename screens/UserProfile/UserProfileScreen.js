@@ -18,6 +18,8 @@ import {
   storage,
   fetchGroups,
   userSignOut,
+  getCurrentUser,
+  createGroup,
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -28,16 +30,31 @@ export default function UserProfileScreen() {
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
-
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
   const navigation = useNavigation();
 
-  // const data = [
-  //   { id: "1", name: "Group 1", image: "https://picsum.photos/201" },
-  //   { id: "2", name: "Group 2", image: "https://picsum.photos/202" },
-  //   { id: "3", name: "Group 3", image: "https://picsum.photos/204" },
-  //   { id: "4", name: "Group 4", image: "https://picsum.photos/206" },
-  // ];
+  useEffect(() => {
+    const unsubscribe = getCurrentUser((user) => {
+      setCurrentUser(user);
+    });
 
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchUserData = async () => {
+        const data = await getUser(currentUser.uid);
+        setCurrentUserData(data);
+        console.log(data);
+        console.log(data.firstName);
+      };
+      fetchUserData();
+    }
+  }, [currentUser]);
   useEffect(() => {
     const uid = auth.getAuth().currentUser.uid;
     let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
@@ -60,6 +77,32 @@ export default function UserProfileScreen() {
   }, []);
 
   const renderGroupCard = ({ item: group }) => {
+    if (group.id === "add-new-group") {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            const groupId = createGroup("Undefined Group");
+
+            navigation.navigate("Itineraries", {
+              isNewGroup: true,
+              groupId: groupId,
+            });
+          }}
+          style={{
+            marginHorizontal: 10,
+            backgroundColor: "white",
+            justifyContent: "center",
+            alignItems: "center",
+            width: 150,
+            height: 150,
+            borderRadius: 10,
+          }}
+        >
+          <Ionicons name="add" size={50} color={PRIMARY_COLOR} />
+        </TouchableOpacity>
+      );
+    }
+
     return (
       <View style={{ marginHorizontal: 10 }}>
         <TouchableOpacity
@@ -88,7 +131,7 @@ export default function UserProfileScreen() {
         <TouchableOpacity
           onPress={async () => {
             await userSignOut();
-            navigation.navigate("Sign In"); // Replace "SignIn" with the name of your sign-in screen in your navigation
+            navigation.navigate("Sign In");
           }}
           style={styles.logoutIcon}
         >
@@ -133,7 +176,7 @@ export default function UserProfileScreen() {
             <View style={styles.flatListContainer}>
               <Text style={styles.flatListTitle}>Groups</Text>
               <FlatList
-                data={groups}
+                data={[...groups, { id: "add-new-group" }]}
                 renderItem={renderGroupCard}
                 keyExtractor={(item) => item.id}
                 horizontal
