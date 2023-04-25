@@ -11,7 +11,7 @@ import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
 import { getBlobFromUri } from "./util/ImageUtils";
-
+import { onAuthStateChanged } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -213,15 +213,6 @@ export async function updateUser(uid, data) {
 
   await updateDoc(docRef, data);
 }
-
-export async function getUser(uid) {
-  const docRef = doc(firestore.getFirestore(), "users", uid);
-
-  const docSnap = await getDoc(docRef);
-
-  return docSnap.data();
-}
-
 // Image
 export function generateImageName() {
   const imageName = `images/img-${new Date().getTime()}.jpg`;
@@ -232,6 +223,17 @@ export async function getImageUrl(uri) {
   let ref = storage.ref(storage.getStorage(), uri);
   const downloadUrl = await storage.getDownloadURL(ref);
   return downloadUrl;
+}
+
+export function getCurrentUser(callback) {
+  const authInstance = auth.getAuth();
+  return onAuthStateChanged(authInstance, callback);
+}
+
+export async function getUser(uid) {
+  const docRef = doc(firestore.getFirestore(), "users", uid);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
 }
 
 export async function uploadImage(uri, imageName) {

@@ -1,6 +1,8 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation }  from "@react-navigation/native";
 import { onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import Card from "../../components/UI/Card";
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   ScrollView,
   FlatList,
@@ -16,6 +18,7 @@ import {
   auth,
   firestore,
   getUser,
+  getCurrentUser,
   storage,
   fetchGroups,
   userSignOut,
@@ -29,15 +32,32 @@ export default function UserProfileScreen() {
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
 
   const navigation = useNavigation();
 
-  // const data = [
-  //   { id: "1", name: "Group 1", image: "https://picsum.photos/201" },
-  //   { id: "2", name: "Group 2", image: "https://picsum.photos/202" },
-  //   { id: "3", name: "Group 3", image: "https://picsum.photos/204" },
-  //   { id: "4", name: "Group 4", image: "https://picsum.photos/206" },
-  // ];
+  const unsubscribe = getCurrentUser((user) => {
+    setCurrentUser(user);
+  });
+
+  useEffect(() => {
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchUserData = async () => {
+        const data = await getUser(currentUser.uid);
+        setCurrentUserData(data);
+        console.log(data);
+        console.log(data.firstName);
+      };
+      fetchUserData();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const uid = auth.getAuth().currentUser.uid;
@@ -62,30 +82,29 @@ export default function UserProfileScreen() {
 
   const renderGroupCard = ({ item: group }) => {
     return (
-      <View style={{ marginHorizontal: 10 }}>
+      <View style={{ marginHorizontal: 8 }}>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("Itineraries", {
               groupName: group.name,
               groupId: group.id,
             })
-          }
-        >
+          }>
           <Image
             source={{ uri: group.image }}
-            style={{ width: 150, height: 150 }}
+            style={{ width: 150, height: 180, borderRadius: 10 }}
           />
         </TouchableOpacity>
-        <Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>
+        <Text style={{ marginLeft: "3%", fontFamily: "roboto-medium", fontWeight: "bold", marginTop: 10, color: "black" }}>
           {group.name}
         </Text>
       </View>
     );
   };
-
   return (
     <SafeAreaView style={styles.safe}>
     <Background>
+    <ScrollView contentContainerStyle={{ alignItems: "center" }}>
       <View style={styles.profileScreenContainer}>
         <TouchableOpacity
           onPress={async () => {
@@ -125,44 +144,65 @@ export default function UserProfileScreen() {
                   source={{ uri: `${image}` }}
                 />
               )}
-              <Text>Test</Text>
             </View>
           </TouchableOpacity>
+          <Text>
+            
+          </Text>
 
-          {/* <View style={styles.curve} /> */}
         </View>
         <View style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ alignItems: "center" }}>
             <View style={styles.flatListContainer}>
-              <Text style={styles.flatListTitle}>Groups</Text>
-              <FlatList
-                data={groups}
-                renderItem={renderGroupCard}
-                keyExtractor={(item) => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={true}
-              />
-            </View>
+              <Card additionalStyles={styles.cardContainer}>
+                <View style={styles.dualCardTitles}>
+                  <View style={styles.dualCardLeft}>
+                    <Text style={styles.flatListTitle}>Groups</Text>
+                  </View>
+                  <View style={styles.dualCardRight}>
+                    <TouchableOpacity>
+                      <Text style={styles.flatListTitleEdit}>Edit {''}
+                      <Icon name="plus-square-o" size={18} color="#FF5553" /> </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                    <FlatList
+                      data={groups}
+                      renderItem={renderGroupCard}
+                      keyExtractor={(item) => item.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={true}
+                    />
+              </Card>
 
-            <View style={styles.flatListContainer}>
-              <Text style={styles.flatListTitle}>Trip History</Text>
-              <FlatList
-                data={groups}
-                renderItem={renderGroupCard}
-                keyExtractor={(item) => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={true}
-              />
             </View>
-          </ScrollView>
+            <View style={styles.flatListContainer}>
+              <Card additionalStyles={styles.cardContainer}>
+                <Text style={styles.flatListTitle}>Trip History</Text>
+                <FlatList
+                  data={groups}
+                  renderItem={renderGroupCard}
+                  keyExtractor={(item) => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={true}
+                />
+              </Card>
+            </View>
         </View>
       </View>
+      </ScrollView>
     </Background>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  cardContainer: {
+    margin: "0%",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    maxHeight: "100%",
+  },
   safe: {
     flex: 1,
     backgroundColor: '#FF5553',
@@ -175,16 +215,36 @@ const styles = StyleSheet.create({
   },
   flatListContainer: {
     width: "100%",
-    height: 255,
-    padding: 10,
+    height: "52%", //change this setting to give more room between the cards
+    padding: 5,
     backgroundColor: "#FF5553",
+  },
+  dualCardTitles: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dualCardRight: {
+    alignItems: 'flex-end',
+    padding: 5,
+  },
+  dualCardLeft: {
+    alignItems: 'flex-start',
+    padding: 5,
   },
   flatListTitle: {
     marginLeft: 10,
     marginVertical: 10,
     fontSize: 18,
     fontWeight: "bold",
-    color: "white",
+    color: "black",
+  },
+  flatListTitleEdit: {
+    marginLeft: 10,
+    marginVertical: 10,
+    fontSize: 18,
+    fontWeight: "thin",
+    color: "#FF5553",
+    marginRight: 10,
   },
   profileScreenContainer: {
     flex: 1,
@@ -204,18 +264,23 @@ const styles = StyleSheet.create({
   settingsIcon: {
     position: "absolute",
     top: "-5%", // Adjust this value if you need more or less spacing from the top
-    right: "5%", // Adjus
+    right: "5%",
   },
   profilePictureContainer: {
     // backgroundColor: "white",
+    paddingBottom: "5%",
   },
   photoContainer: {
     alignItems: "center",
+    
   },
   photoBackground: {
     backgroundColor: PRIMARY_COLOR,
     borderRadius: 100,
-    padding: 10,
+    borderColor: 'white',
+    borderWidth: 3,
+    overflow: 'hidden',
+    
   },
   profilePhoto: {
     width: 100,
@@ -230,14 +295,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: 20,
   },
-  curve: {
-    height: 20,
-    backgroundColor: "white",
-    borderTopLeftRadius: 100,
-    borderTopRightRadius: 100,
-    overflow: "hidden",
-  },
-
   logoutIcon: {
     position: "absolute",
     top: "-5%", // Adjust this value if you need more or less spacing from the top

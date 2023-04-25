@@ -134,7 +134,6 @@ const MyAccordionMenu = () => {
     );
   };
 
-  
   const renderChildren = (section) => {
     return (
       <View style={styles.children}>
@@ -147,7 +146,6 @@ const MyAccordionMenu = () => {
     );
   };
   
-
   return (
     <SafeAreaView style={styles.safe}>
       <Background additionalStyle={styles.container}>
