@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-import { getSectionsByGroupId } from "../../firebase";
+import { getSectionsByGroupId, listenGroupName } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -38,6 +38,19 @@ export default function Itineraries() {
   //     </View>
   //   );
   // }
+
+  useEffect(() => {
+    const unsubscribe = listenGroupName(groupId, (newGroupName) => {
+      setGroupName(newGroupName);
+    });
+    // Cleanup function to unsubscribe when the component is unmounted
+    return () => {
+      unsubscribe();
+    };
+  }, [groupId]);
+
+
+
   const handleEditGroupName = () => {
     setIsEditingGroupName(!isEditingGroupName);
   };
@@ -66,7 +79,10 @@ export default function Itineraries() {
             style={styles.groupName}
             value={updatedGroupName}
             onChangeText={(text) => setUpdatedGroupName(text)}
-            onSubmitEditing={() => setIsEditingGroupName(false)}
+            onSubmitEditing={() => {
+              groupNameUpdate(); // Call the groupNameUpdate function when the user presses return on the keyboard
+              setIsEditingGroupName(false);
+            }}
             onBlur={() => {
               groupNameUpdate();
               setIsEditingGroupName(false);

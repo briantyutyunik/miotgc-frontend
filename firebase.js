@@ -3,11 +3,10 @@
 // import { getAuth } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 
-import { useNavigation } from "@react-navigation/native";
 import * as firebase from "firebase/app";
 import { initializeApp } from "firebase/app";
 
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, query, where } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
 import {
@@ -153,7 +152,7 @@ export async function createGroup(groupName) {
   const groupData = {
     groupName: groupName,
     createdAt: new Date(),
-    };
+  };
 
   // Add the group to Firestore and get the auto-generated ID
   const groupDocRef = await addDoc(
@@ -182,6 +181,15 @@ export async function createInvite(groupId, inviterId) {
   return inviteId;
 }
 
+// Add this function to your firebase.js
+export function listenGroupName(groupId, callback) {
+  const docRef = doc(firestore.getFirestore(), "groups", groupId);
+  const unsubscribe = onSnapshot(docRef, (doc) => {
+    callback(doc.data().groupName);
+  });
+  return unsubscribe;
+}
+
 export async function getSectionsByGroupId(groupId) {
   const db = firestore.getFirestore();
   const querySnapshot = await firestore.getDocs(
@@ -206,6 +214,26 @@ export async function getSectionsByGroupId(groupId) {
 
   return sections;
 }
+
+export const listenGroupNames = (onGroupNameUpdate) => {
+  const uid = auth.getAuth().currentUser.uid;
+  const groupsRef = firestore.collection(firestore.getFirestore(), "groups");
+
+  // Listen for real-time updates
+  const unsubscribe = onSnapshot(
+    query(groupsRef, where("members", "array-contains", uid)),
+    (querySnapshot) => {
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          onGroupNameUpdate(change.doc.id, change.doc.data().name);
+        }
+      });
+    }
+  );
+
+  // Return the unsubscribe function
+  return unsubscribe;
+};
 
 export async function fetchGroups() {
   const groupData = [];

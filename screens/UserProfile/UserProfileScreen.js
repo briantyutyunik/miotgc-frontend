@@ -1,6 +1,7 @@
-import { useNavigation } from "@react-navigation/native";
 import { onSnapshot } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+
 import {
   ScrollView,
   FlatList,
@@ -20,6 +21,7 @@ import {
   userSignOut,
   getCurrentUser,
   createGroup,
+  listenGroupNames,
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -55,26 +57,41 @@ export default function UserProfileScreen() {
       fetchUserData();
     }
   }, [currentUser]);
-  useEffect(() => {
-    const uid = auth.getAuth().currentUser.uid;
-    let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-    const unsub = onSnapshot(docRef, (docSnap) => {
-      const user = docSnap.data();
-      if (user.avatarUrl !== "") {
-        let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-        storage.getDownloadURL(ref).then((res) => {
-          setImage(res);
-        });
-      }
-    });
+  useFocusEffect(
+    React.useCallback(() => {
+      const uid = auth.getAuth().currentUser.uid;
+      let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
 
-    (async () => {
-      const fetchedGroups = await fetchGroups();
-      setGroups(fetchedGroups);
-    })();
+      const unsub = onSnapshot(docRef, (docSnap) => {
+        const user = docSnap.data();
+        if (user.avatarUrl !== "") {
+          let ref = storage.ref(storage.getStorage(), user.avatarUrl);
+          storage.getDownloadURL(ref).then((res) => {
+            setImage(res);
+          });
+        }
+      });
 
-    return unsub;
-  }, []);
+      (async () => {
+        const fetchedGroups = await fetchGroups();
+        setGroups(fetchedGroups);
+      })();
+
+      const unsubscribeGroups = listenGroupNames((groupId, groupName) => {
+        setGroups((prevGroups) =>
+          prevGroups.map((group) =>
+            group.id === groupId ? { ...group, name: groupName } : group
+          )
+        );
+      });
+
+      // Cleanup function to unsubscribe from both onSnapshot and listenGroupNames listeners
+      return () => {
+        unsub();
+        unsubscribeGroups();
+      };
+    }, [])
+  );
 
   const renderGroupCard = ({ item: group }) => {
     if (group.id === "add-new-group") {
