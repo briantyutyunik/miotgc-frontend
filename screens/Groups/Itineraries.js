@@ -1,178 +1,251 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  Share,
+  Modal,
+} from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-import { getSections, auth, firestore, storage } from "../../firebase";
+import { listenGroupName } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
-import { Skeleton } from "@rneui/themed";
-import { onSnapshot } from "firebase/firestore";
-import * as firebase from "firebase/app";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import Button from "../../components/UI/Button";
+import { getFirestore } from "firebase/firestore";
+import {
+  firestore,
+  updateGroupName,
+  addTestUsersToGroup,
+  getGroupMembers,
+} from "../../firebase";
+import AuthInput from "../../components/Auth/Sign In/AuthInput";
+import { PRIMARY_COLOR } from "../../constants/styles";
 
-
-const MyAccordionMenu = () => {
-  const [image, setImage] = useState();
-  const [activeSections, setActiveSections] = useState([]);
-  const [SECTIONS, setSections] = useState([]);
+export default function Itineraries() {
   const route = useRoute();
-  const { groupId, groupName } = route.params;
-  const SECTIONS2 = [
-    {
-      title: "Section 1",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      children: ["Section 1 Child 1", "Section 1 Child 2"],
-    },
-    {
-      title: "Section 2",
-      content:
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    },
-    {
-      title: "Section 3",
-      content:
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-        children: ["Section 1 Child 1", "Section 1 Child 2"],
-      },
-  ];
+  const initialGroupName = route.params.groupName;
+  const isNewGroupParam = route.params?.isNewGroup || false;
+  const [isNewGroup, setIsNewGroup] = useState(isNewGroupParam);
+  const [isEditingGroupName, setIsEditingGroupName] = useState(false);
+  const [groupName, setGroupName] = useState(initialGroupName);
+  const groupId = route.params.groupId;
+  const [isFormValid, setIsFormValid] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
 
-  //     title: "Flight",
-  //     title: "Stay",
-  //     title: "Activities",
-  //     title: "Checklist"
-  //     title: "Transportation",
+  const [testGroupMembers, setTestGroupMembers] = useState([]);
 
-  
+  function handleSubmitButtonPress() {}
+
+  // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
+  // const copyToClipboard = () => {
+  //   Clipboard.setString(`exp://exp.host/@tahir13/miotgc/group/${groupId}`);
+  // };
+
+  // *** THIS IS TO TEST THE GROUP MEMBERS FUNCTIONALITY ***
   useEffect(() => {
-    const uid = auth.getAuth().currentUser.uid;
-    let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-    const unsub = onSnapshot(docRef, (docSnap) => {
-      const user = docSnap.data();
-      if (user.avatarUrl !== "") {
-        let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-        storage.getDownloadURL(ref).then((res) => {
-          setImage(res);
-        });
-      }
-      
-    });
+    async function fetchData() {
+      // await addTestUsersToGroup();
+      const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
+      setTestGroupMembers(members);
+      console.log("*******GROUP MEMBER FIRST NAME******: ", members)
+    }
 
-    async function displaySections() {
-      const sections = await getSections();
-    
-      sections.forEach((section) => {
-        console.log(`ID: ${section.id}`);
-    
-        for (const key in section) {
-          if (key !== 'id') {
-            console.log(`${key}: ${section[key]}`);
-          }
-        }
-    
-        console.log('---');
+    fetchData();
+  }, []);
+
+  const handleShare = async () => {
+    // exp://exp.host/@yourusername/your-app-slug/some-path
+    // exp://exp.host/@tahir13/miotgc/group/{groupId}
+    try {
+      const result = await Share.share({
+        message: `Your invite link: exp://exp.host/@tahir13/miotgc/group/${groupId}`,
       });
-    }
 
-    (async () => {
-      const fetchedGroups = await fetchGroups();
-      setGroups(fetchedGroups);
-    })();
-
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const fetchGroupData = async () => {
-      const groupRef = firestore.doc(firestore.getFirestore(), "groups", groupId);
-      const groupSnap = await firestore.getDoc(groupRef);
-
-      if (groupSnap.exists()) {
-        setGroupData(groupSnap.data());
+      if (result.action === Share.sharedAction) {
+        console.log("Link shared successfully");
       } else {
-        console.log("No such group!");
+        console.log("Link sharing canceled");
       }
-    };
-
-    fetchGroupData();
-  }, [groupId]);
-
-
-  useEffect(() => {
-    const fetchSections = async () => {
-      const fetchedSections = await getSections();
-      setSections(fetchedSections);
-      console.log(SECTIONS);
-    };
-
-    fetchSections();
-  }, []);
-
-  const toggleSection = (index) => {
-    const isActive = activeSections.includes(index);
-    if (isActive) {
-      setActiveSections(activeSections.filter((i) => i !== index));
-    } else {
-      setActiveSections([...activeSections, index]);
+    } catch (error) {
+      console.error("Error sharing link: ", error);
     }
   };
 
-  const renderHeader = (section, index, isActive) => {
-    return (
-      <TouchableOpacity style={styles.header} onPress={() => setActiveSections(isActive ? [] : [index])}>
-        <Text style={styles.headerText}>{section.header}</Text>
-      </TouchableOpacity>
-    );
-  };
-  
-  const renderContent = (section, index, isActive) => {
-    return (
-      <TouchableOpacity style={styles.content} onPress={() => setActiveSections(isActive ? [] : [index])}>
-        <Text style={styles.contentText}>Airline: {section.content.Airline}</Text>
-        <Text style={styles.contentText}>City: {section.content.City}</Text>
-        <Text style={styles.contentText}>Airport: {section.content.Airport}</Text>
-        {section.children && renderChildren(section)}
-      </TouchableOpacity>
-    );
+  const handleEditGroupName = () => {
+    setIsEditingGroupName(!isEditingGroupName);
+    setIsNewGroup(false);
   };
 
-  const renderChildren = (section) => {
-    return (
-      <View style={styles.children}>
-        {section.children.map((child, index) => (
-          <Text key={index} style={styles.childText}>
-            {child}
-          </Text>
-        ))}
-      </View>
-    );
+  const groupNameUpdate = async (newGroupName) => {
+    if (newGroupName === initialGroupName) {
+      return;
+    }
+
+    console.log(
+      "Updating group name with groupId:",
+      groupId,
+      "and newGroupName:",
+      newGroupName
+    ); // Add this line
+
+    try {
+      await updateGroupName(groupId, newGroupName);
+      console.log("Group name updated successfully");
+      setGroupName(newGroupName);
+    } catch (error) {
+      console.error("Error updating group name:", error);
+    }
   };
   
   return (
-    <SafeAreaView style={styles.safe}>
-      <Background additionalStyle={styles.container}>
-        <View style={styles.top}>
-          <Text style={styles.itinerariesPadding}>{groupName}</Text>
-        </View>
-        <View style={styles.top}>
-
-          <Card additionalStyles={styles.cardContainer}>
-          <Text>Placeholder</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
+      <ScrollView>
+        <Background additionalStyle={styles.container}>
+          <View style={styles.groupNameContainer}>
+            {isEditingGroupName ? (
+              <TextInput
+                style={styles.groupName}
+                value={groupName}
+                onChangeText={(text) => setGroupName(text)}
+                onSubmitEditing={() => {
+                  groupNameUpdate(groupName);
+                  setIsEditingGroupName(false);
+                }}
+                onBlur={() => {
+                  groupNameUpdate(groupName);
+                  setIsEditingGroupName(false);
+                }}
+                autoFocus={true}
+              />
+            ) : (
+              <Text
+                style={styles.groupName}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {isNewGroup ? "Group Name" : groupName}
+              </Text>
+            )}
+            <TouchableOpacity onPress={handleEditGroupName}>
+              <Ionicons name="pencil-outline" size={28} color="white" />
+            </TouchableOpacity>
+          </View>
+          <Card additionalStyles={styles.groupMembersCard}>
+            <Text style={styles.groupMembersText}>Group Members</Text>
+            <View style={styles.groupMembersList}>
+              {testGroupMembers.map((member, index) => (
+                <Text style={styles.groupMembersListText} key={index}>
+                  {member.firstName}
+                  {console.log("*******GROUP MEMBER FIRST NAME******: ", member.firstName)}
+                </Text>
+              ))}
+            </View>
           </Card>
 
-          <Card additionalStyles={styles.cardContainer}>
-            <Accordion
-              sections={SECTIONS}
-              activeSections={activeSections}
-              renderHeader={renderHeader}
-              renderContent={renderContent}
-              renderChildren={renderChildren}
-              onChange={setActiveSections}
-            />
-          </Card>
+          <TouchableOpacity
+            style={styles.openModalButton}
+            onPress={() => {
+              setShowShareModal(true);
+            }}
+          >
+            <Text style={styles.openModalButtonText}>Open Modal</Text>
+          </TouchableOpacity>
+
+          {isNewGroup ? (
+            <Card additionalStyles={styles.newTripButtonCard}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsNewGroup(false);
+                  setGroupName("Group Name");
+                }}
+              >
+                <View style={styles.newTripButton}>
+                  <Ionicons name="add" size={36} color={PRIMARY_COLOR} />
+                  <Text style={styles.newTripButtonText}>New Trip</Text>
+                </View>
+              </TouchableOpacity>
+            </Card>
+          ) : (
+            <Card additionalStyles={styles.cardContainer}>
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>Age Group</Text>
+              </View>
+              <AuthInput />
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>Date Of Travel</Text>
+              </View>
+
+              <AuthInput textInputBackgroundColor="white" />
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>Number of people</Text>
+              </View>
+              <AuthInput />
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>Destination</Text>
+              </View>
+
+              <AuthInput textInputBackgroundColor="white" />
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>Budget</Text>
+              </View>
+
+              <AuthInput textInputBackgroundColor="white" />
+
+              <Button
+                containerStyle={styles.submitBtnContainer}
+                iconName={"arrow-forward-outline"}
+                iconSize={40}
+                iconColor={PRIMARY_COLOR}
+                onPress={handleSubmitButtonPress}
+                disabled={!isFormValid}
+                disabledStyle={styles.disabledButton}
+              />
+            </Card>
+          )}
+        </Background>
+      </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showShareModal}
+        onRequestClose={() => {
+          setShowShareModal(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.linkInputContainer}>
+              <TextInput
+                style={styles.linkInput}
+                value={`exp://exp.host/@tahir13/miotgc/group/${groupId}`}
+                editable={false}
+              />
+              <TouchableOpacity
+                style={styles.copyButtonInInput}
+                // onPress={copyToClipboard}
+              >
+                <Text style={styles.copyButtonTextInInput}>Copy</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={styles.copyButton}
+              onPress={() => {
+                handleShare();
+              }}
+            >
+              <Text style={styles.copyButtonText}>Copy & Share</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </Background>
+      </Modal>
     </SafeAreaView>
   );
-};
+}
 
 const styles = {
   safe: {
@@ -186,6 +259,16 @@ const styles = {
     paddingLeft: 15,
     color: "white",
   },
+
+  textContainer: {
+    alignSelf: "stretch",
+  },
+  textStyle: {
+    color: PRIMARY_COLOR,
+    textAlign: "left",
+    marginBottom: 20,
+    fontSize: 24,
+  },
   itinerariesPadding: {
     marginLeft: 10,
     marginTop: 10,
@@ -194,8 +277,45 @@ const styles = {
     fontWeight: "bold",
     color: "white",
   },
-  top: {
-    marginTop: "15%",
+  newTripButton: {
+    flexDirection: "row",
+    width: "100%",
+  },
+
+  newTripButtonCard: {
+    width: "80%",
+    alignSelf: "center",
+    marginTop: "30%",
+  },
+
+  submitBtnContainer: {
+    height: 50,
+    width: "35%",
+    top: 10,
+    backgroundColor: "#fff",
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "10%",
+  },
+  groupNameContainer: {
+    marginTop: "10%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    flexDirection: "row", // Add this line
+  },
+
+  newTripButtonText: {
+    color: PRIMARY_COLOR,
+    fontSize: 32,
+    marginLeft: 10,
+  },
+  groupName: {
+    color: "white",
+    fontSize: 48,
+    fontWeight: "bold",
+    marginRight: "5%",
+    flexShrink: 1,
   },
   header: {
     backgroundColor: "#f2f2f2",
@@ -217,7 +337,7 @@ const styles = {
     padding: 10,
   },
   container: {
-    // backgroundColor: "white",
+    alignItems: "center",
   },
   cardContainer: {
     margin: "5%",
@@ -225,6 +345,116 @@ const styles = {
     alignItems: "center",
     width: "90%",
     maxHeight: "100%",
+    marginTop: 100,
   },
+  cardContainerTwo: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    maxHeight: "100%",
+  },
+  // open modal button styles
+  openModalButton: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 10,
+    padding: 10,
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  openModalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  // modal styles
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  linkInput: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    padding: 5,
+    width: 300,
+    marginBottom: 20,
+  },
+  copyButton: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 10,
+    padding: 10,
+    paddingHorizontal: 20,
+  },
+  copyButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  shareButton: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 10,
+    padding: 10,
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  shareButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  linkInputContainer: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    padding: 5,
+    width: 300,
+    marginBottom: 20,
+  },
+  linkInput: {
+    flex: 1,
+  },
+  copyButtonInInput: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 5,
+    padding: 5,
+    paddingHorizontal: 10,
+  },
+  copyButtonTextInInput: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  groupMembersCard: {
+    width: 300,
+    height: 200,
+  },
+  groupMembersText: {
+    fontSize: 20,
+    color: PRIMARY_COLOR
+  },
+  groupMembersListText:{
+    fontSize: 16,
+    color: PRIMARY_COLOR
+  }
 };
-export default MyAccordionMenu;

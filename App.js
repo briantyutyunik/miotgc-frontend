@@ -14,6 +14,20 @@ import TestScreen from "./screens/UserProfile/TestScreen.js";
 
 const Stack = createNativeStackNavigator();
 
+  export default function App() {
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+      const unsubscribe = auth.getAuth().onAuthStateChanged((user) => {
+        if (user) {
+          setUser(user);
+        } else {
+          setUser(null);
+        }
+
+      });
+      // Unsubscribe from the listener when the component unmounts
+      return () => unsubscribe();
+    }, []);
 export default function App() {
   const [user, setUser] = useState(null);
   useEffect(() => {

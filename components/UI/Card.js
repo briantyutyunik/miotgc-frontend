@@ -10,6 +10,9 @@ export default function Card({ children, additionalStyles }) {
   );
 }
 
+
+
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",

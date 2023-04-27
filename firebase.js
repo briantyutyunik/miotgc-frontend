@@ -1,11 +1,26 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
-import { useNavigation } from "@react-navigation/native";
+import { onAuthStateChanged } from "firebase/auth";
+
 import * as firebase from "firebase/app";
+import { initializeApp } from "firebase/app";
+
+import { getFirestore, query, where } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
-import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion } from 'firebase/firestore';
+
+import {
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 import * as storage from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
@@ -30,7 +45,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
-
 export async function userSignIn(input, password) {
   let isLoading = true;
   let error = "";
@@ -66,7 +80,16 @@ export async function userSignIn(input, password) {
   return { isLoading, error };
 }
 
+export function getCurrentUser(callback) {
+  const authInstance = auth.getAuth();
+  return onAuthStateChanged(authInstance, callback);
+}
 
+export async function getUser(uid) {
+  const docRef = doc(firestore.getFirestore(), "users", uid);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+}
 
 export async function getEmailByUsername(username) {
   const db = firestore.getFirestore();
@@ -83,7 +106,6 @@ export async function getEmailByUsername(username) {
   }
 }
 
-
 export async function userSignOut() {
   try {
     await auth.signOut(auth.getAuth());
@@ -93,7 +115,17 @@ export async function userSignOut() {
   }
 }
 
+export async function updateGroupName(groupId, newGroupName) {
+  console.log("Received groupId:", groupId, "and newGroupName:", newGroupName); // Add this line
 
+  const docRef = doc(getFirestore(), "groups", groupId);
+  try {
+    await updateDoc(docRef, { groupName: newGroupName });
+    console.log("Group name updated successfully");
+  } catch (error) {
+    console.error("Error updating group name:", error);
+  }
+}
 
 export async function userSignUp(newUser) {
   let isLoading = true;
@@ -125,20 +157,61 @@ export async function userSignUp(newUser) {
 
   return { isLoading, error };
 }
-/* export async function getSections() {
-  const sections = [];
+
+export async function createGroup(groupName) {
+  const groupData = {
+    groupName: groupName,
+    createdAt: new Date(),
+  };
+
+  // Add the group to Firestore and get the auto-generated ID
+  const groupDocRef = await addDoc(
+    collection(firestore.getFirestore(), "groups"),
+    groupData
+  );
+  const groupId = groupDocRef.id;
+
+  return groupId;
+}
+
+export async function createInvite(groupId, inviterId) {
+  const inviteData = {
+    groupId: groupId,
+    inviterId: inviterId,
+    createdAt: new Date(),
+  };
+
+  // Add the invite to Firestore and get the auto-generated ID
+  const inviteDocRef = await addDoc(
+    collection(firestore.getFirestore(), "invites"),
+    inviteData
+  );
+  const inviteId = inviteDocRef.id;
+
+  return inviteId;
+}
+
+// Add this function to your firebase.js
+
+export async function getSectionsByGroupId(groupId) {
   const db = firestore.getFirestore();
   const querySnapshot = await firestore.getDocs(
-    firestore.collection(db, "Itinerary")
+    firestore.query(
+      firestore.collection(db, "Itineraries"),
+      firestore.where("groupId", "==", groupId)
+    )
   );
+  const sections = [];
+  // const db = firestore.getFirestore();
+  // const querySnapshot = await firestore.getDocs(
+  //   firestore.collection(db, "Itineraries")
+  // );
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
     sections.push({
       id: doc.id,
-      title: data.title,
-      content: data.content,
-      children: data.children || [], // If you have children array in your Firestore, otherwise you can remove this line.
+      ...data, // This will spread all the fields from the document into the new object
     });
   });
 
@@ -168,7 +241,25 @@ export async function getSections() {
   return sections;
 }
 
+export const listenGroupNames = (onGroupNameUpdate) => {
+  const uid = auth.getAuth().currentUser.uid;
+  const groupsRef = firestore.collection(firestore.getFirestore(), "groups");
 
+  // Listen for real-time updates
+  const unsubscribe = onSnapshot(
+    query(groupsRef, where("members", "array-contains", uid)),
+    (querySnapshot) => {
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          onGroupNameUpdate(change.doc.id, change.doc.data().name);
+        }
+      });
+    }
+  );
+
+  // Return the unsubscribe function
+  return unsubscribe;
+};
 
 export async function fetchGroups() {
   const groupData = [];
@@ -239,51 +330,77 @@ export async function getUser(uid) {
 export async function uploadImage(uri, imageName) {
   let blob = await getBlobFromUri(uri);
 
-  // const newFile = new File([blob], `${imgName}.jpeg`, { type: "image/jpeg" });
-
-  // name consists of current time - can add another part to string (Do not use
-  // uid as can cause issues in sign up for)
+  
 
   const storageRef = storage.ref(storage.getStorage(), imageName);
 
-  // onStart && onStart();
   const uploadTask = await storage.uploadBytesResumable(storageRef, blob);
 
-  // uploadTask.on(
-  //   "state_changed",
-  //   (snapshot) => {
-  //     // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-  //     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //     console.log("Upload is " + progress + "% done");
-  //     switch (snapshot.state) {
-  //       case "paused":
-  //         console.log("Upload is paused");
-  //         break;
-  //       case "running":
-  //         console.log("Upload is running");
-  //         break;
-  //     }
-  //   },
-  //   (error) => {
-  //     this.setState({ isLoading: false });
-  //     // A full list of error codes is available at
-  //     // https://firebase.google.com/docs/storage/web/handle-errors
-  //     switch (error.code) {
-  //       case "storage/unauthorized":
-  //         console.log("User doesn't have permission to access the object");
-  //         break;
-  //       case "storage/canceled":
-  //         console.log("User canceled the upload");
-  //         break;
-  //       case "storage/unknown":
-  //         console.log("Unknown error occurred, inspect error.serverResponse");
-  //         break;
-  //     }
-  //   },
-  //   async () => {
-  //     // Upload completed successfully, now we can get the download URL
-  //   }
-  // );
+ 
 }
+
+
+
+
+export async function addUserToGroup(userId, groupId) {
+  const userRef = doc(firestore.getFirestore(), 'users', userId);
+  const groupRef = doc(firestore.getFirestore(), 'groups', groupId);
+
+  // Add the user to the 'members' subcollection within the group
+  await setDoc(doc(groupRef, 'members', userId), {
+    userRef: userRef
+  });
+
+  // You might also want to add the group reference to the user document
+  // This helps you to keep track of which groups a user is a part of
+  await updateDoc(userRef, {
+    groups: arrayUnion(groupRef)
+  });
+}
+
+
+
+
+export async function addTestUsersToGroup() {
+  const testUserId1 = 'GUz7LWZApIajKf2QHIm9t14SBNw2'; 
+  const testUserId2 = 'HqKayQtQdwXv8zfHcUsggGCBjQS2'; 
+  const testGroupId = 'fCo0N3buHNjoKVSMOVJ7'; 
+
+  try {
+    await addUserToGroup(testUserId1, testGroupId);
+    console.log(`User ${testUserId1} was added to the group ${testGroupId}`);
+    await addUserToGroup(testUserId2, testGroupId);
+    console.log(`User ${testUserId2} was added to the group ${testGroupId}`);
+  } catch (error) {
+    console.error('Error adding test users to group:', error);
+  }
+}
+
+// Add the getGroupMembers function
+export async function getGroupMembers(groupId) {
+  console.log("Getting group members for groupId:", groupId); // Add this line
+
+  const groupRef = doc(firestore.getFirestore(), 'groups', groupId);
+  const membersSnapshot = await getDocs(collection(groupRef, 'members'));
+
+  const members = [];
+  for (const memberDoc of membersSnapshot.docs) {
+    console.log("Found memberDoc:", memberDoc); // Add this line
+
+    const userRef = memberDoc.data().userRef;
+    console.log("User reference:", userRef); // Add this line
+
+    const userSnapshot = await getDoc(userRef);
+    console.log("User snapshot:", userSnapshot); // Add this line
+
+    const userData = userSnapshot.data();
+    console.log("User data:", userData); // Add this line
+
+    members.push(userData);
+  }
+
+  return members;
+}
+
 
 export { firebase, auth, firestore, storage };

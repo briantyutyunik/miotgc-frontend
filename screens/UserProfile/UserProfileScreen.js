@@ -1,8 +1,9 @@
-import { useNavigation } from "@react-navigation/native";
 import { onSnapshot } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card from "../../components/UI/Card";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+
 import {
   ScrollView,
   FlatList,
@@ -22,6 +23,9 @@ import {
   storage,
   fetchGroups,
   userSignOut,
+  getCurrentUser,
+  createGroup,
+  listenGroupNames,
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -29,6 +33,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function UserProfileScreen() {
+  console.log("**********************  NEW LOG   ***********************")
+
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
@@ -60,27 +66,80 @@ export default function UserProfileScreen() {
   }, [currentUser]);
 
   useEffect(() => {
-    const uid = auth.getAuth().currentUser.uid;
-    let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-    const unsub = onSnapshot(docRef, (docSnap) => {
-      const user = docSnap.data();
-      if (user.avatarUrl !== "") {
-        let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-        storage.getDownloadURL(ref).then((res) => {
-          setImage(res);
-        });
-      }
-    });
+    if (currentUser) {
+      const fetchUserData = async () => {
+        const data = await getUser(currentUser.uid);
+        setCurrentUserData(data);
+        console.log(data);
+        console.log(data.firstName);
+      };
+      fetchUserData();
+    }
+  }, [currentUser]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const uid = auth.getAuth().currentUser.uid;
+      let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
 
-    (async () => {
-      const fetchedGroups = await fetchGroups();
-      setGroups(fetchedGroups);
-    })();
+      const unsub = onSnapshot(docRef, (docSnap) => {
+        const user = docSnap.data();
+        if (user.avatarUrl !== "") {
+          let ref = storage.ref(storage.getStorage(), user.avatarUrl);
+          storage.getDownloadURL(ref).then((res) => {
+            setImage(res);
+          });
+        }
+      });
 
-    return unsub;
-  }, []);
+      (async () => {
+        const fetchedGroups = await fetchGroups();
+        setGroups(fetchedGroups);
+      })();
+
+      const unsubscribeGroups = listenGroupNames((groupId, groupName) => {
+        setGroups((prevGroups) =>
+          prevGroups.map((group) =>
+            group.id === groupId ? { ...group, name: groupName } : group
+          )
+        );
+      });
+
+      // Cleanup function to unsubscribe from both onSnapshot and listenGroupNames listeners
+      return () => {
+        unsub();
+        unsubscribeGroups();
+      };
+    }, [])
+  );
 
   const renderGroupCard = ({ item: group }) => {
+    if (group.id === "add-new-group") {
+      return (
+        <TouchableOpacity
+          onPress={async () => {
+            const initialGroupName = "Group name";
+            const groupId = await createGroup(initialGroupName);
+            navigation.navigate("Itineraries", {
+              isNewGroup: true,
+              groupId: groupId,
+              groupName: initialGroupName, // Pass the initial group name
+            });
+          }}
+          style={{
+            marginHorizontal: 10,
+            backgroundColor: "white",
+            justifyContent: "center",
+            alignItems: "center",
+            width: 150,
+            height: 150,
+            borderRadius: 10,
+          }}
+        >
+          <Ionicons name="add" size={50} color={PRIMARY_COLOR} />
+        </TouchableOpacity>
+      );
+    }
+
     return (
       <View style={{ marginHorizontal: 8 }}>
         <TouchableOpacity
