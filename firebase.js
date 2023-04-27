@@ -9,9 +9,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, query, where } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
+import { arrayUnion } from 'firebase/firestore';
+
 import {
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   setDoc,
   updateDoc,
@@ -113,8 +116,15 @@ export async function userSignOut() {
 }
 
 export async function updateGroupName(groupId, newGroupName) {
-  const docRef = doc(firestore.getFirestore(), "groups", groupId);
-  await updateDoc(docRef, { groupName: newGroupName });
+  console.log("Received groupId:", groupId, "and newGroupName:", newGroupName); // Add this line
+
+  const docRef = doc(getFirestore(), "groups", groupId);
+  try {
+    await updateDoc(docRef, { groupName: newGroupName });
+    console.log("Group name updated successfully");
+  } catch (error) {
+    console.error("Error updating group name:", error);
+  }
 }
 
 export async function userSignUp(newUser) {
@@ -182,13 +192,6 @@ export async function createInvite(groupId, inviterId) {
 }
 
 // Add this function to your firebase.js
-export function listenGroupName(groupId, callback) {
-  const docRef = doc(firestore.getFirestore(), "groups", groupId);
-  const unsubscribe = onSnapshot(docRef, (doc) => {
-    callback(doc.data().groupName);
-  });
-  return unsubscribe;
-}
 
 export async function getSectionsByGroupId(groupId) {
   const db = firestore.getFirestore();
@@ -294,51 +297,77 @@ export async function getImageUrl(uri) {
 export async function uploadImage(uri, imageName) {
   let blob = await getBlobFromUri(uri);
 
-  // const newFile = new File([blob], `${imgName}.jpeg`, { type: "image/jpeg" });
-
-  // name consists of current time - can add another part to string (Do not use
-  // uid as can cause issues in sign up for)
+  
 
   const storageRef = storage.ref(storage.getStorage(), imageName);
 
-  // onStart && onStart();
   const uploadTask = await storage.uploadBytesResumable(storageRef, blob);
 
-  // uploadTask.on(
-  //   "state_changed",
-  //   (snapshot) => {
-  //     // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-  //     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //     console.log("Upload is " + progress + "% done");
-  //     switch (snapshot.state) {
-  //       case "paused":
-  //         console.log("Upload is paused");
-  //         break;
-  //       case "running":
-  //         console.log("Upload is running");
-  //         break;
-  //     }
-  //   },
-  //   (error) => {
-  //     this.setState({ isLoading: false });
-  //     // A full list of error codes is available at
-  //     // https://firebase.google.com/docs/storage/web/handle-errors
-  //     switch (error.code) {
-  //       case "storage/unauthorized":
-  //         console.log("User doesn't have permission to access the object");
-  //         break;
-  //       case "storage/canceled":
-  //         console.log("User canceled the upload");
-  //         break;
-  //       case "storage/unknown":
-  //         console.log("Unknown error occurred, inspect error.serverResponse");
-  //         break;
-  //     }
-  //   },
-  //   async () => {
-  //     // Upload completed successfully, now we can get the download URL
-  //   }
-  // );
+ 
 }
+
+
+
+
+export async function addUserToGroup(userId, groupId) {
+  const userRef = doc(firestore.getFirestore(), 'users', userId);
+  const groupRef = doc(firestore.getFirestore(), 'groups', groupId);
+
+  // Add the user to the 'members' subcollection within the group
+  await setDoc(doc(groupRef, 'members', userId), {
+    userRef: userRef
+  });
+
+  // You might also want to add the group reference to the user document
+  // This helps you to keep track of which groups a user is a part of
+  await updateDoc(userRef, {
+    groups: arrayUnion(groupRef)
+  });
+}
+
+
+
+
+export async function addTestUsersToGroup() {
+  const testUserId1 = 'GUz7LWZApIajKf2QHIm9t14SBNw2'; 
+  const testUserId2 = 'HqKayQtQdwXv8zfHcUsggGCBjQS2'; 
+  const testGroupId = 'fCo0N3buHNjoKVSMOVJ7'; 
+
+  try {
+    await addUserToGroup(testUserId1, testGroupId);
+    console.log(`User ${testUserId1} was added to the group ${testGroupId}`);
+    await addUserToGroup(testUserId2, testGroupId);
+    console.log(`User ${testUserId2} was added to the group ${testGroupId}`);
+  } catch (error) {
+    console.error('Error adding test users to group:', error);
+  }
+}
+
+// Add the getGroupMembers function
+export async function getGroupMembers(groupId) {
+  console.log("Getting group members for groupId:", groupId); // Add this line
+
+  const groupRef = doc(firestore.getFirestore(), 'groups', groupId);
+  const membersSnapshot = await getDocs(collection(groupRef, 'members'));
+
+  const members = [];
+  for (const memberDoc of membersSnapshot.docs) {
+    console.log("Found memberDoc:", memberDoc); // Add this line
+
+    const userRef = memberDoc.data().userRef;
+    console.log("User reference:", userRef); // Add this line
+
+    const userSnapshot = await getDoc(userRef);
+    console.log("User snapshot:", userSnapshot); // Add this line
+
+    const userData = userSnapshot.data();
+    console.log("User data:", userData); // Add this line
+
+    members.push(userData);
+  }
+
+  return members;
+}
+
 
 export { firebase, auth, firestore, storage };

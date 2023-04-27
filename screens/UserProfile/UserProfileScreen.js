@@ -29,6 +29,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function UserProfileScreen() {
+  console.log("**********************  NEW LOG   ***********************")
+
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
@@ -97,12 +99,13 @@ export default function UserProfileScreen() {
     if (group.id === "add-new-group") {
       return (
         <TouchableOpacity
-          onPress={() => {
-            const groupId = createGroup("Undefined Group");
-
+          onPress={async () => {
+            const initialGroupName = "Group name";
+            const groupId = await createGroup(initialGroupName);
             navigation.navigate("Itineraries", {
               isNewGroup: true,
               groupId: groupId,
+              groupName: initialGroupName, // Pass the initial group name
             });
           }}
           style={{
