@@ -9,6 +9,8 @@ import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 import Settings from "./screens/UserProfile/Settings";
+import TestScreen from "./screens/UserProfile/TestScreen.js";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +44,7 @@ export default function App() {
         <Stack.Screen name="Profile" component={UserProfileScreen} />
         <Stack.Screen name="Itineraries" component={Itineraries} />
         <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="Test" component={TestScreen} />
       </Stack.Navigator>
     );
   }
