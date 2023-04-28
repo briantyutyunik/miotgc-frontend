@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  SafeAreaView,
-  Share,
-  Modal,
-} from "react-native";
-import Accordion from "react-native-collapsible/Accordion";
+import {View, Text, TouchableOpacity, TextInput, ScrollView, SafeAreaView, Share, Modal } from "react-native";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
 import { listenGroupName } from "../../firebase";
@@ -17,16 +7,11 @@ import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
-import {
-  firestore,
-  updateGroupName,
-  addTestUsersToGroup,
-  getGroupMembers,
-} from "../../firebase";
+import { firestore, updateGroupName, addTestUsersToGroup, getGroupMembers} from "../../firebase";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
-export default function Itineraries() {
+export default function Groups() {
   const route = useRoute();
   const initialGroupName = route.params.groupName;
   const isNewGroupParam = route.params?.isNewGroup || false;
@@ -36,7 +21,6 @@ export default function Itineraries() {
   const groupId = route.params.groupId;
   const [isFormValid, setIsFormValid] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
-
   const [testGroupMembers, setTestGroupMembers] = useState([]);
 
   function handleSubmitButtonPress() {}
@@ -54,7 +38,6 @@ export default function Itineraries() {
       setTestGroupMembers(members);
       console.log("*******GROUP MEMBER FIRST NAME******: ", members)
     }
-
     fetchData();
   }, []);
 

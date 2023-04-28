@@ -3,36 +3,15 @@ import React, { useEffect, useState } from "react";
 import Card from "../../components/UI/Card";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-
-import {
-  ScrollView,
-  FlatList,
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  Button,
-  TouchableOpacity,
-  SafeAreaView,
-} from "react-native";
-import {
-  auth,
-  firestore,
-  getUser,
-  getCurrentUser,
-  storage,
-  fetchGroups,
-  userSignOut,
-  getCurrentUser,
-  createGroup,
-  listenGroupNames,
-} from "../../firebase";
+import { ScrollView,FlatList, StyleSheet, View, Text, Image, Button, TouchableOpacity, SafeAreaView, } from "react-native";
+import { auth,firestore,getUser,storage,fetchGroups,userSignOut,getCurrentUser,createGroup, listenGroupNames } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function UserProfileScreen() {
+  const navigation = useNavigation();
   console.log("**********************  NEW LOG   ***********************")
 
   const [image, setImage] = useState();
@@ -40,8 +19,6 @@ export default function UserProfileScreen() {
   const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
-
-  const navigation = useNavigation();
 
   const unsubscribe = getCurrentUser((user) => {
     setCurrentUser(user);
@@ -76,6 +53,7 @@ export default function UserProfileScreen() {
       fetchUserData();
     }
   }, [currentUser]);
+
   useFocusEffect(
     React.useCallback(() => {
       const uid = auth.getAuth().currentUser.uid;
@@ -119,7 +97,7 @@ export default function UserProfileScreen() {
           onPress={async () => {
             const initialGroupName = "Group name";
             const groupId = await createGroup(initialGroupName);
-            navigation.navigate("Itineraries", {
+            navigation.navigate("Group", {
               isNewGroup: true,
               groupId: groupId,
               groupName: initialGroupName, // Pass the initial group name

@@ -1,16 +1,12 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
-import { onAuthStateChanged } from "firebase/auth";
-
 import * as firebase from "firebase/app";
 import { initializeApp } from "firebase/app";
-
 import { getFirestore, query, where } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
 import { arrayUnion } from 'firebase/firestore';
-
 import {
   doc,
   getDoc,
@@ -78,11 +74,6 @@ export async function userSignIn(input, password) {
   }
 
   return { isLoading, error };
-}
-
-export function getCurrentUser(callback) {
-  const authInstance = auth.getAuth();
-  return onAuthStateChanged(authInstance, callback);
 }
 
 export async function getUser(uid) {
@@ -216,7 +207,7 @@ export async function getSectionsByGroupId(groupId) {
   });
 
   return sections;
-} */
+} 
 
 export async function getSections() {
   const sections = [];
@@ -319,12 +310,6 @@ export async function getImageUrl(uri) {
 export function getCurrentUser(callback) {
   const authInstance = auth.getAuth();
   return onAuthStateChanged(authInstance, callback);
-}
-
-export async function getUser(uid) {
-  const docRef = doc(firestore.getFirestore(), "users", uid);
-  const docSnap = await getDoc(docRef);
-  return docSnap.data();
 }
 
 export async function uploadImage(uri, imageName) {
