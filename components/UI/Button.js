@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function Button({
   title,
@@ -13,19 +14,14 @@ export default function Button({
   disabled,
   disabledStyle,
   enabledStyle,
-  
-  
+  textColor,
 }) {
   const buttonStyle = disabled
     ? [styles.buttonContainer, disabledStyle, containerStyle]
     : [styles.buttonContainer, enabledStyle, containerStyle];
 
   return (
-    <TouchableOpacity
-      style={buttonStyle}
-      onPress={onPress}
-      disabled={disabled}
-    >
+    <TouchableOpacity style={buttonStyle} onPress={onPress} disabled={disabled}>
       {iconName && iconSize && (
         <View style={iconPositionStyle}>
           <Ionicons name={iconName} size={iconSize} color={iconColor} />
@@ -33,7 +29,11 @@ export default function Button({
       )}
       {title && (
         <Text
-          style={textStyle ? [styles.buttonText, textStyle] : styles.buttonText}
+          style={
+            textStyle
+              ? [styles.buttonText, textStyle, { color: textColor }]
+              : [styles.buttonText, { color: textColor }]
+          }
         >
           {title}
         </Text>

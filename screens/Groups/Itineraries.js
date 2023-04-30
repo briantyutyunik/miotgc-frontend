@@ -17,6 +17,8 @@ import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
+import { QUESTIONS } from "./questions";
+
 import {
   firestore,
   updateGroupName,
@@ -25,7 +27,7 @@ import {
 } from "../../firebase";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
-
+import Logo from "../../components/UI/Logo";
 export default function Itineraries() {
   const route = useRoute();
   const initialGroupName = route.params.groupName;
@@ -34,12 +36,16 @@ export default function Itineraries() {
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
   const [groupName, setGroupName] = useState(initialGroupName);
   const groupId = route.params.groupId;
-  const [isFormValid, setIsFormValid] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
-
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [answers, setAnswers] = useState(
+    QUESTIONS.map((_, index) => ({ questionIndex: index, answer: "" }))
+  );
   const [testGroupMembers, setTestGroupMembers] = useState([]);
-
-  function handleSubmitButtonPress() {}
+  useEffect(() => {
+    console.log("INPUT VALUE:", inputValue);
+  }, [inputValue]);
 
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
@@ -47,16 +53,16 @@ export default function Itineraries() {
   // };
 
   // *** THIS IS TO TEST THE GROUP MEMBERS FUNCTIONALITY ***
-  useEffect(() => {
-    async function fetchData() {
-      // await addTestUsersToGroup();
-      const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
-      setTestGroupMembers(members);
-      console.log("*******GROUP MEMBER FIRST NAME******: ", members)
-    }
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     // await addTestUsersToGroup();
+  //     const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
+  //     setTestGroupMembers(members);
+  //     console.log("*******GROUP MEMBER FIRST NAME******: ", members);
+  //   }
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   const handleShare = async () => {
     // exp://exp.host/@yourusername/your-app-slug/some-path
@@ -75,6 +81,30 @@ export default function Itineraries() {
       console.error("Error sharing link: ", error);
     }
   };
+  const handleSubmitButtonPress = () => {
+    console.log("ANSWER:", inputValue);
+    const tempAnswers = [...answers];
+    tempAnswers[currentQuestionIndex] = {
+      questionIndex: currentQuestionIndex,
+      answer: inputValue,
+    };
+
+    if (currentQuestionIndex < QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setShowShareModal(true);
+
+      // Log the temporary answers array after the last question has been answered
+      console.log("Final answers:", tempAnswers);
+    }
+
+    setAnswers(tempAnswers);
+    setInputValue(""); // Reset the input value for the next question
+  };
+
+  function answerFieldChangeHandler(text) {
+    setInputValue(text);
+  }
 
   const handleEditGroupName = () => {
     setIsEditingGroupName(!isEditingGroupName);
@@ -106,110 +136,94 @@ export default function Itineraries() {
     <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
       <ScrollView>
         <Background additionalStyle={styles.container}>
-          <View style={styles.groupNameContainer}>
-            {isEditingGroupName ? (
-              <TextInput
-                style={styles.groupName}
-                value={groupName}
-                onChangeText={(text) => setGroupName(text)}
-                onSubmitEditing={() => {
-                  groupNameUpdate(groupName);
-                  setIsEditingGroupName(false);
-                }}
-                onBlur={() => {
-                  groupNameUpdate(groupName);
-                  setIsEditingGroupName(false);
-                }}
-                autoFocus={true}
-              />
+          <View style={styles.itinerariesContainer}>
+            {!isNewGroup ? (
+              <>
+                {isEditingGroupName ? (
+                  <TextInput
+                    style={styles.groupName}
+                    value={groupName}
+                    onChangeText={(text) => setGroupName(text)}
+                    onSubmitEditing={() => {
+                      groupNameUpdate(groupName);
+                      setIsEditingGroupName(false);
+                    }}
+                    onBlur={() => {
+                      groupNameUpdate(groupName);
+                      setIsEditingGroupName(false);
+                    }}
+                    autoFocus={true}
+                  />
+                ) : (
+                  <Text
+                    style={styles.groupName}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {groupName}
+                  </Text>
+                )}
+                <Card additionalStyles={styles.groupMembersCard}>
+                  <Text style={styles.groupMembersText}>Group Members</Text>
+                  <View style={styles.groupMembersList}>
+                    {testGroupMembers.map((member, index) => (
+                      <Text style={styles.groupMembersListText} key={index}>
+                        {member.firstName}
+                        {console.log(
+                          "*******GROUP MEMBER FIRST NAME******: ",
+                          member.firstName
+                        )}
+                      </Text>
+                    ))}
+                  </View>
+                </Card>
+              </>
             ) : (
-              <Text
-                style={styles.groupName}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
-                {isNewGroup ? "Group Name" : groupName}
-              </Text>
-            )}
-            <TouchableOpacity onPress={handleEditGroupName}>
-              <Ionicons name="pencil-outline" size={28} color="white" />
-            </TouchableOpacity>
-          </View>
-          <Card additionalStyles={styles.groupMembersCard}>
-            <Text style={styles.groupMembersText}>Group Members</Text>
-            <View style={styles.groupMembersList}>
-              {testGroupMembers.map((member, index) => (
-                <Text style={styles.groupMembersListText} key={index}>
-                  {member.firstName}
-                  {console.log("*******GROUP MEMBER FIRST NAME******: ", member.firstName)}
-                </Text>
-              ))}
-            </View>
-          </Card>
+              <View style={styles.newGroupContainer}>
+                <Text style={styles.itinerarySurveyText}>Itinerary Survey</Text>
+                <Logo additionalStyle={styles.logo} height={120} width={120} />
+                <Card additionalStyles={styles.surveyCard}>
+                  <Text style={[styles.textStyle, styles.surveyQuestion]}>
+                    {QUESTIONS[currentQuestionIndex].text}
+                  </Text>
+                  <AuthInput
+                    textInputBackgroundColor="white"
+                    value={inputValue}
+                    onChangeText={answerFieldChangeHandler}
+                    disableCustomBehavior={true} // Add this prop here
+                  />
 
-          <TouchableOpacity
+                  <View style={styles.submitBtnContainer}>
+                    <Button
+                      containerStyle={styles.submitBtn}
+                      title={
+                        currentQuestionIndex === QUESTIONS.length - 1
+                          ? "Submit"
+                          : "Next"
+                      }
+                      textColor={PRIMARY_COLOR}
+                      iconSize={40}
+                      buttonText={PRIMARY_COLOR}
+                      onPress={handleSubmitButtonPress}
+                    />
+                  </View>
+                </Card>
+              </View>
+            )}
+          </View>
+
+          {/* // *** THIS WILL BE ADDED TO THE GROUP MEMBERS CARD *** */}
+          {/* <TouchableOpacity
             style={styles.openModalButton}
             onPress={() => {
               setShowShareModal(true);
             }}
           >
             <Text style={styles.openModalButtonText}>Open Modal</Text>
-          </TouchableOpacity>
-
-          {isNewGroup ? (
-            <Card additionalStyles={styles.newTripButtonCard}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsNewGroup(false);
-                  setGroupName("Group Name");
-                }}
-              >
-                <View style={styles.newTripButton}>
-                  <Ionicons name="add" size={36} color={PRIMARY_COLOR} />
-                  <Text style={styles.newTripButtonText}>New Trip</Text>
-                </View>
-              </TouchableOpacity>
-            </Card>
-          ) : (
-            <Card additionalStyles={styles.cardContainer}>
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Age Group</Text>
-              </View>
-              <AuthInput />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Date Of Travel</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Number of people</Text>
-              </View>
-              <AuthInput />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Destination</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Budget</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-
-              <Button
-                containerStyle={styles.submitBtnContainer}
-                iconName={"arrow-forward-outline"}
-                iconSize={40}
-                iconColor={PRIMARY_COLOR}
-                onPress={handleSubmitButtonPress}
-                disabled={!isFormValid}
-                disabledStyle={styles.disabledButton}
-              />
-            </Card>
-          )}
+          </TouchableOpacity> */}
         </Background>
       </ScrollView>
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={showShareModal}
@@ -242,12 +256,17 @@ export default function Itineraries() {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </SafeAreaView>
   );
 }
 
 const styles = {
+  newGroupContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
   tripLengthPadding: {
     marginLeft: 10,
     marginTop: 10,
@@ -256,14 +275,15 @@ const styles = {
     color: "white",
   },
 
+  surveyCard: {
+    width: "90%",
+  },
   textContainer: {
     alignSelf: "stretch",
   },
   textStyle: {
     color: PRIMARY_COLOR,
     textAlign: "left",
-    marginBottom: 20,
-    fontSize: 24,
   },
   itinerariesPadding: {
     marginLeft: 10,
@@ -286,12 +306,12 @@ const styles = {
 
   submitBtnContainer: {
     height: 50,
-    width: "35%",
     top: 10,
     backgroundColor: "#fff",
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    width: "100%",
     marginBottom: "10%",
   },
   groupNameContainer: {
@@ -386,6 +406,10 @@ const styles = {
     shadowRadius: 4,
     elevation: 5,
   },
+  surveyQuestion: {
+    marginBottom: "15%",
+    fontSize: 32,
+  },
   linkInput: {
     borderWidth: 1,
     borderColor: "gray",
@@ -411,6 +435,11 @@ const styles = {
     padding: 10,
     paddingHorizontal: 20,
     marginTop: 20,
+  },
+  itinerarySurveyText: {
+    color: "white",
+    fontSize: 45,
+    fontWeight: "bold",
   },
   shareButtonText: {
     color: "white",
@@ -447,10 +476,17 @@ const styles = {
   },
   groupMembersText: {
     fontSize: 20,
-    color: PRIMARY_COLOR
+    color: PRIMARY_COLOR,
   },
-  groupMembersListText:{
+  groupMembersListText: {
     fontSize: 16,
-    color: PRIMARY_COLOR
-  }
+    color: PRIMARY_COLOR,
+  },
+  itinerariesContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
 };

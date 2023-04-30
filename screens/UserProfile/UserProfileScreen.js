@@ -1,6 +1,7 @@
 import { onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import SideMenu from "react-native-side-menu";
 
 import {
   ScrollView,
@@ -27,16 +28,41 @@ import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
+import { testGPT } from "../../util/api/openaiApi";
+
+const menuStyles = StyleSheet.create({
+  // Other styles...
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  menuItem: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+});
 
 export default function UserProfileScreen() {
-  console.log("**********************  NEW LOG   ***********************")
-
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
   const navigation = useNavigation();
+
+  async function anotherFunction() {
+    console.log("calling testGPT...");
+    const response = await testGPT(); // wait for the response from the OpenAI API
+    if (response.hasOwnProperty("error")) {
+      console.log("Error occurred:", response.error);
+    } else {
+      console.log("Response:", response);
+    }
+
+    console.log("testGPT done.");
+  }
 
   useEffect(() => {
     const unsubscribe = getCurrentUser((user) => {
@@ -148,22 +174,13 @@ export default function UserProfileScreen() {
   return (
     <Background>
       <View style={styles.profileScreenContainer}>
-        <TouchableOpacity
-          onPress={async () => {
-            await userSignOut();
-            navigation.navigate("Sign In");
+        <Button
+          containerStyle={styles.buttonContainer}
+          title={"GPT"}
+          onPress={() => {
+            anotherFunction();
           }}
-          style={styles.logoutIcon}
-        >
-          <Ionicons name="log-out-outline" size={35} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Settings")}
-          style={styles.settingsIcon}
-        >
-          <Ionicons name="settings-outline" size={30} color="white" />
-        </TouchableOpacity>
-
+        />
         <View style={styles.profilePictureContainer}>
           <TouchableOpacity
             style={styles.photoContainer}

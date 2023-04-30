@@ -18,11 +18,23 @@ export default function AuthInput({
   containerStyle,
   error,
   keyboardType,
-
   onBlurHandler,
+
+  disableCustomBehavior,
+  value,
+  onChangeText,
+  ...props
 }) {
   const [secureIcon, setSecureIcon] = useState(secure);
-
+  if (disableCustomBehavior) {
+    return (
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        {...props}
+      />
+    );
+  }
   return (
     <>
       {error && <Text style={{ color: "red" }}>{error}</Text>}
@@ -41,7 +53,6 @@ export default function AuthInput({
           keyboardType={keyboardType}
           secureTextEntry={secureIcon}
           autoCapitalize="none"
-         
         />
         {inputType === "password" && (
           <TouchableOpacity
@@ -60,16 +71,14 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     marginBottom: 25,
-    borderColor: PRIMARY_COLOR,
-    borderRadius: 10,
-    borderWidth: 2,
     width: "95%",
   },
   inputText: {
     color: "#000",
     fontSize: 16,
     padding: 15,
-    // paddingLeft: 10,
+    borderBottomWidth: 2, // Add this line
+    borderBottomColor: PRIMARY_COLOR, // Add this line
   },
   showIconContainer: {
     position: "absolute",
