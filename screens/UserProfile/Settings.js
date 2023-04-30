@@ -11,6 +11,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import Card from "../../components/UI/Card";
 import { PRIMARY_COLOR } from "../../constants/styles";
+import useNavigation from "@react-navigation/native";
 
 const Settings = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -18,12 +19,14 @@ const Settings = () => {
   const [currency, setCurrency] = useState("usd");
   const [pushNotifications, setPushNotifications] = useState(false);
   const appVersion = "1.0.0";
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
       <ScrollView contentContainerStyle={{ alignItems: "center" }}>
         <View style={styles.settingsTitle}>
           <Text style={styles.settingsText}>Settings</Text>
+          <Ionicons name="settings-outline" size={30} color="white" />
         </View>
         <View style={styles.container}>
           <View style={styles.settingRow}>
@@ -74,7 +77,8 @@ const Settings = () => {
           </View>
 
           <View
-            style={{ //todo add shadow to fake card
+            style={{
+              //todo add shadow to fake card
               ...styles.touchableContainer,
               width: "80%",
               height: 200,
@@ -96,15 +100,27 @@ const Settings = () => {
                 <Text style={styles.link}>Get Help</Text>
               </TouchableOpacity>
               <View style={styles.settingRow}>
-                <Text Text style = {styles.linkVer}>Version</Text>
-                <Text style = {styles.linkVer}>{appVersion}</Text>
+                <Text Text style={styles.linkVer}>
+                  Version
+                </Text>
+                <Text style={styles.linkVer}>{appVersion}</Text>
               </View>
             </View>
           </View>
         </View>
 
         <TouchableOpacity style={styles.signOutButton}>
-          <Text style={styles.signOut}>Sign Out</Text>
+          <TouchableOpacity
+            onPress={async () => {
+              await userSignOut();
+              navigation.navigate("Sign In"); 
+            }}
+            style={styles.logoutIcon}
+          >
+            <Text style={styles.signOut}>Sign Out</Text>
+
+            <Ionicons name="log-out-outline" size={35} color="white" />
+          </TouchableOpacity>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -112,9 +128,7 @@ const Settings = () => {
 };
 
 const styles = StyleSheet.create({
-  settingsTitle: {
-
-  },
+  settingsTitle: {},
   settingsText: {
     fontWeight: "bold",
     fontSize: 24,
@@ -123,7 +137,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#FF5553",
-    width: "100%"
+    width: "100%",
   },
   settingRow: {
     flexDirection: "row",

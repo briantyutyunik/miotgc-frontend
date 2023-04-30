@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { auth } from "./firebase";
+import { View } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
@@ -11,6 +13,8 @@ import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 import Settings from "./screens/UserProfile/Settings";
 import TestScreen from "./screens/UserProfile/TestScreen.js";
+import { PRIMARY_COLOR } from "./constants/styles"
+
 
 
 const Stack = createNativeStackNavigator();
@@ -54,14 +58,46 @@ export default function App() {
       </Stack.Navigator>
     );
   }
+  
+  //https://www.youtube.com/watch?v=gPaBicMaib4
 
   function TabNavigator() {
     return (
-      <Tab.Navigator screenOptions={{ headerShown: false }}>
-        <Tab.Screen name="Settings" component={Settings} />
-        <Tab.Screen name="Today" component={TestScreen} /> 
-        {/*today is just the TestScreen.js for the time being*/}
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarStyle: {
+          height: 85,
+          paddingHorizontal: 5,
+          paddingTop: 0,
+          backgroundColor: PRIMARY_COLOR,
+          position: 'absolute',
+          borderTopWidth: 0,
+        },
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+    
+            if (route.name === 'UserProfile') {
+              iconName = focused ? 'person' : 'person-outline';
+            } else if (route.name === 'Today') {
+              iconName = focused ? 'document-text' : 'document-text-outline';
+            } else if (route.name === 'Settings') {
+              iconName = focused ? 'settings' : 'settings-outline';
+            }
+    
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+        })}
+        tabBarOptions={{
+          activeTintColor: 'white',
+          inactiveTintColor: 'black',
+          labelStyle: { fontSize: 14, fontWeight: 'bold' },
+          style: { elevation: 5, shadowColor: '#000', borderTopColor: 'transparent', backgroundColor: 'transparent' },
+        }}
+      >
         <Tab.Screen name="UserProfile" component={UserProfileScreen} />
+        <Tab.Screen name="Today" component={TestScreen} />
+        <Tab.Screen name="Settings" component={Settings} />
       </Tab.Navigator>
     );
   }

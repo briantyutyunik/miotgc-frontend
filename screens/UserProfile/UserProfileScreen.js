@@ -1,24 +1,75 @@
 import { onSnapshot } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Card from "../../components/UI/Card";
+import CardDarker from "../../components/UI/CardDarker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { ScrollView,FlatList, StyleSheet, View, Text, Image, Button, TouchableOpacity, SafeAreaView, } from "react-native";
-import { auth,firestore,getUser,storage,fetchGroups,userSignOut,getCurrentUser,createGroup, listenGroupNames } from "../../firebase";
+import {
+  ScrollView,
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  Animated,
+} from "react-native";
+import {
+  auth,
+  firestore,
+  getUser,
+  storage,
+  fetchGroups,
+  userSignOut,
+  getCurrentUser,
+  createGroup,
+  listenGroupNames,
+} from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
 export default function UserProfileScreen() {
+  const shakeAnimation = useRef(new Animated.Value(0)).current;
+
   const navigation = useNavigation();
-  console.log("**********************  NEW LOG   ***********************")
+  const [showDeleteIcon, setShowDeleteIcon] = useState(false);
 
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
+
+  const startShaking = () => {
+    setShowDeleteIcon(true);
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shakeAnimation, {
+          toValue: 2,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnimation, {
+          toValue: -2,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stopShaking = () => {
+    setShowDeleteIcon(false);
+    Animated.timing(shakeAnimation, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const unsubscribe = getCurrentUser((user) => {
     setCurrentUser(user);
@@ -35,8 +86,8 @@ export default function UserProfileScreen() {
       const fetchUserData = async () => {
         const data = await getUser(currentUser.uid);
         setCurrentUserData(data);
-        console.log(data);
-        console.log(data.firstName);
+        //console.log(data);
+        //console.log(data.firstName);
       };
       fetchUserData();
     }
@@ -47,8 +98,8 @@ export default function UserProfileScreen() {
       const fetchUserData = async () => {
         const data = await getUser(currentUser.uid);
         setCurrentUserData(data);
-        console.log(data);
-        console.log(data.firstName);
+        //console.log(data);
+        //console.log(data.firstName);
       };
       fetchUserData();
     }
@@ -58,7 +109,6 @@ export default function UserProfileScreen() {
     React.useCallback(() => {
       const uid = auth.getAuth().currentUser.uid;
       let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-
       const unsub = onSnapshot(docRef, (docSnap) => {
         const user = docSnap.data();
         if (user.avatarUrl !== "") {
@@ -90,6 +140,14 @@ export default function UserProfileScreen() {
     }, [])
   );
 
+  const EditProfileButton = ({ onPress }) => {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.button}>
+        <Text style={styles.text}>Edit</Text>
+      </TouchableOpacity>
+    );
+  };
+  
   const renderGroupCard = ({ item: group }) => {
     if (group.id === "add-new-group") {
       return (
@@ -97,7 +155,7 @@ export default function UserProfileScreen() {
           onPress={async () => {
             const initialGroupName = "Group name";
             const groupId = await createGroup(initialGroupName);
-            navigation.navigate("Group", {
+            navigation.navigate("Itineraries", {
               isNewGroup: true,
               groupId: groupId,
               groupName: initialGroupName, // Pass the initial group name
@@ -128,10 +186,35 @@ export default function UserProfileScreen() {
             })
           }
         >
-          <Image
-            source={{ uri: group.image }}
-            style={{ width: 150, height: 180, borderRadius: 10 }}
-          />
+          <Animated.View
+            style={{
+              transform: [{ translateX: shakeAnimation }],
+            }}
+          >
+            <Image
+              source={{ uri: group.image }}
+              style={{ width: 150, height: 180, borderRadius: 10 }}
+            />
+            {showDeleteIcon && (
+              <TouchableOpacity
+                onPress={() => deleteGroup(group.id)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  padding: 5,
+                  borderRadius: 50,
+                  backgroundColor: "transparent", // Change this line
+                }}
+              >
+                  <Ionicons
+                    name="ios-remove-circle-outline"
+                    size={24}
+                    color="red"
+                  />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
         </TouchableOpacity>
         <Text
           style={{
@@ -147,35 +230,22 @@ export default function UserProfileScreen() {
       </View>
     );
   };
+
   return (
     <SafeAreaView style={styles.safe}>
       <Background>
         <ScrollView contentContainerStyle={{ alignItems: "center" }}>
           <View style={styles.profileScreenContainer}>
-            <TouchableOpacity
-              onPress={async () => {
-                await userSignOut();
-                navigation.navigate("Sign In"); // Replace "SignIn" with the name of your sign-in screen in your navigation
-              }}
-              style={styles.logoutIcon}
-            >
-              <Ionicons name="log-out-outline" size={35} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Settings")}
-              style={styles.settingsIcon}
-            >
-              <Ionicons name="settings-outline" size={30} color="white" />
-            </TouchableOpacity>
-
+          <View style={styles.logoutIcon}>
+            <EditProfileButton></EditProfileButton>
+          </View>
             <View style={styles.profilePictureContainer}>
-              {/*<View style={styles.photoContainer}>*/}
-              <View style={styles.header}></View>
+              <View style={styles.photoContainer}>
                 <TouchableOpacity
                   onPress={() => {
                     setOpenImageSelect(!openImageSelect);
                   }}
-                  //style={styles.photoBackground}
+                  style={styles.photoBackground}
                 >
                   {!image && (
                     <Skeleton
@@ -192,39 +262,21 @@ export default function UserProfileScreen() {
                     />
                   )}
                 </TouchableOpacity>
-                <Text style={styles.username}>Username</Text>
-                <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate("Test", {
-                      })
-                    }
-                >
-                  <View>
-                    <Text>TEST SCREEN</Text>
-                  </View>
-                </TouchableOpacity>
-              {/*</View>*/}
-              <View style={styles.bottomContainer}>
-                <View style={styles.bodyContent}>
-                  <Text style={styles.name}>John Doe</Text>
-                  <Text style={styles.info}>UX Designer / Mobile developer</Text>
-                  <Text style={styles.description}>
-                    Lorem ipsum dolor sit amet, saepe sapientem eu nam. Qui ne assum electram expetendis,
-                    omittam deseruisse consequuntur ius an,
-                  </Text>
+                <View>
+                  <Text style={styles.textName}>John Doe</Text>
                 </View>
               </View>
             </View>
 
-            <View style={{ flex: 1 }}>
+            <View style={styles.parentListContainer}>
               <View style={styles.flatListContainer}>
-                <Card additionalStyles={styles.cardContainer}>
+                <CardDarker additionalStyles={styles.cardContainer}>
                   <View style={styles.dualCardTitles}>
                     <View style={styles.dualCardLeft}>
                       <Text style={styles.flatListTitle}>Groups</Text>
                     </View>
                     <View style={styles.dualCardRight}>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={startShaking}>
                         <Text style={styles.flatListTitleEdit}>
                           Edit {""}
                           <Icon
@@ -243,10 +295,10 @@ export default function UserProfileScreen() {
                     horizontal
                     showsHorizontalScrollIndicator={true}
                   />
-                </Card>
+                </CardDarker>
               </View>
               <View style={styles.flatListContainer}>
-                <Card additionalStyles={styles.cardContainer}>
+                <CardDarker additionalStyles={styles.cardContainer}>
                   <Text style={styles.flatListTitle}>Trip History</Text>
                   <FlatList
                     data={groups}
@@ -255,7 +307,7 @@ export default function UserProfileScreen() {
                     horizontal
                     showsHorizontalScrollIndicator={true}
                   />
-                </Card>
+                </CardDarker>
               </View>
             </View>
           </View>
@@ -266,10 +318,6 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: '#00BFFF',
-    height: 200,
-  },  
   cardContainer: {
     margin: "0%",
     justifyContent: "center",
@@ -281,6 +329,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FF5553",
   },
+  deleteGroupIconStyle: {
+    marginRight: "2%",
+    marginTop: "2%",
+  },
+
   buttonContainer: {
     height: 60,
     width: "80%",
@@ -322,24 +375,18 @@ const styles = StyleSheet.create({
   },
   profileScreenContainer: {
     flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
     marginTop: "15%",
   },
-  logo: {
-    position: "absolute",
-    top: 5,
-  },
-  profilePhoto: {
-    width: 130,
-    height: 130,
-    borderRadius: 63,
-    borderWidth: 4,
-    borderColor: 'white',
-    marginBottom: 10,
-    alignSelf: 'center',
-    position: 'absolute',
-    marginTop: 130,
+  parentListContainer: {
+    flex: 1,
+    height: "50%",
   },
   settingsIcon: {
     position: "absolute",
@@ -347,33 +394,38 @@ const styles = StyleSheet.create({
     right: "5%",
   },
   profilePictureContainer: {
-    // backgroundColor: "white",
-    //paddingBottom: "5%",
+    paddingBottom: "5%",
     flex: 1,
+    height: "50%",
   },
   photoContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
   },
   photoBackground: {
     backgroundColor: PRIMARY_COLOR,
+    width: 130,
+    height: 130,
+    marginBottom: 10,
+    alignSelf: "center",
+    shadowColor: "black",
+    shadowOffset: {
+      width: 4,
+      height: 2,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
     borderRadius: 100,
-    borderColor: "black",
-    borderWidth: 10,
-    overflow: "hidden",
   },
   profilePhoto: {
     width: 130,
     height: 130,
-    borderRadius: 63,
+    borderRadius: 100,
     borderWidth: 4,
-    borderColor: 'white',
+    borderColor: "white",
     marginBottom: 10,
-    alignSelf: 'center',
-    position: 'absolute',
-    marginTop: 130,
+    alignSelf: "center",
   },
   skeletonContainer: {
     width: 100,
@@ -383,18 +435,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: 20,
   },
+  textName: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "30pt",
+    shadowColor: "black",
+    shadowOffset: {
+      width: 4,
+      height: 2,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+  },
   logoutIcon: {
     position: "absolute",
-    top: "-5%", // Adjust this value if you need more or less spacing from the top
-    left: "5%", // Adjust this value if you need more or less spacing from the left
-  },
-  bottomContainer: {
-    /*flex: 1,
-    backgroundColor: "#f2f2f2",
-    padding: 20,
-    alignItems: "center",
-    paddingTop: 10, */
-    marginTop: 40,
+    top: "-7%", // Adjust this value if you need more or less spacing from the top
+    left: "4%", // Adjust this value if you need more or less spacing from the left
   },
   sectionTitle: {
     fontSize: 16,
@@ -405,26 +461,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 20,
   },
-  bodyContent: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 30,
+  button: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    borderWidth: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
-  name: {
-    fontSize: 28,
-    color: '#696969',
+  text: {
+    fontSize: 14,
     fontWeight: '600',
+    color: PRIMARY_COLOR,
   },
-  info: {
-    fontSize: 16,
-    color: '#00BFFF',
-    marginTop: 10,
-  },
-  description: {
-    fontSize: 16,
-    color: '#696969',
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  
 });
