@@ -342,14 +342,7 @@ const styles = StyleSheet.create({
     marginRight: "2%",
     marginTop: "2%",
   },
-  flatListTitleEdit: {
-    marginLeft: 10,
-    marginVertical: 10,
-    fontSize: 18,
-    fontWeight: "thin",
-    color: "#FF5553",
-    marginRight: 10,
-  },
+
   buttonContainer: {
     height: 60,
     width: "80%",
@@ -358,16 +351,36 @@ const styles = StyleSheet.create({
   },
   flatListContainer: {
     width: "100%",
-    height: 255,
-    padding: 10,
+    height: "52%", //change this setting to give more room between the cards
+    padding: 5,
     backgroundColor: "#FF5553",
+  },
+  dualCardTitles: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dualCardRight: {
+    alignItems: "flex-end",
+    padding: 5,
+  },
+  dualCardLeft: {
+    alignItems: "flex-start",
+    padding: 5,
   },
   flatListTitle: {
     marginLeft: 10,
     marginVertical: 10,
     fontSize: 18,
     fontWeight: "bold",
-    color: "white",
+    color: "black",
+  },
+  flatListTitleEdit: {
+    marginLeft: 10,
+    marginVertical: 10,
+    fontSize: 18,
+    fontWeight: "thin",
+    color: "#FF5553",
+    marginRight: 10,
   },
   profileScreenContainer: {
     flex: 1,
@@ -387,7 +400,7 @@ const styles = StyleSheet.create({
   settingsIcon: {
     position: "absolute",
     top: "-5%", // Adjust this value if you need more or less spacing from the top
-    right: "5%", // Adjus
+    right: "5%",
   },
   profilePictureContainer: {
     paddingBottom: "5%",
@@ -395,6 +408,7 @@ const styles = StyleSheet.create({
     height: "50%",
   },
   photoContainer: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -457,7 +471,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 0,
     paddingHorizontal: 20,
@@ -465,7 +479,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: PRIMARY_COLOR,
   },
 });
