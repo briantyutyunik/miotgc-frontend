@@ -15,13 +15,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: {
       width: 8,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
     elevation: 5,
   },
 });
