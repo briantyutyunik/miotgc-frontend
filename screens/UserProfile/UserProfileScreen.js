@@ -4,6 +4,8 @@ import Card from "../../components/UI/Card";
 import CardDarker from "../../components/UI/CardDarker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import SideMenu from "react-native-side-menu";
+
 import {
   ScrollView,
   FlatList,
@@ -30,6 +32,21 @@ import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
+import { testGPT } from "../../util/api/openaiApi";
+
+const menuStyles = StyleSheet.create({
+  // Other styles...
+  menuContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  menuItem: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+});
 
 export default function UserProfileScreen() {
   const shakeAnimation = useRef(new Animated.Value(0)).current;
@@ -69,6 +86,18 @@ export default function UserProfileScreen() {
       duration: 100,
       useNativeDriver: true,
     }).start();
+
+  async function anotherFunction() {
+    console.log("calling testGPT...");
+    const response = await testGPT(); // wait for the response from the OpenAI API
+    if (response.hasOwnProperty("error")) {
+      console.log("Error occurred:", response.error);
+    } else {
+      console.log("Response:", response);
+    }
+
+    console.log("testGPT done.");
+  }
   };
 
   const unsubscribe = getCurrentUser((user) => {

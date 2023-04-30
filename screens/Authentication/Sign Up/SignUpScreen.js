@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     maxHeight: "85%",
-    marginTop: "-7%"
+    marginTop: "-7%",
   },
   avatarContainerStyle: {
     backgroundColor: PRIMARY_COLOR,

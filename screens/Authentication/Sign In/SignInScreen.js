@@ -92,6 +92,7 @@ const SignInScreen = ({ navigation }) => {
                 fontWeight: "normal",
                 shadowColor: "transparent"
               }}
+              textColor={PRIMARY_COLOR}
                 containerStyle={styles.noShadowSignUpHereButton}
 
             />

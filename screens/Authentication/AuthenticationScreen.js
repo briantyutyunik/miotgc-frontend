@@ -94,6 +94,7 @@ export default function AuthenticationScreen() {
       <Logo additionalStyle={styles.logo} height={120} width={120} />
       <Slogan />
       <View style={styles.authButtonsContainer}>
+      
         <Button
           containerStyle={styles.buttonContainer}
           title={"Sign in with Google"}
@@ -115,7 +116,7 @@ export default function AuthenticationScreen() {
       <Button
         containerStyle={styles.signInContainer}
         textStyle={styles.signInText}
-        additionalStyle={{ color: { PRIMARY_COLOR } }}
+        textColor={"white"}
         title="Sign In"
         onPress={onSignIn}
       />
