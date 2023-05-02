@@ -25,6 +25,8 @@ import {
   getCurrentUser,
   createGroup,
   listenGroupNames,
+  getCurrentUserProfilePicture,
+
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -122,17 +124,10 @@ export default function UserProfileScreen() {
   useFocusEffect(
     React.useCallback(() => {
       const uid = auth.getAuth().currentUser.uid;
-      let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-      const unsub = onSnapshot(docRef, (docSnap) => {
-        const user = docSnap.data();
-        if (user.avatarUrl !== "") {
-          let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-          storage.getDownloadURL(ref).then((res) => {
-            setImage(res);
-          });
-        }
-      });
-
+      (async () => {
+        const profilePictureURL = await getCurrentUserProfilePicture(uid);
+        setImage(profilePictureURL);
+      })();
       (async () => {
         const fetchedGroups = await fetchGroups();
         setGroups(fetchedGroups);
@@ -148,7 +143,6 @@ export default function UserProfileScreen() {
 
       // Cleanup function to unsubscribe from both onSnapshot and listenGroupNames listeners
       return () => {
-        unsub();
         unsubscribeGroups();
       };
     }, [])
@@ -169,7 +163,7 @@ export default function UserProfileScreen() {
           onPress={async () => {
             const initialGroupName = "Group name";
             const groupId = await createGroup(initialGroupName);
-            navigation.navigate("Itineraries", {
+            navigation.navigate("Group", {
               isNewGroup: true,
               groupId: groupId,
               groupName: initialGroupName, // Pass the initial group name
@@ -194,7 +188,7 @@ export default function UserProfileScreen() {
       <View style={{ marginHorizontal: 10 }}>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("Itineraries", {
+            navigation.navigate("Group", {
               groupName: group.name,
               groupId: group.id,
             })

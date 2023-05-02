@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 // import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
+import Group from "./screens/Groups/Group";
 import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
 import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
@@ -15,7 +16,6 @@ import Settings from "./screens/UserProfile/Settings";
 import TestScreen from "./screens/UserProfile/TestScreen.js";
 import { PRIMARY_COLOR } from "./constants/styles"
 
-import Itineraries from "./screens/Groups/Itineraries";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator(); // Create the Tab variable
@@ -106,7 +106,7 @@ export default function App() {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={TabNavigator} />
-        <Stack.Screen name="Itineraries" component={Itineraries} />
+        <Stack.Screen name="Group" component={Group} />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Test" component={TestScreen} />
       </Stack.Navigator>
