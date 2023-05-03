@@ -1,129 +1,60 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import Card from "../../components/UI/Card";
-import { PRIMARY_COLOR } from "../../constants/styles";
-import useNavigation from "@react-navigation/native";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { PRIMARY_COLOR } from '../../constants/styles';
+import Background from '../../components/UI/Background';
+import CustomPicker from '../../components/UI/CustomPicker';
 
-const Settings = () => {
+const languages = [
+  { label: 'English', value: 'en' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'French', value: 'fr' },
+];
+
+const currencies = [
+  { label: 'USD', value: 'usd' },
+  { label: 'EUR', value: 'eur' },
+  { label: 'GBP', value: 'gbp' },
+];
+
+export default function Settings() {
+  const [language, setLanguage] = useState(languages[0].value);
+  const [currency, setCurrency] = useState(currencies[0].value);
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("en");
-  const [currency, setCurrency] = useState("usd");
-  const [pushNotifications, setPushNotifications] = useState(false);
-  const appVersion = "1.0.0";
-  const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
-      <ScrollView contentContainerStyle={{ alignItems: "center" }}>
-        <View style={styles.settingsTitle}>
-          <Text style={styles.settingsText}>Settings</Text>
-          <Ionicons name="settings-outline" size={30} color="white" />
-        </View>
-        <View style={styles.container}>
-          <View style={styles.settingRow}>
-            <Text style={styles.text}>Dark Mode</Text>
-            <Switch
-              value={darkMode}
-              onValueChange={(value) => setDarkMode(value)}
-            />
-          </View>
+    <Background>
+      <View style={styles.settingsScreenContainer}>
+        <Text style={styles.heading}>Settings</Text>
 
-          <View style={styles.settingRow}>
-            <Text>Language</Text>
-            <Picker
-              selectedValue={language}
-              style={styles.picker}
-              onValueChange={(itemValue, itemIndex) => setLanguage(itemValue)}
-            >
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="Spanish" value="es" />
-              <Picker.Item label="Chinese" value="es" />
-              <Picker.Item label="French" value="es" />
-              <Picker.Item label="German" value="es" />
-              <Picker.Item label="Arabic" value="es" />
-              <Picker.Item label="Russian" value="es" />
-            </Picker>
-          </View>
-          <View style={styles.settingRow}>
-            <Text>Currency</Text>
-            <Picker
-              selectedValue={currency}
-              style={styles.picker}
-              onValueChange={(itemValue, itemIndex) => setCurrency(itemValue)}
-            >
-              {/* Add your supported currencies here */}
-              <Picker.Item label="USD" value="usd" />
-              <Picker.Item label="EUR" value="eur" />
-              <Picker.Item label="JPY" value="jpy" />
-              <Picker.Item label="GBP" value="gbp" />
-              <Picker.Item label="CAD" value="cad" />
-            </Picker>
-          </View>
-          <View style={styles.settingRow}>
-            <Text>Push Notifications</Text>
-            <Switch
-              value={pushNotifications}
-              onValueChange={(value) => setPushNotifications(value)}
-            />
-          </View>
+        <Text style={styles.label}>Language</Text>
+        <CustomPicker
+          selectedValue={language}
+          onValueChange={setLanguage}
+          items={languages}
+          style={styles.picker}
+        />
 
-          <View
-            style={{
-              //todo add shadow to fake card
-              ...styles.touchableContainer,
-              width: "80%",
-              height: 200,
-              backgroundColor: "white",
-              borderRadius: 10,
-              padding: 20,
-              marginTop: 20,
-              marginBottom: 20,
-            }}
-          >
-            <View style={styles.touchableViewContainer}>
-              <TouchableOpacity>
-                <Text style={styles.link}>Terms and Conditions</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={styles.link}>Privacy Note</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={styles.link}>Get Help</Text>
-              </TouchableOpacity>
-              <View style={styles.settingRow}>
-                <Text Text style={styles.linkVer}>
-                  Version
-                </Text>
-                <Text style={styles.linkVer}>{appVersion}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+        <Text style={styles.label}>Currency</Text>
+        <CustomPicker
+          selectedValue={currency}
+          onValueChange={setCurrency}
+          items={currencies}
+          style={styles.picker}
+        />
 
-        <TouchableOpacity style={styles.signOutButton}>
+        <View style={styles.darkModeContainer}>
+          <Text style={styles.label}>Dark Mode</Text>
           <TouchableOpacity
-            onPress={async () => {
-              await userSignOut();
-              navigation.navigate("Sign In"); 
-            }}
-            style={styles.logoutIcon}
-          >
-            <Text style={styles.signOut}>Sign Out</Text>
+            style={[styles.darkModeSwitch, darkMode ? styles.darkModeOn : styles.darkModeOff]}
+            onPress={() => setDarkMode(!darkMode)}
+          />
+        </View>
 
-            <Ionicons name="log-out-outline" size={35} color="white" />
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </Background>
   );
 };
 
@@ -147,28 +78,51 @@ const styles = StyleSheet.create({
   },
   touchableContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 20,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  touchableViewContainer: {},
-  text: {
-    color: "white",
+  heading: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 30,
   },
-  link: {
-    color: PRIMARY_COLOR,
-    textDecorationLine: "underline",
+  label: {
+    color: 'white',
+    fontSize: 18,
     marginBottom: 10,
-    fontSize: "16",
-  },
-  linkVer: {
-    color: "#b01311",
-    fontSize: "16",
   },
   picker: {
-    width: 150,
-    color: "white",
+    marginBottom: 30,
   },
+  darkModeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+  },
+  darkModeSwitch: {
+    width: 40,
+    height: 20,
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+  darkModeOn: {
+    backgroundColor: 'black',
+  },
+  darkModeOff: {
+    backgroundColor: 'white',
+  },
+  logoutButton: {
+    backgroundColor: 'red',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    alignSelf: 'center',
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 16,
   signOut: {
     color: "white",
     fontSize: 26,

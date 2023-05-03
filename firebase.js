@@ -149,6 +149,33 @@ export async function userSignUp(newUser) {
   return { isLoading, error };
 }
 
+
+
+
+export async function getCurrentUserProfilePicture(uid) {
+  try {
+    const docRef = firestore.doc(firestore.getFirestore(), "users", uid);
+    const docSnap = await firestore.getDoc(docRef);
+    const user = docSnap.data();
+    if (user.avatarUrl !== "") {
+      const ref = storage.ref(storage.getStorage(), user.avatarUrl);
+      const url = await storage.getDownloadURL(ref);
+      console.log(url)
+
+      return url;
+    } else {
+      throw new Error("User has no profile picture");
+    }
+  } catch (error) {
+    throw new Error(`Failed to get user profile picture for uid ${uid}: ${error.message}`);
+  }
+}
+
+
+
+
+
+
 export async function createGroup(groupName) {
   const groupData = {
     groupName: groupName,
@@ -360,32 +387,23 @@ export async function addTestUsersToGroup() {
     console.error('Error adding test users to group:', error);
   }
 }
-
-// Add the getGroupMembers function
 export async function getGroupMembers(groupId) {
-  console.log("Getting group members for groupId:", groupId); // Add this line
-
-  const groupRef = doc(firestore.getFirestore(), 'groups', groupId);
-  const membersSnapshot = await getDocs(collection(groupRef, 'members'));
-
+  const groupRef = doc(firestore.getFirestore(), "groups", groupId);
+  const membersCollectionRef = collection(groupRef, "members");
+  const membersSnap = await getDocs(membersCollectionRef);
   const members = [];
-  for (const memberDoc of membersSnapshot.docs) {
-    console.log("Found memberDoc:", memberDoc); // Add this line
-
-    const userRef = memberDoc.data().userRef;
-    console.log("User reference:", userRef); // Add this line
-
-    const userSnapshot = await getDoc(userRef);
-    console.log("User snapshot:", userSnapshot); // Add this line
-
-    const userData = userSnapshot.data();
-    console.log("User data:", userData); // Add this line
-
-    members.push(userData);
-  }
+  membersSnap.forEach((memberDoc) => {
+    const memberData = memberDoc.data();
+    const { userRef, ...rest } = memberData;
+    members.push({ uid: memberDoc.id, ...rest });
+  });
+  console.log(members);
 
   return members;
 }
+
+
+
 
 
 export { firebase, auth, firestore, storage };

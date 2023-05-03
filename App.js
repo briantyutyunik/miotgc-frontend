@@ -4,9 +4,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { auth } from "./firebase";
 import { View } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import Group from "./screens/Groups/Group";
+// import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
+import Group from "./screens/Groups/Group";
 import AuthenticationScreen from "./screens/Authentication/AuthenticationScreen";
 import SignInScreen from "./screens/Authentication/Sign In/SignInScreen";
 import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
@@ -14,7 +15,6 @@ import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 import Settings from "./screens/UserProfile/Settings";
 import TestScreen from "./screens/UserProfile/TestScreen.js";
 import { PRIMARY_COLOR } from "./constants/styles"
-
 
 
 const Stack = createNativeStackNavigator();
@@ -122,13 +122,13 @@ export default function App() {
     );
   }
 
-  Font.loadAsync({
-    roboto: require("./constants/fonts/Roboto-Regular.ttf"),
-    "roboto-medium": require("./constants/fonts/Roboto-Medium.ttf"),
-    "roboto-thin": require("./constants/fonts/Roboto-Thin.ttf"),
-    "roboto-bold": require("./constants/fonts/Roboto-Bold.ttf"),
-    "roboto-black": require("./constants/fonts/Roboto-Black.ttf"),
-  });
+  // Font.loadAsync({
+  //   roboto: require("./constants/fonts/Roboto-Regular.ttf"),
+  //   "roboto-medium": require("./constants/fonts/Roboto-Medium.ttf"),
+  //   "roboto-thin": require("./constants/fonts/Roboto-Thin.ttf"),
+  //   "roboto-bold": require("./constants/fonts/Roboto-Bold.ttf"),
+  //   "roboto-black": require("./constants/fonts/Roboto-Black.ttf"),
+  // });
 
   return (
     <>

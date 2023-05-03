@@ -1,11 +1,9 @@
 import { onSnapshot } from "firebase/firestore";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useRef } from "react";
 import Card from "../../components/UI/Card";
 import CardDarker from "../../components/UI/CardDarker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import SideMenu from "react-native-side-menu";
-
 import {
   ScrollView,
   FlatList,
@@ -27,6 +25,8 @@ import {
   getCurrentUser,
   createGroup,
   listenGroupNames,
+  getCurrentUserProfilePicture,
+
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -59,6 +59,19 @@ export default function UserProfileScreen() {
   const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
+  const navigation = useNavigation();
+
+  async function anotherFunction() {
+    console.log("calling testGPT...");
+    const response = await testGPT(); // wait for the response from the OpenAI API
+    if (response.hasOwnProperty("error")) {
+      console.log("Error occurred:", response.error);
+    } else {
+      console.log("Response:", response);
+    }
+
+    console.log("testGPT done.");
+  }
 
   const startShaking = () => {
     setShowDeleteIcon(true);
@@ -86,18 +99,6 @@ export default function UserProfileScreen() {
       duration: 100,
       useNativeDriver: true,
     }).start();
-
-  async function anotherFunction() {
-    console.log("calling testGPT...");
-    const response = await testGPT(); // wait for the response from the OpenAI API
-    if (response.hasOwnProperty("error")) {
-      console.log("Error occurred:", response.error);
-    } else {
-      console.log("Response:", response);
-    }
-
-    console.log("testGPT done.");
-  }
   };
 
   const unsubscribe = getCurrentUser((user) => {
@@ -115,7 +116,7 @@ export default function UserProfileScreen() {
       const fetchUserData = async () => {
         const data = await getUser(currentUser.uid);
         setCurrentUserData(data);
-        //console.log(data);
+        ////console.log(data);
         //console.log(data.firstName);
       };
       fetchUserData();
@@ -128,7 +129,7 @@ export default function UserProfileScreen() {
         const data = await getUser(currentUser.uid);
         setCurrentUserData(data);
         //console.log(data);
-        //console.log(data.firstName);
+        ////console.log(data.firstName);
       };
       fetchUserData();
     }
@@ -137,17 +138,10 @@ export default function UserProfileScreen() {
   useFocusEffect(
     React.useCallback(() => {
       const uid = auth.getAuth().currentUser.uid;
-      let docRef = firestore.doc(firestore.getFirestore(), "users", uid);
-      const unsub = onSnapshot(docRef, (docSnap) => {
-        const user = docSnap.data();
-        if (user.avatarUrl !== "") {
-          let ref = storage.ref(storage.getStorage(), user.avatarUrl);
-          storage.getDownloadURL(ref).then((res) => {
-            setImage(res);
-          });
-        }
-      });
-
+      (async () => {
+        const profilePictureURL = await getCurrentUserProfilePicture(uid);
+        setImage(profilePictureURL);
+      })();
       (async () => {
         const fetchedGroups = await fetchGroups();
         setGroups(fetchedGroups);
@@ -163,7 +157,6 @@ export default function UserProfileScreen() {
 
       // Cleanup function to unsubscribe from both onSnapshot and listenGroupNames listeners
       return () => {
-        unsub();
         unsubscribeGroups();
       };
     }, [])
@@ -176,7 +169,7 @@ export default function UserProfileScreen() {
       </TouchableOpacity>
     );
   };
-  
+
   const renderGroupCard = ({ item: group }) => {
     if (group.id === "add-new-group") {
       return (
@@ -184,7 +177,7 @@ export default function UserProfileScreen() {
           onPress={async () => {
             const initialGroupName = "Group name";
             const groupId = await createGroup(initialGroupName);
-            navigation.navigate("Itineraries", {
+            navigation.navigate("Group", {
               isNewGroup: true,
               groupId: groupId,
               groupName: initialGroupName, // Pass the initial group name
@@ -209,7 +202,7 @@ export default function UserProfileScreen() {
       <View style={{ marginHorizontal: 8 }}>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("Itineraries", {
+            navigation.navigate("Group", {
               groupName: group.name,
               groupId: group.id,
             })
@@ -236,24 +229,16 @@ export default function UserProfileScreen() {
                   backgroundColor: "transparent", // Change this line
                 }}
               >
-                  <Ionicons
-                    name="ios-remove-circle-outline"
-                    size={24}
-                    color="red"
-                  />
+                <Ionicons
+                  name="ios-remove-circle-outline"
+                  size={24}
+                  color="red"
+                />
               </TouchableOpacity>
             )}
           </Animated.View>
         </TouchableOpacity>
-        <Text
-          style={{
-            marginLeft: "3%",
-            fontFamily: "roboto-medium",
-            fontWeight: "bold",
-            marginTop: 10,
-            color: "black",
-          }}
-        >
+        <Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>
           {group.name}
         </Text>
       </View>
@@ -265,9 +250,9 @@ export default function UserProfileScreen() {
       <Background>
         <ScrollView contentContainerStyle={{ alignItems: "center" }}>
           <View style={styles.profileScreenContainer}>
-          <View style={styles.logoutIcon}>
-            <EditProfileButton></EditProfileButton>
-          </View>
+            <View style={styles.logoutIcon}>
+              <EditProfileButton></EditProfileButton>
+            </View>
             <View style={styles.profilePictureContainer}>
               <View style={styles.photoContainer}>
                 <TouchableOpacity
@@ -297,6 +282,8 @@ export default function UserProfileScreen() {
               </View>
             </View>
 
+            {/* <View style={styles.curve} /> */}
+
             <View style={styles.parentListContainer}>
               <View style={styles.flatListContainer}>
                 <CardDarker additionalStyles={styles.cardContainer}>
@@ -318,7 +305,7 @@ export default function UserProfileScreen() {
                     </View>
                   </View>
                   <FlatList
-                    data={groups}
+                    data={[...groups, { id: "add-new-group" }]}
                     renderItem={renderGroupCard}
                     keyExtractor={(item) => item.id}
                     horizontal
@@ -326,6 +313,7 @@ export default function UserProfileScreen() {
                   />
                 </CardDarker>
               </View>
+
               <View style={styles.flatListContainer}>
                 <CardDarker additionalStyles={styles.cardContainer}>
                   <Text style={styles.flatListTitle}>Trip History</Text>

@@ -1,44 +1,89 @@
 import React, { useState, useEffect } from "react";
-import {View, Text, TouchableOpacity, TextInput, ScrollView, SafeAreaView, Share, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  Share,
+  Modal,
+  Image,
+} from "react-native";
+import Accordion from "react-native-collapsible/Accordion";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-import { listenGroupName } from "../../firebase";
+import { listenGroupName, getCurrentUserProfilePicture } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
-import { firestore, updateGroupName, addTestUsersToGroup, getGroupMembers} from "../../firebase";
+import { QUESTIONS } from "./questions";
+
+import {
+  firestore,
+  updateGroupName,
+  addTestUsersToGroup,
+  getGroupMembers,
+} from "../../firebase";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
-
-export default function Groups() {
+import Logo from "../../components/UI/Logo";
+export default function Group() {
   const route = useRoute();
-  const initialGroupName = route.params.groupName;
+  // const initialGroupName = route.params.groupName;
+  const initialGroupName = "Group Name";
   const isNewGroupParam = route.params?.isNewGroup || false;
   const [isNewGroup, setIsNewGroup] = useState(isNewGroupParam);
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
-  const [groupName, setGroupName] = useState(initialGroupName);
+  // const [groupName, setGroupName] = useState(initialGroupName);
+  // for testing. this groupName will be replaced with the one above
+  const [groupName, setGroupName] = useState("Group Name");
   const groupId = route.params.groupId;
-  const [isFormValid, setIsFormValid] = useState(true);
+  const [groupMembers, setGroupMembers] = useState([]);
+
   const [showShareModal, setShowShareModal] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [answers, setAnswers] = useState(
+    QUESTIONS.map((_, index) => ({ questionIndex: index, answer: "" }))
+  );
   const [testGroupMembers, setTestGroupMembers] = useState([]);
-
-  function handleSubmitButtonPress() {}
-
+  console.log("***CURRNET GROUP ID***", groupId);
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
   //   Clipboard.setString(`exp://exp.host/@tahir13/miotgc/group/${groupId}`);
   // };
 
   // *** THIS IS TO TEST THE GROUP MEMBERS FUNCTIONALITY ***
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     // await addTestUsersToGroup();
+  //     const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
+  //     setTestGroupMembers(members);
+  //     console.log("*******GROUP MEMBER FIRST NAME******: ", members);
+  //   }
+
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
-    async function fetchData() {
-      // await addTestUsersToGroup();
-      const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
-      setTestGroupMembers(members);
-      console.log("*******GROUP MEMBER FIRST NAME******: ", members)
+    async function fetchGroupMembers() {
+      const members = await getGroupMembers(groupId);
+      const promises = members.map((member) =>
+        getCurrentUserProfilePicture(member.uid)
+      );
+      const pfpUrls = await Promise.all(promises);
+      console.log("PFP URLS:", pfpUrls);
+      const membersWithPfp = members.map((member, index) => ({
+        ...member,
+        pfpUrl: pfpUrls[index],
+      }));
+      console.log(membersWithPfp);
+      console;
+      setGroupMembers(membersWithPfp);
     }
-    fetchData();
+    fetchGroupMembers();
   }, []);
 
   const handleShare = async () => {
@@ -58,6 +103,30 @@ export default function Groups() {
       console.error("Error sharing link: ", error);
     }
   };
+  const handleSubmitButtonPress = () => {
+    console.log("ANSWER:", inputValue);
+    const tempAnswers = [...answers];
+    tempAnswers[currentQuestionIndex] = {
+      questionIndex: currentQuestionIndex,
+      answer: inputValue,
+    };
+
+    if (currentQuestionIndex < QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setShowShareModal(true);
+
+      // Log the temporary answers array after the last question has been answered
+      console.log("Final answers:", tempAnswers);
+    }
+
+    setAnswers(tempAnswers);
+    setInputValue(""); // Reset the input value for the next question
+  };
+
+  function answerFieldChangeHandler(text) {
+    setInputValue(text);
+  }
 
   const handleEditGroupName = () => {
     setIsEditingGroupName(!isEditingGroupName);
@@ -84,156 +153,227 @@ export default function Groups() {
       console.error("Error updating group name:", error);
     }
   };
-  
+  const closeModal = () => {
+    setShowShareModal(false);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
       <ScrollView>
         <Background additionalStyle={styles.container}>
-          <View style={styles.groupNameContainer}>
-            {isEditingGroupName ? (
-              <TextInput
-                style={styles.groupName}
-                value={groupName}
-                onChangeText={(text) => setGroupName(text)}
-                onSubmitEditing={() => {
-                  groupNameUpdate(groupName);
-                  setIsEditingGroupName(false);
-                }}
-                onBlur={() => {
-                  groupNameUpdate(groupName);
-                  setIsEditingGroupName(false);
-                }}
-                autoFocus={true}
-              />
+          <View style={styles.itinerariesContainer}>
+            {!isNewGroup ? (
+              <>
+                {isEditingGroupName ? (
+                  <View style={styles.groupNameContainer}>
+                    <TextInput
+                      style={styles.groupName}
+                      value={groupName}
+                      onChangeText={(text) => setGroupName(text)}
+                      onSubmitEditing={() => {
+                        groupNameUpdate(groupName);
+                        setIsEditingGroupName(false);
+                      }}
+                      onBlur={() => {
+                        groupNameUpdate(groupName);
+                        setIsEditingGroupName(false);
+                      }}
+                      autoFocus={true}
+                    />
+                  </View>
+                ) : (
+                  <View style={styles.groupNameContainer}>
+                    <Text
+                      style={styles.groupName}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {groupName}
+                    </Text>
+                    <TouchableOpacity onPress={handleEditGroupName}>
+                      <Ionicons
+                        name="pencil-outline"
+                        size={30}
+                        color={"white"}
+                      ></Ionicons>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <Card additionalStyles={styles.groupMembersCard}>
+                  <View style={styles.groupMembersRow}>
+                    {groupMembers.map((member, index) => (
+                      <View key={index} style={styles.groupMember}>
+                        <Image
+                          source={{ uri: member.pfpUrl }}
+                          style={styles.profilePhoto}
+                        />
+                        {/* <Text style={styles.groupMembersListText}>
+                          John Doe
+                        </Text> */}
+                      </View>
+                    ))}
+                    <View style={styles.addNewGroupMemberContainer}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowShareModal(true);
+                        }}
+                      >
+                        <Ionicons
+                          name="add"
+                          size={30}
+                          color={PRIMARY_COLOR}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Card>
+                <Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
+                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.itineraryText}>Itinerary</Text>
+                    <Ionicons
+                        name="arrow-forward-outline"
+                        size={30}
+                        color={PRIMARY_COLOR}
+                      ></Ionicons>
+                  </TouchableOpacity>
+                </Card>
+                <Card additionalStyles={styles.sectionsCard}>
+                  <View>
+                    <Text style={styles.sectionsTitle}>Flight</Text>
+                    <Text style={styles.sectionsText}>JFK - LGA 1:00PM</Text>
+                    <Text style={styles.sectionsText}>Terminal 1</Text>
+                    <Text style={styles.sectionsText}>etc...</Text>
+                  </View>
+                </Card>
+                <Card additionalStyles={styles.sectionsCard}>
+                  <View>
+                    <Text style={styles.sectionsTitle}>Hotel</Text>
+                    <Text style={styles.sectionsText}>Whatever Hotel</Text>
+                    <Text style={styles.sectionsText}>Rm.212</Text>
+                    <Text style={styles.sectionsText}>Check in</Text>
+                    <Text style={styles.sectionsText}>Check out</Text>
+                  </View>
+                </Card>
+                <Card additionalStyles={styles.sectionsCard}></Card>
+                <Card additionalStyles={styles.sectionsCard}></Card>
+                <Card additionalStyles={styles.sectionsCard}></Card>
+              </>
             ) : (
-              <Text
-                style={styles.groupName}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
-                {isNewGroup ? "Group Name" : groupName}
-              </Text>
+              <View style={styles.newGroupContainer}>
+                <Text style={styles.itinerarySurveyText}>Itinerary Survey</Text>
+                <Logo additionalStyle={styles.logo} height={120} width={120} />
+                <Card additionalStyles={styles.surveyCard}>
+                  <Text style={[styles.textStyle, styles.surveyQuestion]}>
+                    {QUESTIONS[currentQuestionIndex].text}
+                  </Text>
+                  <AuthInput
+                    textInputBackgroundColor="white"
+                    value={inputValue}
+                    onChangeText={answerFieldChangeHandler}
+                    disableCustomBehavior={true} // Add this prop here
+                  />
+
+                  <View style={styles.submitBtnContainer}>
+                    <Button
+                      containerStyle={styles.submitBtn}
+                      title={
+                        currentQuestionIndex === QUESTIONS.length - 1
+                          ? "Submit"
+                          : "Next"
+                      }
+                      textColor={PRIMARY_COLOR}
+                      iconSize={40}
+                      buttonText={PRIMARY_COLOR}
+                      onPress={handleSubmitButtonPress}
+                    />
+                  </View>
+                </Card>
+              </View>
             )}
-            <TouchableOpacity onPress={handleEditGroupName}>
-              <Ionicons name="pencil-outline" size={28} color="white" />
-            </TouchableOpacity>
           </View>
-          <Card additionalStyles={styles.groupMembersCard}>
-            <Text style={styles.groupMembersText}>Group Members</Text>
-            <View style={styles.groupMembersList}>
-              {testGroupMembers.map((member, index) => (
-                <Text style={styles.groupMembersListText} key={index}>
-                  {member.firstName}
-                  {console.log("*******GROUP MEMBER FIRST NAME******: ", member.firstName)}
-                </Text>
-              ))}
-            </View>
-          </Card>
 
-          <TouchableOpacity
-            style={styles.openModalButton}
-            onPress={() => {
-              setShowShareModal(true);
-            }}
-          >
-            <Text style={styles.openModalButtonText}>Open Modal</Text>
-          </TouchableOpacity>
-
-          {isNewGroup ? (
-            <Card additionalStyles={styles.newTripButtonCard}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsNewGroup(false);
-                  setGroupName("Group Name");
-                }}
-              >
-                <View style={styles.newTripButton}>
-                  <Ionicons name="add" size={36} color={PRIMARY_COLOR} />
-                  <Text style={styles.newTripButtonText}>New Trip</Text>
-                </View>
-              </TouchableOpacity>
-            </Card>
-          ) : (
-            <Card additionalStyles={styles.cardContainer}>
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Age Group</Text>
-              </View>
-              <AuthInput />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Date Of Travel</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Number of people</Text>
-              </View>
-              <AuthInput />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Destination</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-              <View style={styles.textContainer}>
-                <Text style={styles.textStyle}>Budget</Text>
-              </View>
-
-              <AuthInput textInputBackgroundColor="white" />
-
-              <Button
-                containerStyle={styles.submitBtnContainer}
-                iconName={"arrow-forward-outline"}
-                iconSize={40}
-                iconColor={PRIMARY_COLOR}
-                onPress={handleSubmitButtonPress}
-                disabled={!isFormValid}
-                disabledStyle={styles.disabledButton}
-              />
-            </Card>
-          )}
+          {/* // *** THIS WILL BE ADDED TO THE GROUP MEMBERS CARD *** */}
         </Background>
       </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
         visible={showShareModal}
-        onRequestClose={() => {
-          setShowShareModal(false);
-        }}
+        onRequestClose={closeModal}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.linkInputContainer}>
-              <TextInput
-                style={styles.linkInput}
-                value={`exp://exp.host/@tahir13/miotgc/group/${groupId}`}
-                editable={false}
-              />
-              <TouchableOpacity
-                style={styles.copyButtonInInput}
-                // onPress={copyToClipboard}
-              >
-                <Text style={styles.copyButtonTextInInput}>Copy</Text>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              style={styles.copyButton}
-              onPress={() => {
-                handleShare();
-              }}
-            >
-              <Text style={styles.copyButtonText}>Copy & Share</Text>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={closeModal}
+        >
+          <View style={styles.centeredView}>
+            <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+              <View style={styles.modalView}>
+                <View style={styles.linkInputContainer}>
+                  <TextInput
+                    style={styles.linkInput}
+                    value={`exp://exp.host/@tahir13/miotgc/group/${groupId}`}
+                    editable={false}
+                  />
+                  <TouchableOpacity
+                    style={styles.copyButtonInInput}
+                    // onPress={copyToClipboard}
+                  >
+                    <Text style={styles.copyButtonTextInInput}>Copy</Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={styles.copyButton}
+                  onPress={() => {
+                    handleShare();
+                  }}
+                >
+                  <Text style={styles.copyButtonText}>Copy & Share</Text>
+                </TouchableOpacity>
+              </View>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = {
-  safe: {
+  sectionsText: {
+    color: PRIMARY_COLOR,
+  },
+  itineraryTextContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itineraryText: {
+    fontSize: 30,
+    marginRight: "5%",
+    color: PRIMARY_COLOR,
+  },
+  sectionsTitle: {
+    color: PRIMARY_COLOR,
+    fontSize: 40,
+    textDecorationLine: "underline",
+    marginBottom: "5%",
+  },
+  sectionsCard: {
+    marginVertical: "10%",
+    height: "auto",
+    width: "90%",
+  },
+  modalOverlay: {
     flex: 1,
-    backgroundColor: '#FF5553',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  newGroupContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
   tripLengthPadding: {
     marginLeft: 10,
@@ -243,14 +383,15 @@ const styles = {
     color: "white",
   },
 
+  surveyCard: {
+    width: "90%",
+  },
   textContainer: {
     alignSelf: "stretch",
   },
   textStyle: {
     color: PRIMARY_COLOR,
     textAlign: "left",
-    marginBottom: 20,
-    fontSize: 24,
   },
   itinerariesPadding: {
     marginLeft: 10,
@@ -273,19 +414,13 @@ const styles = {
 
   submitBtnContainer: {
     height: 50,
-    width: "35%",
     top: 10,
     backgroundColor: "#fff",
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    width: "100%",
     marginBottom: "10%",
-  },
-  groupNameContainer: {
-    marginTop: "10%",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    flexDirection: "row", // Add this line
   },
 
   newTripButtonText: {
@@ -299,6 +434,8 @@ const styles = {
     fontWeight: "bold",
     marginRight: "5%",
     flexShrink: 1,
+    marginBottom: "10%",
+    marginTop: "10%",
   },
   header: {
     backgroundColor: "#f2f2f2",
@@ -372,6 +509,11 @@ const styles = {
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    width: "90%",
+  },
+  surveyQuestion: {
+    marginBottom: "15%",
+    fontSize: 32,
   },
   linkInput: {
     borderWidth: 1,
@@ -398,6 +540,11 @@ const styles = {
     padding: 10,
     paddingHorizontal: 20,
     marginTop: 20,
+  },
+  itinerarySurveyText: {
+    color: "white",
+    fontSize: 45,
+    fontWeight: "bold",
   },
   shareButtonText: {
     color: "white",
@@ -429,15 +576,65 @@ const styles = {
   },
 
   groupMembersCard: {
-    width: 300,
-    height: 200,
+    width: "90%",
+    height: "10%",
   },
   groupMembersText: {
     fontSize: 20,
-    color: PRIMARY_COLOR
+    color: PRIMARY_COLOR,
   },
-  groupMembersListText:{
+  groupMembersListText: {
     fontSize: 16,
-    color: PRIMARY_COLOR
-  }
+    color: PRIMARY_COLOR,
+  },
+  itinerariesContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  profilePhoto: {
+    width: 60,
+    height: 60,
+    borderRadius: 100,
+    borderWidth: 4,
+    borderColor: "white",
+    marginBottom: 10,
+    alignSelf: "center",
+  },
+
+  groupMembersRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "start",
+  },
+  groupMember: {
+    alignItems: "center",
+    margin: 5,
+  },
+
+  groupMembersListText: {
+    marginTop: 5,
+    fontSize: 16,
+  },
+  addNewGroupMemberContainer: {
+    width: 55,
+    height: 55,
+    borderRadius: 30,
+    backgroundColor: "white",
+    margin: 5,
+    marginBottom: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  icon: {
+    padding: 0,
+    marginLeft: 2, // Adjust this value based on your requirements
+  },
+  groupNameContainer: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    flexDirection: "row", // Add this line
+  },
 };
