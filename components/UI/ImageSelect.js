@@ -15,7 +15,6 @@ import {
   updateUser,
   uploadImage,
 } from "../../firebase";
-import User from "../../models/User";
 
 //import to show social icons
 
