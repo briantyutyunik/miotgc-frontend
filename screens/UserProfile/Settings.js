@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { PRIMARY_COLOR } from '../../constants/styles';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Switch } from 'react-native';
+import { PRIMARY_COLOR, SECONDARY_COLOR, TEXT_COLOR } from '../../constants/styles';
 import Background from '../../components/UI/Background';
 import CustomPicker from '../../components/UI/CustomPicker';
+import CardDarker from "../../components/UI/CardDarker";
+import Card from '../../components/UI/CardDarker';
 
 const languages = [
   { label: 'English', value: 'en' },
@@ -22,125 +24,99 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(false);
 
   return (
-    <Background>
-      <View style={styles.settingsScreenContainer}>
-        <Text style={styles.heading}>Settings</Text>
+    <SafeAreaView style={styles.safe}>
+      <Background>
+        <View style={styles.settingsScreenContainer}>
+          <Text style={styles.heading}>Settings</Text>
+          <CardDarker>
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Language</Text>
+            <CustomPicker
+              selectedValue={language}
+              onValueChange={setLanguage}
+              items={languages}
+              style={styles.picker}
+            />
+          </View>
 
-        <Text style={styles.label}>Language</Text>
-        <CustomPicker
-          selectedValue={language}
-          onValueChange={setLanguage}
-          items={languages}
-          style={styles.picker}
-        />
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Currency</Text>
+            <CustomPicker
+              selectedValue={currency}
+              onValueChange={setCurrency}
+              items={currencies}
+              style={styles.picker}
+            />
+          </View>
 
-        <Text style={styles.label}>Currency</Text>
-        <CustomPicker
-          selectedValue={currency}
-          onValueChange={setCurrency}
-          items={currencies}
-          style={styles.picker}
-        />
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Dark Mode</Text>
+            <Switch
+              value={darkMode}
+              onValueChange={setDarkMode}
+              style={styles.switch}
+            />
+          </View>
+          </CardDarker>
+          
 
-        <View style={styles.darkModeContainer}>
-          <Text style={styles.label}>Dark Mode</Text>
-          <TouchableOpacity
-            style={[styles.darkModeSwitch, darkMode ? styles.darkModeOn : styles.darkModeOff]}
-            onPress={() => setDarkMode(!darkMode)}
-          />
+          <TouchableOpacity style={styles.logoutButton}>
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
-      </View>
-    </Background>
+      </Background>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  settingsTitle: {},
-  settingsText: {
-    fontWeight: "bold",
-    fontSize: 24,
-  },
-  container: {
+  safe: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#FF5553",
-    width: "100%",
+    backgroundColor: PRIMARY_COLOR,
   },
-  settingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  touchableContainer: {
+  settingsScreenContainer: {
     flex: 1,
-    justifyContent: 'center',
+    paddingVertical: 30,
     paddingHorizontal: 20,
+    backgroundColor: PRIMARY_COLOR,
+    width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   heading: {
-    color: 'white',
+    color: "white",
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 30,
   },
-  label: {
-    color: 'white',
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  picker: {
-    marginBottom: 30,
-  },
-  darkModeContainer: {
+  rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 30,
   },
-  darkModeSwitch: {
-    width: 40,
-    height: 20,
-    borderRadius: 10,
-    marginLeft: 10,
+  label: {
+    color: "black",
+    padding: "2.5%",
+    fontSize: 18,
   },
-  darkModeOn: {
-    backgroundColor: 'black',
+  picker: {
+    width: '80%',
+    backgroundColor: 'rgba(0, 0, 0, 0.425)',
   },
-  darkModeOff: {
-    backgroundColor: 'white',
+  switch: {
+    width: '30%',
   },
   logoutButton: {
-    backgroundColor: 'red',
-    paddingVertical: 10,
+    backgroundColor: "white",
+    paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 5,
     alignSelf: 'center',
+    marginTop: 30,
   },
   logoutText: {
-    color: 'white',
+    color: "black",
     fontSize: 16,
-  signOut: {
-    color: "white",
-    fontSize: 26,
-    paddingLeft: 50,
-    paddingRight: 50,
-    textAlign: "center",
-    paddingTop: 4,
-    textAlignVertical: "center",
-  },
-  signOutButton: {
-    borderColor: "white",
-    backgroundColor: "#ff6966",
-    borderWidth: 2,
-    borderRadius: 50,
-    width: "50%",
-    height: "5%",
-    marginBottom: 75,
   },
 });
-
-export default Settings;

@@ -14,6 +14,7 @@ import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 import Settings from "./screens/UserProfile/Settings";
 import TestScreen from "./screens/UserProfile/TestScreen.js";
+import EditProfile from "./screens/UserProfile/EditProfile.js"
 import { PRIMARY_COLOR } from "./constants/styles"
 
 
@@ -109,6 +110,7 @@ export default function App() {
         <Stack.Screen name="Group" component={Group} />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Test" component={TestScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
       </Stack.Navigator>
     );
   }

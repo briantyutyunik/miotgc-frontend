@@ -1,6 +1,5 @@
 import { onSnapshot } from "firebase/firestore";
-import React, { useEffect, useState, useRef, useRef } from "react";
-import Card from "../../components/UI/Card";
+import React, { useEffect, useState, useRef } from "react";
 import CardDarker from "../../components/UI/CardDarker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -26,7 +25,6 @@ import {
   createGroup,
   listenGroupNames,
   getCurrentUserProfilePicture,
-
 } from "../../firebase";
 import Background from "../../components/UI/Background";
 import { Skeleton } from "@rneui/themed";
@@ -35,7 +33,6 @@ import { PRIMARY_COLOR } from "../../constants/styles";
 import { testGPT } from "../../util/api/openaiApi";
 
 const menuStyles = StyleSheet.create({
-  // Other styles...
   menuContainer: {
     flex: 1,
     backgroundColor: "#fff",
@@ -50,10 +47,7 @@ const menuStyles = StyleSheet.create({
 
 export default function UserProfileScreen() {
   const shakeAnimation = useRef(new Animated.Value(0)).current;
-
-  const navigation = useNavigation();
   const [showDeleteIcon, setShowDeleteIcon] = useState(false);
-
   const [image, setImage] = useState();
   const [openImageSelect, setOpenImageSelect] = useState(false);
   const [groups, setGroups] = useState([]);
@@ -164,8 +158,10 @@ export default function UserProfileScreen() {
 
   const EditProfileButton = ({ onPress }) => {
     return (
-      <TouchableOpacity onPress={onPress} style={styles.button}>
-        <Text style={styles.text}>Edit</Text>
+      <TouchableOpacity 
+        onPress={() =>
+            navigation.navigate("EditProfile")} style={styles.button}>
+        <Icon name="pencil" size={20} color="black" />
       </TouchableOpacity>
     );
   };
@@ -411,7 +407,7 @@ const styles = StyleSheet.create({
     right: "5%",
   },
   profilePictureContainer: {
-    paddingBottom: "5%",
+    paddingBottom: "15%",
     flex: 1,
     height: "50%",
   },
