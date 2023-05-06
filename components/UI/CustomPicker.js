@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
+import { PRIMARY_COLOR } from '../../constants/styles';
 
 const CustomPicker = ({ selectedValue, onValueChange, items, style }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
     marginLeft: "10%"
   },
   selectedValue: {
-    color: 'white',
+    color: PRIMARY_COLOR,
     fontSize: 16,
   },
   modalOverlay: {

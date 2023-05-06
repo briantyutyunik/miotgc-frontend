@@ -5,7 +5,6 @@ import Background from '../../components/UI/Background';
 import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLOR } from '../../constants/styles.js';
 import CardDarker from "../../components/UI/CardDarker";
-import Card from '../../components/UI/CardDarker';
 
 const EditProfile = () => {  
     const navigation = useNavigation();
