@@ -6,7 +6,7 @@ export default {
   expo: {
     // ...your other configurations
     extra: {
-      openaiApiKey: "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",
+      openaiApiKey: "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",
     },
   },
 };
