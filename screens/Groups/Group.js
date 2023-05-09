@@ -18,8 +18,8 @@ import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
-import { QUESTIONS } from "./questions";
-
+import { testGPT } from "../../util/api/openaiApi";
+import Itinerary from "./Itinerary";
 import {
   firestore,
   updateGroupName,
@@ -29,7 +29,35 @@ import {
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Logo from "../../components/UI/Logo";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+
 export default function Group() {
+  const QUESTIONS = [
+    {
+      field: "groupCount",
+      question: "Question 1?",
+      text: "What's the size of your group?",
+    },
+    {
+      field: "ageGroup",
+      question: "Question 2?",
+      text: "What's the age group of your group?",
+    },
+    {
+      field: "destination",
+      question: "Question 3?",
+      text: "What's your destination?",
+    },
+    { field: "dates", question: "Question 4?", text: "What are your dates?" },
+    { field: "budget", question: "Question 5?", text: "What's your budget?" },
+    {
+      field: "departureAirport",
+      question: "Question 6?",
+      text: "What's your departure airport?",
+    },
+  ];
+  const navigation = useNavigation();
+
   const route = useRoute();
   // const initialGroupName = route.params.groupName;
   const initialGroupName = "Group Name";
@@ -41,15 +69,21 @@ export default function Group() {
   const [groupName, setGroupName] = useState("Group Name");
   const groupId = route.params.groupId;
   const [groupMembers, setGroupMembers] = useState([]);
+  const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
 
   const [showShareModal, setShowShareModal] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [answers, setAnswers] = useState(
-    QUESTIONS.map((_, index) => ({ questionIndex: index, answer: "" }))
+    QUESTIONS.map((question) => ({
+      [question.field]: "",
+      questionIndex: question.question,
+    }))
   );
+
   const [testGroupMembers, setTestGroupMembers] = useState([]);
   console.log("***CURRNET GROUP ID***", groupId);
+
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
   //   Clipboard.setString(`exp://exp.host/@tahir13/miotgc/group/${groupId}`);
@@ -107,17 +141,21 @@ export default function Group() {
     console.log("ANSWER:", inputValue);
     const tempAnswers = [...answers];
     tempAnswers[currentQuestionIndex] = {
-      questionIndex: currentQuestionIndex,
-      answer: inputValue,
+      ...tempAnswers[currentQuestionIndex],
+      [QUESTIONS[currentQuestionIndex].field]: inputValue,
     };
 
     if (currentQuestionIndex < QUESTIONS.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setShowShareModal(true);
-
-      // Log the temporary answers array after the last question has been answered
-      console.log("Final answers:", tempAnswers);
+      // add loading spinner here
+      console.log("Submitting answers...");
+      console.log(answers);
+      testGPT(answers).then((aiGeneratedResponse) => {
+        setAiGeneratedResponse(aiGeneratedResponse);
+        setIsNewGroup(false);
+        console.log(aiGeneratedResponse);
+      });
     }
 
     setAnswers(tempAnswers);
@@ -228,31 +266,71 @@ export default function Group() {
                     </View>
                   </View>
                 </Card>
-                <Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
-                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Card
+                  additionalStyles={[
+                    styles.sectionsCard,
+                    styles.itineraryTextContainer,
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                    onPress={() => {
+                      navigation.navigate("Itinerary", { aiGeneratedResponse: aiGeneratedResponse });
+
+                    }}
+                  >
                     <Text style={styles.itineraryText}>Itinerary</Text>
                     <Ionicons
-                        name="arrow-forward-outline"
-                        size={30}
-                        color={PRIMARY_COLOR}
-                      ></Ionicons>
+                      name="arrow-forward-outline"
+                      size={30}
+                      color={PRIMARY_COLOR}
+                    ></Ionicons>
                   </TouchableOpacity>
                 </Card>
                 <Card additionalStyles={styles.sectionsCard}>
                   <View>
                     <Text style={styles.sectionsTitle}>Flight</Text>
-                    <Text style={styles.sectionsText}>JFK - LGA 1:00PM</Text>
-                    <Text style={styles.sectionsText}>Terminal 1</Text>
-                    <Text style={styles.sectionsText}>etc...</Text>
+                    <Text style={styles.sectionsText}>
+                      {aiGeneratedResponse.FlightInformation.DepartureAirport} -
+                      {aiGeneratedResponse.FlightInformation.ArrivalAirport}
+                      {aiGeneratedResponse.FlightInformation.DepartureTime}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Flight Number:{" "}
+                      {aiGeneratedResponse.FlightInformation.FlightNumber}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Departure Date:{" "}
+                      {aiGeneratedResponse.FlightInformation.DepartureDate}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Arrival Time:{" "}
+                      {aiGeneratedResponse.FlightInformation.ArrivalTime}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Return Date:{" "}
+                      {aiGeneratedResponse.FlightInformation.ReturnDate}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Airline: {aiGeneratedResponse.FlightInformation.Airline}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Price: {aiGeneratedResponse.FlightInformation.Price}
+                    </Text>
                   </View>
                 </Card>
                 <Card additionalStyles={styles.sectionsCard}>
                   <View>
                     <Text style={styles.sectionsTitle}>Hotel</Text>
-                    <Text style={styles.sectionsText}>Whatever Hotel</Text>
-                    <Text style={styles.sectionsText}>Rm.212</Text>
-                    <Text style={styles.sectionsText}>Check in</Text>
-                    <Text style={styles.sectionsText}>Check out</Text>
+                    <Text style={styles.sectionsText}>
+                      {aiGeneratedResponse.Accommodation.Name}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Address: {aiGeneratedResponse.Accommodation.Address}
+                    </Text>
+                    <Text style={styles.sectionsText}>
+                      Price: {aiGeneratedResponse.Accommodation.Price}
+                    </Text>
                   </View>
                 </Card>
                 <Card additionalStyles={styles.sectionsCard}></Card>

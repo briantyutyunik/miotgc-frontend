@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { auth } from "./firebase";
 import { View } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 // import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
@@ -14,13 +14,14 @@ import SignUpScreen from "./screens/Authentication/Sign Up/SignUpScreen";
 import UserProfileScreen from "./screens/UserProfile/UserProfileScreen";
 import Settings from "./screens/UserProfile/Settings";
 import TestScreen from "./screens/UserProfile/TestScreen.js";
-import { PRIMARY_COLOR } from "./constants/styles"
-
+import Itinerary  from "./screens/Groups/Itinerary";
+import { PRIMARY_COLOR } from "./constants/styles";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator(); // Create the Tab variable
 
-  {/*export default function App() {
+{
+  /*export default function App() {
     const [user, setUser] = useState(null);
     useEffect(() => {
       const unsubscribe = auth.getAuth().onAuthStateChanged((user) => {
@@ -33,7 +34,8 @@ const Tab = createBottomTabNavigator(); // Create the Tab variable
       });
       // Unsubscribe from the listener when the component unmounts
       return () => unsubscribe();
-    }, []);*/}
+    }, []);*/
+}
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -58,7 +60,7 @@ export default function App() {
       </Stack.Navigator>
     );
   }
-  
+
   //https://www.youtube.com/watch?v=gPaBicMaib4
 
   function TabNavigator() {
@@ -67,32 +69,37 @@ export default function App() {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: {
-          height: 85,
-          paddingHorizontal: 5,
-          paddingTop: 0,
-          backgroundColor: PRIMARY_COLOR,
-          position: 'absolute',
-          borderTopWidth: 0,
-        },
+            height: 85,
+            paddingHorizontal: 5,
+            paddingTop: 0,
+            backgroundColor: PRIMARY_COLOR,
+            position: "absolute",
+            borderTopWidth: 0,
+          },
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
-    
-            if (route.name === 'UserProfile') {
-              iconName = focused ? 'person' : 'person-outline';
-            } else if (route.name === 'Today') {
-              iconName = focused ? 'document-text' : 'document-text-outline';
-            } else if (route.name === 'Settings') {
-              iconName = focused ? 'settings' : 'settings-outline';
+
+            if (route.name === "UserProfile") {
+              iconName = focused ? "person" : "person-outline";
+            } else if (route.name === "Today") {
+              iconName = focused ? "document-text" : "document-text-outline";
+            } else if (route.name === "Settings") {
+              iconName = focused ? "settings" : "settings-outline";
             }
-    
+
             return <Ionicons name={iconName} size={size} color={color} />;
           },
         })}
         tabBarOptions={{
-          activeTintColor: 'white',
-          inactiveTintColor: 'black',
-          labelStyle: { fontSize: 14, fontWeight: 'bold' },
-          style: { elevation: 5, shadowColor: '#000', borderTopColor: 'transparent', backgroundColor: 'transparent' },
+          activeTintColor: "white",
+          inactiveTintColor: "black",
+          labelStyle: { fontSize: 14, fontWeight: "bold" },
+          style: {
+            elevation: 5,
+            shadowColor: "#000",
+            borderTopColor: "transparent",
+            backgroundColor: "transparent",
+          },
         }}
       >
         <Tab.Screen name="UserProfile" component={UserProfileScreen} />
@@ -109,6 +116,7 @@ export default function App() {
         <Stack.Screen name="Group" component={Group} />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Test" component={TestScreen} />
+        <Stack.Screen name="Itinerary" component={Itinerary} />
       </Stack.Navigator>
     );
   }
