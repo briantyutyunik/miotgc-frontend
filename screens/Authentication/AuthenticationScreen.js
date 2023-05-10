@@ -11,6 +11,7 @@ import Button from "../../components/UI/Button";
 import { auth, userSignIn } from "Color../../../firebase";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Line from "../../components/UI/Line";
+import { testGPT } from "../../util/api/openaiApi";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -94,7 +95,13 @@ export default function AuthenticationScreen() {
       <Logo additionalStyle={styles.logo} height={120} width={120} />
       <Slogan />
       <View style={styles.authButtonsContainer}>
-      
+      <Button
+          containerStyle={styles.buttonContainer}
+          title={"GPT"}
+          onPress={() => {
+            testGPT();
+          }}
+        />
         <Button
           containerStyle={styles.buttonContainer}
           title={"Sign in with Google"}
