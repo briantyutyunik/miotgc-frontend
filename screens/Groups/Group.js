@@ -10,16 +10,15 @@ import {
   Modal,
   Image,
 } from "react-native";
-import Accordion from "react-native-collapsible/Accordion";
+import Icon from "react-native-vector-icons/FontAwesome";
 import Background from "../../components/UI/Background";
-import Card from "../../components/UI/Card";
+import Card from "../../components/UI/CardDarker";
 import { listenGroupName, getCurrentUserProfilePicture } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
 import { QUESTIONS } from "./questions";
-
 import {
   firestore,
   updateGroupName,
@@ -29,6 +28,8 @@ import {
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Logo from "../../components/UI/Logo";
+
+
 export default function Group() {
   const route = useRoute();
   // const initialGroupName = route.params.groupName;
@@ -49,7 +50,7 @@ export default function Group() {
     QUESTIONS.map((_, index) => ({ questionIndex: index, answer: "" }))
   );
   const [testGroupMembers, setTestGroupMembers] = useState([]);
-  console.log("***CURRNET GROUP ID***", groupId);
+  console.log("***CURRENT GROUP ID***", groupId);
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
   //   Clipboard.setString(`exp://exp.host/@tahir13/miotgc/group/${groupId}`);
@@ -86,6 +87,7 @@ export default function Group() {
     fetchGroupMembers();
   }, []);
 
+
   const handleShare = async () => {
     // exp://exp.host/@yourusername/your-app-slug/some-path
     // exp://exp.host/@tahir13/miotgc/group/{groupId}
@@ -93,7 +95,6 @@ export default function Group() {
       const result = await Share.share({
         message: `Your invite link: exp://exp.host/@tahir13/miotgc/group/${groupId}`,
       });
-
       if (result.action === Share.sharedAction) {
         console.log("Link shared successfully");
       } else {
@@ -102,7 +103,9 @@ export default function Group() {
     } catch (error) {
       console.error("Error sharing link: ", error);
     }
-  };
+};
+
+
   const handleSubmitButtonPress = () => {
     console.log("ANSWER:", inputValue);
     const tempAnswers = [...answers];
@@ -110,41 +113,39 @@ export default function Group() {
       questionIndex: currentQuestionIndex,
       answer: inputValue,
     };
-
     if (currentQuestionIndex < QUESTIONS.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setShowShareModal(true);
-
       // Log the temporary answers array after the last question has been answered
       console.log("Final answers:", tempAnswers);
     }
-
     setAnswers(tempAnswers);
     setInputValue(""); // Reset the input value for the next question
   };
 
+
   function answerFieldChangeHandler(text) {
     setInputValue(text);
   }
+
 
   const handleEditGroupName = () => {
     setIsEditingGroupName(!isEditingGroupName);
     setIsNewGroup(false);
   };
 
+
   const groupNameUpdate = async (newGroupName) => {
     if (newGroupName === initialGroupName) {
       return;
     }
-
     console.log(
       "Updating group name with groupId:",
       groupId,
       "and newGroupName:",
       newGroupName
     ); // Add this line
-
     try {
       await updateGroupName(groupId, newGroupName);
       console.log("Group name updated successfully");
@@ -153,14 +154,26 @@ export default function Group() {
       console.error("Error updating group name:", error);
     }
   };
+
+
   const closeModal = () => {
     setShowShareModal(false);
   };
+
+  const DESTINATION_IMAGE = require("../../assets/images/paris_night.jpg"); // replace with your destination image 
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
       <ScrollView>
         <Background additionalStyle={styles.container}>
+          <View style = {styles.destinationImgContainer}>
+            <Image
+            source={DESTINATION_IMAGE}
+            style={[
+              styles.destinationsImg,
+            ]}
+            />       
+          </View>
           <View style={styles.itinerariesContainer}>
             {!isNewGroup ? (
               <>
@@ -191,14 +204,11 @@ export default function Group() {
                       {groupName}
                     </Text>
                     <TouchableOpacity onPress={handleEditGroupName}>
-                      <Ionicons
-                        name="pencil-outline"
-                        size={30}
-                        color={"white"}
-                      ></Ionicons>
+                    <Icon name="pencil" size={35} color="white" />
                     </TouchableOpacity>
                   </View>
                 )}
+
                 <Card additionalStyles={styles.groupMembersCard}>
                   <View style={styles.groupMembersRow}>
                     {groupMembers.map((member, index) => (
@@ -228,24 +238,27 @@ export default function Group() {
                     </View>
                   </View>
                 </Card>
+
                 <Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
                 <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={styles.itineraryText}>Itinerary</Text>
                     <Ionicons
                         name="arrow-forward-outline"
                         size={30}
-                        color={PRIMARY_COLOR}
+                        color={'black'}
                       ></Ionicons>
                   </TouchableOpacity>
                 </Card>
+
                 <Card additionalStyles={styles.sectionsCard}>
                   <View>
                     <Text style={styles.sectionsTitle}>Flight</Text>
-                    <Text style={styles.sectionsText}>JFK - LGA 1:00PM</Text>
+                    <Text style={styles.sectionsText}><Text style={styles.sectionsTextAlt}>Airport: </Text>JFK - LGA 1:00PM</Text>
                     <Text style={styles.sectionsText}>Terminal 1</Text>
                     <Text style={styles.sectionsText}>etc...</Text>
                   </View>
                 </Card>
+
                 <Card additionalStyles={styles.sectionsCard}>
                   <View>
                     <Text style={styles.sectionsTitle}>Hotel</Text>
@@ -255,6 +268,7 @@ export default function Group() {
                     <Text style={styles.sectionsText}>Check out</Text>
                   </View>
                 </Card>
+
                 <Card additionalStyles={styles.sectionsCard}></Card>
                 <Card additionalStyles={styles.sectionsCard}></Card>
                 <Card additionalStyles={styles.sectionsCard}></Card>
@@ -341,8 +355,21 @@ export default function Group() {
 }
 
 const styles = {
+  destinationsImg: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: .9,
+  },
+  destinationImgContainer: {
+    shadowColor: 'green',
+    shadowOffset: 3,
+  },
   sectionsText: {
-    color: PRIMARY_COLOR,
+    color: 'black',
+  },
+  sectionsTextAlt: {
+    color: 'black',
+    fontWeight: 600,
   },
   itineraryTextContainer: {
     alignItems: "center",
@@ -351,12 +378,11 @@ const styles = {
   itineraryText: {
     fontSize: 30,
     marginRight: "5%",
-    color: PRIMARY_COLOR,
+    color: 'black',
   },
   sectionsTitle: {
-    color: PRIMARY_COLOR,
+    color: 'black',
     fontSize: 40,
-    textDecorationLine: "underline",
     marginBottom: "5%",
   },
   sectionsCard: {

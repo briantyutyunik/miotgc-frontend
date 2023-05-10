@@ -75,25 +75,35 @@ export default function Settings() {
               <Text style={styles.settingHeading}>Support</Text>
             </View>
             <Separator/>
+            
             <View style={styles.rowContainer}>
-              <Text style={styles.label}>Report a Bug</Text>
-            </View>
-            <Separator/>
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>Contact Us</Text>
+              <TouchableOpacity>
+                <Text style={styles.label}>Report a Bug</Text>
+              </TouchableOpacity>
             </View>
             <Separator/>
 
             <View style={styles.rowContainer}>
-              <Text style={styles.label}>Visit Our Help Center</Text>
+              <TouchableOpacity>
+                <Text style={styles.label}>Contact Us</Text>
+              </TouchableOpacity>
             </View>
             <Separator/>
+
             <View style={styles.rowContainer}>
-              <Text style={styles.label}>Terms of Service</Text>
+              <TouchableOpacity>
+                <Text style={styles.label}>Visit Our Help Center</Text>
+              </TouchableOpacity>
+            </View>
+            <Separator/>
+
+            <View style={styles.rowContainer}>
+              <TouchableOpacity>
+                <Text style={styles.label}>Terms of Service</Text>
+              </TouchableOpacity>
             </View>
             <Separator/>
           </CardDarker>
-          
 
           <TouchableOpacity style={styles.logoutButton}>
             <Text style={styles.logoutText}>Log Out</Text>
