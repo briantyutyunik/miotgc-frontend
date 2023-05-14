@@ -1,238 +1,252 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  KeyboardAvoidingView,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useContext, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, KeyboardAvoidingView, ActivityIndicator, View, Modal, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 
-import { PRIMARY_COLOR } from "../../../constants/styles";
-// import Button from "../../../components/UI/Button";
 import Background from "../../../components/UI/Background";
 import Logo from "../../../components/UI/Logo";
-import { ActivityIndicator } from "react-native";
-
-import { auth, userSignIn } from "Color../../../firebase";
-import { AuthContext } from "../../../store/auth-context";
-import { GOOGLE_ICON } from "../../../assets/icons/Logos";
-import Seperator from "../../../components/UI/Seperator";
-import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import Button from "../../../components/UI/Button";
+import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import Card from "../../../components/UI/Card";
-import Line from "../../../components/UI/Line";
-import ErrorOverlay from "../../../components/UI/ErrorOverlay";
-export default function SignInScreen() {
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const authCtx = useContext(AuthContext);
+import { PRIMARY_COLOR } from "../../../constants/styles";
+import { userSignIn } from "../../../firebase";
 
-  const [email, setEmail] = useState("");
+const SignInScreen = ({ navigation }) => {
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [isFormValid, setIsFormValid] = useState(false);
+	const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
 
-  const [isEmailValid, setIsEmailValid] = useState(false);
+	useEffect(() => {
+		setIsFormValid(email.length > 0 && password.length > 0);
+	}, [email, password]);
 
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+	const handleEmailChange = (text) => {
+		setEmail(text);
+	};
 
-  const [authError, setAuthError] = useState(false);
-  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
-  // loading spinner and error overlay states
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isError, setIsError] = useState(false);
+	const handlePasswordChange = (text) => {
+		setPassword(text);
+	};
 
-  const [emailErrorMessage, setEmailErrorMessage] = useState("");
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+	const handleSignInButtonPress = async () => {
+		setIsLoading(true);
+		setError("");
+		const { error } = await userSignIn(email, password);
+		setIsLoading(false);
+		setError("Incorrect email or password.");
 
-  function SignInDirections() {
-    const navigator = useNavigation();
+		if (error) {
+			setIsErrorModalVisible(true);
+		} else {
+			console.log("success");
+		}
+	};
+	const handleCloseErrorModal = () => {
+		setIsErrorModalVisible(false);
+	};
 
-    return (
-      <View style={styles.signInDirectionContainer}>
-        <Text style={styles.signInDirectionText}>Log in to Miotgc</Text>
-      </View>
-    );
-  }
+	return (
+		<Background additionalStyle={styles.container}>
+			<Logo additionalStyle={styles.logo} height={120} width={120} />
+			<KeyboardAvoidingView behavior="padding" style={styles.authInputContainer}>
+				<Card additionalStyles={styles.cardContainer}>
+					<Text style={styles.signInHeader}>Welcome Back!</Text>
 
-  function handleAuthenticationRequest() {
-    // use firebase function to sign in the user + handle error
+					{error !== "" && <Text style={styles.errorText}>{error}</Text>}
 
-    //commented out for testing
-    /*setLoading(true);
-    setError("");
-    const { isLoading, error } = await userSignIn(email, password);
-    setLoading(isLoading);*/
+					<AuthInput placeholder="email or username" inputType="email" secure={false} onChangeTextHandler={(text) => setEmail(text)} />
+					<AuthInput placeholder="password" inputType="password" secure={true} onChangeTextHandler={(text) => setPassword(text)} />
 
-    // setLoading(true);
-    setErrorMessage("Invalid email or password");
-    setIsError(true);
-    setLoading(false);
-  }
+					<View style={styles.signUpHereContainer}>
+						<Text style={styles.signUpHereText}>Not registered? Sign up </Text>
+						<Button
+							title="here"
+							onPress={() => navigation.navigate("SignUp")}
+							textStyle={{
+								color: PRIMARY_COLOR, // Custom text color
+								fontSize: 16, // Custom text size
+								textDecorationLine: "underline",
+								fontWeight: "normal",
+								shadowColor: "transparent",
+							}}
+							textColor={PRIMARY_COLOR}
+							containerStyle={styles.noShadowSignUpHereButton}
+						/>
+					</View>
+					{isLoading ? (
+						<ActivityIndicator size="large" color={PRIMARY_COLOR} />
+					) : (
+						<Button
+							containerStyle={styles.signInButtonContainer}
+							iconName={"arrow-forward-outline"}
+							iconSize={40}
+							iconColor={PRIMARY_COLOR}
+							onPress={handleSignInButtonPress}
+							disabled={!isFormValid}
+							disabledStyle={styles.disabledButton}
+						/>
+					)}
+				</Card>
+				<Modal visible={isErrorModalVisible} transparent={true} onRequestClose={handleCloseErrorModal} animationType="slide">
+					<TouchableWithoutFeedback onPress={handleCloseErrorModal}>
+						<View style={styles.modalContainer}>
+							<TouchableWithoutFeedback>
+								<Card additionalStyles={styles.modalContent}>
+									<Text style={styles.modalErrorMessage}>{error}</Text>
+									<TouchableOpacity style={styles.modalButtonContainer} activeOpacity={1} onPress={handleCloseErrorModal}>
+										<Text style={styles.errorModalExitButton}>Close</Text>
+									</TouchableOpacity>
+								</Card>
+							</TouchableWithoutFeedback>
+						</View>
+					</TouchableWithoutFeedback>
+				</Modal>
+			</KeyboardAvoidingView>
+		</Background>
+	);
+};
 
-  const handleSignInButtonPress = () => {
-    userSignIn(email, password);
-  };
-
-  function validateEmail(email) {
-    if (email === "") {
-      return true;
-    }
-  
-
-    const re = /\S+@\S+\.\S+/;
-    if (!re.test(email)) {
-      setIsEmailValid(false);
-      setEmailErrorMessage("Please enter a valid email address");
-    } else {
-      setIsEmailValid(true);
-      setEmailErrorMessage("");
-    }
-  }
-
-  function handleEmailChange(text) {
-    setEmail(text);
-    setIsEmailValid(validateEmail(text));
-  }
-
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleEmailBlur = () => {
-    if (isEmailValid === false) {
-      setEmailErrorMessage("Invalid email format");
-    }
-  };
-
-  return (
-    <Background additionalStyle={styles.container}>
-      <Logo additionalStyle={styles.logo} height={120} width={120} />
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.authInputContainer}
-      >
-        <Card additionalStyles={styles.cardContainer}>
-          <View style={styles.signInHeaderContainer}>
-            <Text style={styles.signInHeader}>Welcome Back!</Text>
-            <Line width={200} color={PRIMARY_COLOR} height={2} />
-          </View>
-
-          <AuthInput
-            placeholder="Email"
-            onChangeTextHandler={handleEmailChange}
-            inputType="email"
-            onBlurHandler={handleEmailBlur}
-            error={emailErrorMessage}
-          />
-          <AuthInput
-            placeholder="Password"
-            onChangeTextHandler={(text) => setPassword(text)}
-            inputType="password"
-            secure
-          />
-        </Card>
-      </KeyboardAvoidingView>
-      <Button
-        containerStyle={styles.signInButtonContainer}
-        iconName={"arrow-forward-outline"}
-        iconSize={40}
-        iconColor={PRIMARY_COLOR}
-        onPress={handleAuthenticationRequest}
-      />
-      {loading && <ActivityIndicator size="large" color={PRIMARY_COLOR} />}
-      {isError && (
-        <Modal
-          visible={true}
-          animationType="fade"
-          transparent={true}
-          onRequestClose={() => setIsError(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalErrorMessage}>{errorMessage}</Text>
-              <Button
-                containerStyle={styles.modalButtonContainer}
-                title="OK"
-                type="outline"
-                textStyle={styles.errorModalExitButton}
-                onPress={handleSignInButtonPress}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
-    </Background>
-  );
-}
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    // justifyContent: "flex-end",
-  },
-  logo: {
-    position: "absolute",
-    top: 50,
-  },
-  signInHeaderContainer: {
-    marginBottom: 40,
-  },
-  signInHeader: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: PRIMARY_COLOR,
-  },
-  authInputContainer: {
-    // marginBottom: "80%",
-    top: "30%",
-    width: "90%",
-  },
-  cardContainer: {
-    paddingVertical: "5%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signInButtonContainer: {
-    height: 50,
-    width: "35%",
-    top: "35%",
-    backgroundColor: "#fff",
-    borderRadius: 100,
-  },
+	container: {
+		alignItems: "center",
+		// justifyContent: "flex-end",
+	},
+	logo: {
+		position: "absolute",
+		top: 50,
+	},
+	signInHeaderContainer: {
+		marginBottom: 40,
+	},
+	signInHeader: {
+		fontSize: 28,
+		fontWeight: "bold",
+		marginBottom: 30,
+		color: PRIMARY_COLOR,
+	},
+	authInputContainer: {
+		// marginBottom: "80%",
+		top: "30%",
+		width: "90%",
+	},
+	disabledButton: {
+		opacity: 0.5,
+	},
+	cardContainer: {
+		paddingTop: 30,
+		paddingBottom: 0,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	errorText: {
+		color: "red",
+		marginBottom: 20,
+	},
+	enabledButton: {
+		opacity: 1,
+	},
+	disabledButton: {
+		opacity: 0.5,
+	},
+	signInButtonContainer: {
+		height: 50,
+		width: "35%",
+		top: "35%",
+		backgroundColor: "#fff",
+		borderRadius: 100,
+		justifyContent: "center",
+		alignItems: "center",
+	},
 
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalErrorMessage: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: PRIMARY_COLOR,
-    marginBottom: 20,
-  },
-  modalButtonContainer: {
-    marginTop: 20,
+	modalContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.4)",
+	},
+	modalContent: {
+		backgroundColor: "white",
+		borderRadius: 10,
+		padding: 20,
+		width: "80%",
+		alignItems: "center",
+	},
+	modalErrorMessage: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: PRIMARY_COLOR,
+		marginBottom: 20,
+	},
+	modalButtonContainer: {
+		marginTop: 20,
 
-    borderColor: PRIMARY_COLOR,
-    borderRadius: 10,
-  },
-  errorModalExitButton: {
-    backgroundColor: PRIMARY_COLOR,
-    color: "#fff",
-    padding: 10,
-    borderColor: "black",
-    width: 80,
-    textAlign: "center",
-  },
+		borderColor: PRIMARY_COLOR,
+		borderRadius: 10,
+	},
+	errorModalExitButton: {
+		backgroundColor: PRIMARY_COLOR,
+		color: "#fff",
+		padding: 10,
+		borderColor: "black",
+		width: 80,
+		textAlign: "center",
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.4)",
+	},
+	modalContent: {
+		backgroundColor: "white",
+		borderRadius: 10,
+		padding: 20,
+		width: "80%",
+		alignItems: "center",
+	},
+	modalErrorMessage: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: PRIMARY_COLOR,
+		marginBottom: 20,
+	},
+	modalButtonContainer: {
+		marginTop: 20,
+		borderColor: PRIMARY_COLOR,
+		borderRadius: 10,
+	},
+	errorModalExitButton: {
+		backgroundColor: PRIMARY_COLOR,
+		color: "#fff",
+		padding: 10,
+		borderColor: "black",
+		width: 80,
+		textAlign: "center",
+	},
+
+	signUpHereButton: {
+		color: PRIMARY_COLOR,
+		fontSize: 16,
+	},
+	signUpHereContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	signUpHereText: {
+		color: PRIMARY_COLOR,
+		fontSize: 16,
+	},
+	noShadowSignUpHereButton: {
+		shadowColor: "transparent",
+		shadowOffset: {
+			width: 0,
+			height: 0,
+		},
+		shadowOpacity: 0,
+		shadowRadius: 0,
+		elevation: 0,
+	},
 });
+
+export default SignInScreen;
