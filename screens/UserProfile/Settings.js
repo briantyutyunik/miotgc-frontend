@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { PRIMARY_COLOR } from '../../constants/styles';
 import Background from '../../components/UI/Background';
 import CustomPicker from '../../components/UI/CustomPicker';
@@ -26,7 +26,6 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe}>
       <Background>
         <View style={styles.settingsScreenContainer}>
           <Separator/> 
@@ -110,7 +109,6 @@ export default function Settings() {
           </TouchableOpacity>
         </View>
       </Background>
-    </SafeAreaView>
   );
 };
 

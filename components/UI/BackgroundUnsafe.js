@@ -17,7 +17,6 @@ export default function Background({ children, additionalStyle }) {
     >
           <StatusBar backgroundColor={"transparent"} barStyle="light-content" /> 
 
-      <SafeAreaView style={styles.safe} />
       <View style={styles.contentContainer}>{children}</View>
     </LinearGradient>
   );

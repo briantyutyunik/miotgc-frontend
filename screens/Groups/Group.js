@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  SafeAreaView,
-  Share,
-  Modal,
-  Image,
-} from "react-native";
+import {Dimensions, View, Text, TouchableOpacity,TextInput, ScrollView, Share,Modal,Image,} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import Background from "../../components/UI/Background";
+import Background from "../../components/UI/BackgroundUnsafe";
 import Card from "../../components/UI/CardDarker";
 import { listenGroupName, getCurrentUserProfilePicture } from "../../firebase";
 import { useRoute } from "@react-navigation/native";
@@ -19,47 +9,34 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
 import { testGPT } from "../../util/api/openaiApi";
-import Itinerary from "./Itinerary";
-import {
-  firestore,
-  updateGroupName,
-  addTestUsersToGroup,
-  getGroupMembers,
-} from "../../firebase";
+import { firestore, updateGroupName, addTestUsersToGroup,getGroupMembers,} from "../../firebase";
+import FlightHeadline from "../../components/UI/FlightsCard/FlightHeadline";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Logo from "../../components/UI/Logo";
+import LoadingMessage from "../../components/UI/LoadingMessage";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import CardSwipeFlights from "../../components/UI/FlightsCard/CardSwipeFlights";
+import HotelHeadline from "../../components/UI/HotelCard/HotelHeadline";
+import HotelCard from "../../components/UI/HotelCard/HotelCard";
+import {LinearGradient} from 'expo-linear-gradient';
 
 export default function Group() {
+  useEffect(() => {
+    console.log("hello world")
+  }, [])
   const QUESTIONS = [
-    {
-      field: "groupCount",
-      question: "Question 1?",
-      text: "What's the size of your group?",
-    },
-    {
-      field: "ageGroup",
-      question: "Question 2?",
-      text: "What's the age group of your group?",
-    },
-    {
-      field: "destination",
-      question: "Question 3?",
-      text: "What's your destination?",
-    },
-    { field: "dates", question: "Question 4?", text: "What are your dates?" },
-    { field: "budget", question: "Question 5?", text: "What's your budget?" },
-    {
-      field: "departureAirport",
-      question: "Question 6?",
-      text: "What's your departure airport?",
-    },
+    { field: "groupCount", question: "Question 1?", text: "How many travelers are in your group?",},
+    { field: "ageGroup", question: "Question 2?",text: "Whats the age range of your group members",},
+    { field: "destination",question: "Question 3?", text: "Where are you planning to travel?",},
+    { field: "dates", question: "Question 4", text: "What dates do you have in mind?" },
+    { field: "budget", question: "Question 5", text: "What is your budget for this trip?" },
+    { field: "departureAirport", question: "Question 6", text: "What airport do you plan to depart from?",},
   ];
   const navigation = useNavigation();
-
   const route = useRoute();
   // const initialGroupName = route.params.groupName;
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const initialGroupName = "Group Name";
   const isNewGroupParam = route.params?.isNewGroup || false;
   const [isNewGroup, setIsNewGroup] = useState(isNewGroupParam);
@@ -70,10 +47,10 @@ export default function Group() {
   const groupId = route.params.groupId;
   const [groupMembers, setGroupMembers] = useState([]);
   const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
-
   const [showShareModal, setShowShareModal] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [answers, setAnswers] = useState(
     QUESTIONS.map((question) => ({
       [question.field]: "",
@@ -83,6 +60,7 @@ export default function Group() {
 
   const [testGroupMembers, setTestGroupMembers] = useState([]);
   console.log("***CURRENT GROUP ID***", groupId);
+
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
   //   Clipboard.setString(`exp://exp.host/@tahir13/miotgc/group/${groupId}`);
@@ -99,6 +77,7 @@ export default function Group() {
 
   //   fetchData();
   // }, []);
+  const gradientColors = ['#21a167', '#00FFFF'];
 
   useEffect(() => {
     async function fetchGroupMembers() {
@@ -119,7 +98,6 @@ export default function Group() {
     fetchGroupMembers();
   }, []);
 
-
   const handleShare = async () => {
     // exp://exp.host/@yourusername/your-app-slug/some-path
     // exp://exp.host/@tahir13/miotgc/group/{groupId}
@@ -137,41 +115,38 @@ export default function Group() {
     }
 };
 
-
-  const handleSubmitButtonPress = () => {
-    console.log("ANSWER:", inputValue);
-    const tempAnswers = [...answers];
-    tempAnswers[currentQuestionIndex] = {
-      ...tempAnswers[currentQuestionIndex],
-      [QUESTIONS[currentQuestionIndex].field]: inputValue,
-    };
-    if (currentQuestionIndex < QUESTIONS.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      // add loading spinner here
-      console.log("Submitting answers...");
-      console.log(answers);
-      testGPT(answers).then((aiGeneratedResponse) => {
-        setAiGeneratedResponse(aiGeneratedResponse);
-        setIsNewGroup(false);
-        console.log(aiGeneratedResponse);
-      });
-    }
-    setAnswers(tempAnswers);
-    setInputValue(""); // Reset the input value for the next question
+const handleSubmitButtonPress = () => {
+  console.log("ANSWER:", inputValue);
+  const tempAnswers = [...answers];
+  tempAnswers[currentQuestionIndex] = {
+    ...tempAnswers[currentQuestionIndex],
+    [QUESTIONS[currentQuestionIndex].field]: inputValue,
   };
-
+  if (currentQuestionIndex < QUESTIONS.length - 1) {
+    setCurrentQuestionIndex(currentQuestionIndex + 1);
+  } else {
+    setIsLoading(true); // Start loading before making the request
+    console.log("Submitting answers...");
+    console.log(answers);
+    testGPT(answers).then((aiGeneratedResponse) => {
+      setAiGeneratedResponse(aiGeneratedResponse);
+      setIsNewGroup(false);
+      console.log(aiGeneratedResponse);
+      setIsLoading(false); // Stop loading after the request is complete
+    });
+  }
+  setAnswers(tempAnswers);
+  setInputValue(""); // Reset the input value for the next question
+};
 
   function answerFieldChangeHandler(text) {
     setInputValue(text);
   }
 
-
   const handleEditGroupName = () => {
     setIsEditingGroupName(!isEditingGroupName);
     setIsNewGroup(false);
   };
-
 
   const groupNameUpdate = async (newGroupName) => {
     if (newGroupName === initialGroupName) {
@@ -191,29 +166,25 @@ export default function Group() {
       console.error("Error updating group name:", error);
     }
   };
-
-
   const closeModal = () => {
     setShowShareModal(false);
   };
-
   const DESTINATION_IMAGE = require("../../assets/images/paris_night.jpg"); // replace with your destination image 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
+    <Background additionalStyle={styles.container}>
       <ScrollView>
-        <Background additionalStyle={styles.container}>
-          <View style = {styles.destinationImgContainer}>
-            <Image
-            source={DESTINATION_IMAGE}
-            style={[
-              styles.destinationsImg,
-            ]}
-            />       
-          </View>
           <View style={styles.itinerariesContainer}>
             {!isNewGroup ? (
               <>
+              <View style = {styles.destinationImgContainer}>
+              <Image
+                source={DESTINATION_IMAGE}
+                style={[
+                  styles.destinationsImg,
+                ]}
+                />    
+              </View>
                 {isEditingGroupName ? (
                   <View style={styles.groupNameContainer}>
                     <TextInput
@@ -232,49 +203,47 @@ export default function Group() {
                     />
                   </View>
                 ) : (
-                  <View style={styles.groupNameContainer}>
-                    <Text
-                      style={styles.groupName}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {groupName}
-                    </Text>
-                    <TouchableOpacity onPress={handleEditGroupName}>
-                    <Icon name="pencil" size={35} color="white" />
-                    </TouchableOpacity>
-                  </View>
+                  <Card additionalStyles={styles.groupMembersCard}>
+                    <View style={styles.groupNameContainer}>
+                        <Text
+                          style={styles.groupName}
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
+                          {groupName}
+                        </Text>
+                        <TouchableOpacity onPress={handleEditGroupName}>
+                        <Icon name="pencil" size={35} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.groupMembersRow}>
+                      {groupMembers.map((member, index) => (
+                        <View key={index} style={styles.groupMember}>
+                          <Image
+                            source={{ uri: member.pfpUrl }}
+                            style={styles.profilePhoto}
+                          />
+                        </View>
+                      ))}
+                      <View style={styles.addNewGroupMemberContainer}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowShareModal(true);
+                          }}
+                          >
+                          <Ionicons
+                            name="add"
+                            size={35}
+                            color={PRIMARY_COLOR}
+                            style={styles.icon}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                </View>
+              </Card>
                 )}
 
-                <Card additionalStyles={styles.groupMembersCard}>
-                  <View style={styles.groupMembersRow}>
-                    {groupMembers.map((member, index) => (
-                      <View key={index} style={styles.groupMember}>
-                        <Image
-                          source={{ uri: member.pfpUrl }}
-                          style={styles.profilePhoto}
-                        />
-                        {/* <Text style={styles.groupMembersListText}>
-                          John Doe
-                        </Text> */}
-                      </View>
-                    ))}
-                    <View style={styles.addNewGroupMemberContainer}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowShareModal(true);
-                        }}
-                      >
-                        <Ionicons
-                          name="add"
-                          size={30}
-                          color={PRIMARY_COLOR}
-                          style={styles.icon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </Card>
+                
                 <Card
                   additionalStyles={[
                     styles.sectionsCard,
@@ -285,7 +254,6 @@ export default function Group() {
                     style={{ flexDirection: "row", alignItems: "center" }}
                     onPress={() => {
                       navigation.navigate("Itinerary", { aiGeneratedResponse: aiGeneratedResponse });
-
                     }}
                   >
                     <Text style={styles.itineraryText}>Itinerary</Text>
@@ -296,95 +264,86 @@ export default function Group() {
                       ></Ionicons>
                   </TouchableOpacity>
                 </Card>
-
-                <Card additionalStyles={styles.sectionsCard}>
-                  <View>
-                    <Text style={styles.sectionsTitle}>Flight</Text>
-                    <Text style={styles.sectionsText}>
-                      {aiGeneratedResponse.FlightInformation.DepartureAirport} -
-                      {aiGeneratedResponse.FlightInformation.ArrivalAirport}
-                      {aiGeneratedResponse.FlightInformation.DepartureTime}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Flight Number:{" "}
-                      {aiGeneratedResponse.FlightInformation.FlightNumber}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Departure Date:{" "}
-                      {aiGeneratedResponse.FlightInformation.DepartureDate}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Arrival Time:{" "}
-                      {aiGeneratedResponse.FlightInformation.ArrivalTime}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Return Date:{" "}
-                      {aiGeneratedResponse.FlightInformation.ReturnDate}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Airline: {aiGeneratedResponse.FlightInformation.Airline}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Price: {aiGeneratedResponse.FlightInformation.Price}
-                    </Text>
-                  </View>
-                </Card>
-
-                <Card additionalStyles={styles.sectionsCard}>
-                  <View>
-                    <Text style={styles.sectionsTitle}>Hotel</Text>
-                    <Text style={styles.sectionsText}>
-                      {aiGeneratedResponse.Accommodation.Name}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Address: {aiGeneratedResponse.Accommodation.Address}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Price: {aiGeneratedResponse.Accommodation.Price}
-                    </Text>
-                  </View>
-                </Card>
-
-                <Card additionalStyles={styles.sectionsCard}></Card>
-                <Card additionalStyles={styles.sectionsCard}></Card>
-                <Card additionalStyles={styles.sectionsCard}></Card>
+                <FlightHeadline/>
+                <CardSwipeFlights/>
+                <HotelHeadline/>
+                <HotelCard/>
+                <Button
+                          textColor={"white"}
+                          iconName={"chevron-forward-sharp"}
+                          iconSize={30}
+                          iconColor={"white"}
+                          fontSize={24}
+                          containerStyle={styles.completeButton}
+                          title={"Complete Trip"}
+                        />
               </>
             ) : (
-              <View style={styles.newGroupContainer}>
-                <Text style={styles.itinerarySurveyText}>Itinerary Survey</Text>
-                <Logo additionalStyle={styles.logo} height={120} width={120} />
-                <Card additionalStyles={styles.surveyCard}>
-                  <Text style={[styles.textStyle, styles.surveyQuestion]}>
-                    {QUESTIONS[currentQuestionIndex].text}
-                  </Text>
-                  <AuthInput
-                    textInputBackgroundColor="white"
-                    value={inputValue}
-                    onChangeText={answerFieldChangeHandler}
-                    disableCustomBehavior={true} // Add this prop here
-                  />
-
-                  <View style={styles.submitBtnContainer}>
-                    <Button
-                      containerStyle={styles.submitBtn}
-                      title={
-                        currentQuestionIndex === QUESTIONS.length - 1
-                          ? "Submit"
-                          : "Next"
-                      }
-                      textColor={PRIMARY_COLOR}
-                      iconSize={40}
-                      buttonText={PRIMARY_COLOR}
-                      onPress={handleSubmitButtonPress}
-                    />
+              <View style={styles.containerProg}>
+                <View style={styles.newGroupContainer}>
+                  <View style={styles.surveyCard}>
+                    <Text style={styles.itinerarySurveyText}>
+                      Itinerary Survey
+                      {Platform.OS === 'ios' ? '\u270F\ufe0f' : '\u270F\ufe0f'}
+                    </Text>
+                    <View style={styles.progressBarContainer}>
+                      <LinearGradient
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 0}}
+                        colors={['#ff8583','#ff5553', '#ff4542',]}
+                        style ={{backgroundColor: "transparent",
+                        height: 8,
+                        borderRadius: 100,
+                        width: `${(currentQuestionIndex + 1) / QUESTIONS.length * 100}%`
+                        }}
+                      />
+                    </View>
+                      <Text style={[styles.textStyle, styles.surveyQuestion]}>
+                        {QUESTIONS[currentQuestionIndex].text}
+                      </Text>
+                      <TextInput
+                        style={styles.input}
+                        value={inputValue}
+                        onChangeText={answerFieldChangeHandler}
+                        placeholder="Answer Here"
+                        caretColor="red"
+                      />
+                      <View style={styles.submitBtnContainer}>
+                        <Button
+                          textColor={"white"}
+                          iconName={"chevron-forward-sharp"}
+                          iconSize={30}
+                          iconColor={"white"}
+                          fontSize={24}
+                          containerStyle={styles.submitBtn}
+                          title={
+                            currentQuestionIndex === QUESTIONS.length - 1
+                              ? "Submit"
+                              : "Next"
+                          }
+                          onPress={handleSubmitButtonPress}
+                        />
+                        {isLoading && (
+                        <Modal
+                          animationType="fade"
+                          transparent={false}
+                          visible={isLoading}
+                          onRequestClose={() => {
+                            console.log('Modal has been closed.');
+                          }}>
+                          <View style={styles.loadingModal}>
+                            <LoadingMessage/>
+                          </View>
+                        </Modal>
+                      )}
+                      </View>
                   </View>
-                </Card>
+                </View>
               </View>
-            )}
+          )}
           </View>
 
           {/* // *** THIS WILL BE ADDED TO THE GROUP MEMBERS CARD *** */}
-        </Background>
       </ScrollView>
       <Modal
         animationType="slide"
@@ -426,9 +385,12 @@ export default function Group() {
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </Background>
   );
 }
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const styles = {
   destinationsImg: {
@@ -437,15 +399,14 @@ const styles = {
     aspectRatio: .9,
   },
   destinationImgContainer: {
-    shadowColor: 'green',
-    shadowOffset: 3,
-  },
-  sectionsText: {
-    color: 'black',
-  },
-  sectionsTextAlt: {
-    color: 'black',
-    fontWeight: 600,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 1,
+      height: 5,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 4,
   },
   itineraryTextContainer: {
     alignItems: "center",
@@ -455,11 +416,6 @@ const styles = {
     fontSize: 30,
     marginRight: "5%",
     color: 'black',
-  },
-  sectionsTitle: {
-    color: 'black',
-    fontSize: 40,
-    marginBottom: "5%",
   },
   sectionsCard: {
     marginVertical: "10%",
@@ -477,43 +433,13 @@ const styles = {
     justifyContent: "center",
     width: "100%",
   },
-  tripLengthPadding: {
-    marginLeft: 10,
-    marginTop: 10,
-    fontSize: 28,
-    paddingLeft: 15,
-    color: "white",
-  },
-
   surveyCard: {
     width: "90%",
-  },
-  textContainer: {
-    alignSelf: "stretch",
   },
   textStyle: {
     color: PRIMARY_COLOR,
     textAlign: "left",
   },
-  itinerariesPadding: {
-    marginLeft: 10,
-    marginTop: 10,
-    fontSize: 48,
-    paddingLeft: 15,
-    fontWeight: "bold",
-    color: "white",
-  },
-  newTripButton: {
-    flexDirection: "row",
-    width: "100%",
-  },
-
-  newTripButtonCard: {
-    width: "80%",
-    alignSelf: "center",
-    marginTop: "30%",
-  },
-
   submitBtnContainer: {
     height: 50,
     top: 10,
@@ -524,56 +450,23 @@ const styles = {
     width: "100%",
     marginBottom: "10%",
   },
-
-  newTripButtonText: {
-    color: PRIMARY_COLOR,
-    fontSize: 32,
-    marginLeft: 10,
-  },
   groupName: {
-    color: "white",
-    fontSize: 48,
+    color: "#2b2b2b",
+    fontSize: 42,
     fontWeight: "bold",
     marginRight: "5%",
     flexShrink: 1,
-    marginBottom: "10%",
-    marginTop: "10%",
-  },
-  header: {
-    backgroundColor: "#f2f2f2",
-    padding: 10,
-    marginTop: "1%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-  headerText: {
-    fontWeight: "bold",
-  },
-  content: {
-    backgroundColor: "#fff",
-    padding: 10,
-  },
-  childText: {
-    marginTop: 10,
-    marginLeft: 20,
-    padding: 10,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 1,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 2.62,
+    elevation: 4,
   },
   container: {
     alignItems: "center",
-  },
-  cardContainer: {
-    margin: "5%",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "90%",
-    maxHeight: "100%",
-    marginTop: 100,
-  },
-  cardContainerTwo: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    maxHeight: "100%",
   },
   // open modal button styles
   openModalButton: {
@@ -588,9 +481,6 @@ const styles = {
     fontWeight: "bold",
     textAlign: "center",
   },
-
-  // modal styles
-
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -614,8 +504,8 @@ const styles = {
     width: "90%",
   },
   surveyQuestion: {
-    marginBottom: "15%",
-    fontSize: 32,
+    marginBottom: "25%",
+    fontSize: 40,
   },
   linkInput: {
     borderWidth: 1,
@@ -636,22 +526,12 @@ const styles = {
     fontWeight: "bold",
     textAlign: "center",
   },
-  shareButton: {
-    backgroundColor: PRIMARY_COLOR,
-    borderRadius: 10,
-    padding: 10,
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
   itinerarySurveyText: {
-    color: "white",
-    fontSize: 45,
-    fontWeight: "bold",
-  },
-  shareButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+    color: "#000000",
+    fontSize: 37,
+    fontWeight: "800",
+    marginBottom: "8%",
+    marginTop: "2%",
   },
   linkInputContainer: {
     flexDirection: "row",
@@ -676,25 +556,15 @@ const styles = {
     fontWeight: "bold",
     textAlign: "center",
   },
-
   groupMembersCard: {
+    alignItems: "center",
+    marginTop: 65,
     width: "90%",
-    height: "10%",
-  },
-  groupMembersText: {
-    fontSize: 20,
-    color: PRIMARY_COLOR,
-  },
-  groupMembersListText: {
-    fontSize: 16,
-    color: PRIMARY_COLOR,
+    height: "12%",
   },
   itinerariesContainer: {
     width: "100%",
     alignItems: "center",
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   profilePhoto: {
     width: 60,
@@ -705,20 +575,15 @@ const styles = {
     marginBottom: 10,
     alignSelf: "center",
   },
-
   groupMembersRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "start",
+    height: "auto",
   },
   groupMember: {
     alignItems: "center",
     margin: 5,
-  },
-
-  groupMembersListText: {
-    marginTop: 5,
-    fontSize: 16,
   },
   addNewGroupMemberContainer: {
     width: 55,
@@ -731,6 +596,14 @@ const styles = {
     alignItems: "center",
   },
   icon: {
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 2,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
     padding: 0,
     marginLeft: 2, // Adjust this value based on your requirements
   },
@@ -738,5 +611,91 @@ const styles = {
     alignItems: "center",
     justifyContent: "flex-start",
     flexDirection: "row", // Add this line
+  },
+  containerProg: {
+    marginTop: "10%",
+    width: windowWidth-15,
+    height: windowHeight-275,
+    flex: 1,
+  },
+  progressBarContainer: {
+    backgroundColor: "white",
+    height: 8,
+    marginBottom: 30,
+    borderRadius: 100,
+  },
+  newGroupContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  surveyCard: {
+    width: "98%",
+    height: "100%",
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 2,
+      height: 4,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+  },
+  textStyle: {
+    color: "black",
+    fontWeight: "500",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  input: {
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderColor: "#eaeaea",
+    borderWidth: 1,
+    marginBottom: 0,
+    fontSize: 24,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 7,
+    elevation: 5,
+  },
+  submitBtnContainer: {
+    marginTop: 40,
+    alignItems:"center",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignContent:"center",
+  },
+  submitBtn: {
+    justifyContent: "center",
+    alignContent: "center",
+    backgroundColor: '#fc706eff',
+    borderRadius: 10,
+    paddingHorizontal: "40%",
+    paddingVertical: "3.5%",
+  },
+   loadingModal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  completeButton: {
+    marginTop: 40,
+    marginBottom: 100,
+    justifyContent: "center",
+    alignContent: "center",
+    backgroundColor: '#ff4340ff',
+    borderRadius: 10,
+    paddingHorizontal: "20%",
+    paddingVertical: "3.5%",
   },
 };

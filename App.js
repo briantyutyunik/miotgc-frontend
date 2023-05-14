@@ -38,7 +38,7 @@ const Tab = createBottomTabNavigator(); // Create the Tab variable
     }, []);*/
 }
 
-export default function App() {
+export default  function App() {
   const [user, setUser] = useState(null);
   useEffect(() => {
     const unsubscribe = auth.getAuth().onAuthStateChanged((user) => {

@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 const apiKey = Constants.manifest.extra.openaiApiKey;
 
 const configuration = new Configuration({
-  apiKey: Constants.manifest.extra.openaiApiKey,
+  apiKey: "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" ,
 });
 const openai = new OpenAIApi(configuration);
 

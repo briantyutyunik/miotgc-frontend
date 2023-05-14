@@ -10,7 +10,6 @@ import Seperator from "../../components/UI/Seperator";
 import Button from "../../components/UI/Button";
 import { auth, userSignIn } from "Color../../../firebase";
 import { PRIMARY_COLOR } from "../../constants/styles";
-import Line from "../../components/UI/Line";
 import { testGPT } from "../../util/api/openaiApi";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -76,37 +75,36 @@ export default function AuthenticationScreen() {
       );
     }
   }
-
-  function onSignIn() {
+  // correct function - uncomment later
+  // function onSignIn() {
+  //   // console.log("HERE");
+  //   navigation.navigate("SignIn");
+  // }
+  async function onSignIn() {
     // console.log("HERE");
-    navigation.navigate("SignIn");
+     // temporary to reduce sign in on refresh each time
+     const { error } = await userSignIn('tahirm', 'Hello@123');
   }
 
   function onSignUp() {
     navigation.navigate("SignUp");
   }
 
-  function onTempScreen() {
-    navigation.navigate("TempScreen");
-  }
-
   return (
     <Background additionalStyle={styles.container}>
-      <Logo additionalStyle={styles.logo} height={120} width={120} />
-      <Slogan />
+      <View style={styles.logoContainer}>
+        <Logo additionalStyle={styles.logo} height={120} width={120} />
+      </View>
+      <View style={styles.sloganContainer}>
+        <Slogan />
+      </View>
       <View style={styles.authButtonsContainer}>
-      <Button
-          containerStyle={styles.buttonContainer}
-          title={"GPT"}
-          onPress={() => {
-            testGPT();
-          }}
-        />
         <Button
           containerStyle={styles.buttonContainer}
           title={"Sign in with Google"}
           iconName="logo-google"
           iconSize={35}
+          fontSize={20}
           iconColor={PRIMARY_COLOR}
           iconPositionStyle={styles.googleImageIcon}
           onPress={() => {
@@ -117,48 +115,68 @@ export default function AuthenticationScreen() {
         <Button
           containerStyle={styles.buttonContainer}
           title={"Sign Up"}
-          onPress={onSignUp}
-        />
+          fontSize={20}
+          onPress={onSignUp}        
+          />
+          <Button
+          containerStyle={styles.signInContainer}
+          textStyle={styles.signInText}
+          textColor={"white"}
+          fontSize={20}
+          title="Sign In"
+          onPress={onSignIn}        
+          />
       </View>
-      <Button
-        containerStyle={styles.signInContainer}
-        textStyle={styles.signInText}
-        textColor={"white"}
-        title="Sign In"
-        onPress={onSignIn}
-      />
     </Background>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  authButtonsContainer: {
-    width: "100%",
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    bottom: 170,
+    padding: 20, // add padding to avoid elements sticking to the edge of the screen
+  },
+  logoContainer: {
+    flex: 2, // adjust this value as needed
+    justifyContent: "flex-end",
+    alignItems: "center",
+    width: "100%",
+  },
+  sloganContainer: {
+    top: -60,
+    flex: 2, // adjust this value as needed
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  authButtonsContainer: {
+    flex: 3, // adjust this value as needed
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
   buttonContainer: {
     height: 60,
     width: "80%",
     backgroundColor: "#fff",
     borderRadius: 100,
+    marginBottom: 10, // add some margin to separate the buttons
   },
   logo: {
-    position: "absolute",
-    top: 50,
+    flex: 1,
+    marginBottom: 0, // add some margin to separate the logo from the slogan
   },
   googleImageIcon: {
-    position: "absolute",
     left: 20,
   },
   signInContainer: {
-    position: "absolute",
-    bottom: 30,
+    flex: 1, // adjust this value as needed
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    marginTop: -50,
   },
   signInText: {
     color: "#fff",

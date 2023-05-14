@@ -11,7 +11,6 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   Animated,
 } from "react-native";
 import {
@@ -69,7 +68,6 @@ export default function UserProfileScreen() {
 
   const startShaking = () => {
     setShowDeleteIcon(true);
-
     Animated.loop(
       Animated.sequence([
         Animated.timing(shakeAnimation, {
@@ -242,7 +240,6 @@ export default function UserProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
       <Background>
         <ScrollView contentContainerStyle={{ alignItems: "center" }}>
           <View style={styles.profileScreenContainer}>
@@ -326,7 +323,6 @@ export default function UserProfileScreen() {
           </View>
         </ScrollView>
       </Background>
-    </SafeAreaView>
   );
 }
 
@@ -346,7 +342,6 @@ const styles = StyleSheet.create({
     marginRight: "2%",
     marginTop: "2%",
   },
-
   buttonContainer: {
     height: 60,
     width: "80%",
@@ -355,7 +350,7 @@ const styles = StyleSheet.create({
   },
   flatListContainer: {
     width: "100%",
-    height: "52%", //change this setting to give more room between the cards
+    height: "53%", //change this setting to give more room between the cards
     padding: 5,
     backgroundColor: "#FF5553",
   },

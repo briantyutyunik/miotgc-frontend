@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 
@@ -8,13 +9,13 @@ export default function Button({
   containerStyle,
   iconName,
   iconSize,
-  iconPositionStyle,
   iconColor,
   textStyle,
   disabled,
   disabledStyle,
   enabledStyle,
   textColor,
+  fontSize,
 }) {
   const buttonStyle = disabled
     ? [styles.buttonContainer, disabledStyle, containerStyle]
@@ -22,21 +23,28 @@ export default function Button({
 
   return (
     <TouchableOpacity style={buttonStyle} onPress={onPress} disabled={disabled}>
-      {iconName && iconSize && (
-        <View style={iconPositionStyle}>
-          <Ionicons name={iconName} size={iconSize} color={iconColor} />
-        </View>
-      )}
       {title && (
         <Text
           style={
             textStyle
-              ? [styles.buttonText, textStyle, { color: textColor }]
-              : [styles.buttonText, { color: textColor }]
+              ? [
+                  styles.buttonText,
+                  textStyle,
+                  { color: textColor, fontSize },
+                ]
+              : [styles.buttonText, { color: textColor, fontSize }]
           }
         >
           {title}
         </Text>
+      )}
+      {iconName && (
+        <Ionicons
+          name={iconName}
+          size={iconSize}
+          color={iconColor}
+          style={styles.icon}
+        />
       )}
     </TouchableOpacity>
   );
@@ -44,6 +52,7 @@ export default function Button({
 
 const styles = StyleSheet.create({
   buttonContainer: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -58,5 +67,8 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: "bold",
     fontSize: 20,
+  },
+  icon: {
+    marginLeft: 8,
   },
 });

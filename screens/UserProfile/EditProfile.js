@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import Background from '../../components/UI/Background';
 import { useNavigation } from '@react-navigation/native';
@@ -33,7 +33,6 @@ const EditProfile = () => {
 };
 
 return (
-    <SafeAreaView style = {styles.safe}>
     <Background>
         <View style={styles.container}>
             <View style={styles.header}>
@@ -76,7 +75,6 @@ return (
             </View>
         </View> 
     </Background>
-    </SafeAreaView>
 );
 };
 
