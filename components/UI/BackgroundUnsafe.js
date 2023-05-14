@@ -10,7 +10,6 @@ export default function Background({ children, additionalStyle }) {
 		<LinearGradient start={{ x: 0.0, y: 0.25 }} end={{ x: 0.5, y: 1.0 }} locations={[0, 0.2, 0.35, 0.45, 0.5, 0.6]} style={styles.container} colors={gradientColors}>
 			<StatusBar backgroundColor={"transparent"} barStyle="light-content" />
 
-			<SafeAreaView style={styles.safe} />
 			<View style={styles.contentContainer}>{children}</View>
 		</LinearGradient>
 	);
