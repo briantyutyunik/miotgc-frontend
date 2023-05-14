@@ -613,13 +613,13 @@ const styles = {
     flexDirection: "row", // Add this line
   },
   containerProg: {
-    marginTop: "10%",
+    marginTop: "20%",
     width: windowWidth-15,
     height: windowHeight-275,
     flex: 1,
   },
   progressBarContainer: {
-    backgroundColor: "white",
+    backgroundColor: "gray",
     height: 8,
     marginBottom: 30,
     borderRadius: 100,
