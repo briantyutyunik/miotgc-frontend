@@ -299,14 +299,16 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
-    position: "absolute",
-    top: 10,
+    alignItems: "center",
   },
   authInputContainer: {
     alignItems: "center",
-    top: "17%",
+    // top: "17%",
+    alignSelf: "center",
+    justifyContent: "center",
     width: "90%",
   },
   disabledButton: {
