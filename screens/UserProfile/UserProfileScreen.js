@@ -11,25 +11,13 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import { testGPT } from "../../util/api/openaiApi";
 
-const menuStyles = StyleSheet.create({
-	menuContainer: {
-		flex: 1,
-		backgroundColor: "#fff",
-		paddingTop: 50,
-		paddingHorizontal: 20,
-	},
-	menuItem: {
-		fontSize: 18,
-		marginBottom: 10,
-	},
-});
-
 export default function UserProfileScreen() {
 	const shakeAnimation = useRef(new Animated.Value(0)).current;
 	const [showDeleteIcon, setShowDeleteIcon] = useState(false);
 	const [image, setImage] = useState();
 	const [openImageSelect, setOpenImageSelect] = useState(false);
 	const [groups, setGroups] = useState([]);
+	const [pastGroups, setPastGroups] = useState([]);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [currentUserData, setCurrentUserData] = useState(null);
 	const navigation = useNavigation();
@@ -144,7 +132,8 @@ export default function UserProfileScreen() {
 				<TouchableOpacity
 					onPress={async () => {
 						const initialGroupName = "Group name";
-						const groupId = await createGroup(initialGroupName);
+						const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/miotgc-8e3f9.appspot.com/o/images%2Fgroups-default.jpg?alt=media&token=8b630f55-0a6b-4fce-ad68-db5ad585ddca";
+						const groupId = await createGroup(initialGroupName, defaultImageUrl);
 						navigation.navigate("Group", {
 							isNewGroup: true,
 							groupId: groupId,
@@ -195,10 +184,15 @@ export default function UserProfileScreen() {
 						)}
 					</Animated.View>
 				</TouchableOpacity>
-				<Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>{group.name}</Text>
+				<Text style={{ alignItems: "center",fontWeight: "bold", marginTop: 10, color: "black" }}>{group.name}</Text>
 			</View>
 		);
 	};
+
+	const renderPastGroupCard = ({}) => {
+
+	};
+
 
 	return (
 		<Background>
@@ -222,8 +216,6 @@ export default function UserProfileScreen() {
 							</View>
 						</View>
 					</View>
-
-					{/* <View style={styles.curve} /> */}
 
 					<View style={styles.parentListContainer}>
 						<View style={styles.flatListContainer}>
@@ -251,12 +243,12 @@ export default function UserProfileScreen() {
 							</CardDarker>
 						</View>
 
-						<View style={styles.flatListContainer}>
+						{/*<View style={styles.flatListContainer}>
 							<CardDarker additionalStyles={styles.cardContainer}>
 								<Text style={styles.flatListTitle}>Trip History</Text>
-								<FlatList data={groups} renderItem={renderGroupCard} keyExtractor={(item) => item.id} horizontal showsHorizontalScrollIndicator={true} />
+								<FlatList data={pastGroups} renderItem={renderPastGroupCard} keyExtractor={(item) => item.id} horizontal showsHorizontalScrollIndicator={true} />
 							</CardDarker>
-						</View>
+						</View>*/}
 					</View>
 				</View>
 			</ScrollView>
@@ -288,9 +280,8 @@ const styles = StyleSheet.create({
 	},
 	flatListContainer: {
 		width: "100%",
-		height: "53%", //change this setting to give more room between the cards
+		height: "100%", //this used to be 50%
 		padding: 5,
-		backgroundColor: "#FF5553",
 	},
 	dualCardTitles: {
 		flexDirection: "row",
@@ -384,7 +375,7 @@ const styles = StyleSheet.create({
 	textName: {
 		color: "white",
 		fontWeight: "bold",
-		fontSize: "30pt",
+		fontSize: 30,
 		shadowColor: "black",
 		shadowOffset: {
 			width: 4,

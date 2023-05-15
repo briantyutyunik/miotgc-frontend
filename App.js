@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { auth } from "./firebase";
-import { View } from "react-native";
+import { View, StyleSheet} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 // import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -69,19 +69,25 @@ export default function App() {
 				screenOptions={({ route }) => ({
 					headerShown: false,
 					tabBarStyle: {
-						height: 85,
-						paddingHorizontal: 5,
-						paddingTop: 0,
-						backgroundColor: PRIMARY_COLOR,
+						bottom: 25,
+						left: 20,
+						right: 20,
+						elevation: 0,
+						borderRadius: 15,
+						height: 80,
+						paddingTop: "7%",
+						backgroundColor: "#ffffff",
 						position: "absolute",
 						borderTopWidth: 0,
+						justifyContent: "center",
+						... styles.shadow
 					},
 					tabBarIcon: ({ focused, color, size }) => {
 						let iconName;
 
 						if (route.name === "UserProfile") {
 							iconName = focused ? "person" : "person-outline";
-						} else if (route.name === "Today") {
+						} else if (route.name === "TestScreen") {
 							iconName = focused ? "document-text" : "document-text-outline";
 						} else if (route.name === "Settings") {
 							iconName = focused ? "settings" : "settings-outline";
@@ -91,9 +97,11 @@ export default function App() {
 					},
 				})}
 				tabBarOptions={{
-					activeTintColor: "white",
+					showLabel: false,
+					activeTintColor: PRIMARY_COLOR,
 					inactiveTintColor: "black",
 					labelStyle: { fontSize: 14, fontWeight: "bold" },
+					justifyContent: "center",
 					style: {
 						elevation: 5,
 						shadowColor: "#000",
@@ -102,7 +110,7 @@ export default function App() {
 					},
 				}}>
 				<Tab.Screen name="UserProfile" component={UserProfileScreen} />
-				<Tab.Screen name="Today" component={TestScreen} />
+				<Tab.Screen name="TestScreen" component={TestScreen} />
 				<Tab.Screen name="Settings" component={Settings} />
 			</Tab.Navigator>
 		);
@@ -144,3 +152,15 @@ export default function App() {
 		</>
 	);
 }
+const styles = StyleSheet.create({
+	shadow: {
+		shadowColor: "#000000",
+		shadowOffset: {
+			width: 0,
+			height: 10,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.5,
+		elevation: 5,
+	}
+});

@@ -9,7 +9,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
 import { testGPT } from "../../util/api/openaiApi";
-import { firestore, updateGroupName, addTestUsersToGroup, getGroupMembers } from "../../firebase";
+import {  updateGroupName, addTestUsersToGroup, getGroupMembers, storeAiGeneratedResponse, getTripByGroupId } from "../../firebase";
 import FlightHeadline from "../../components/UI/FlightsCard/FlightHeadline";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
@@ -19,7 +19,10 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import CardSwipeFlights from "../../components/UI/FlightsCard/CardSwipeFlights";
 import HotelHeadline from "../../components/UI/HotelCard/HotelHeadline";
 import HotelCard from "../../components/UI/HotelCard/HotelCard";
+import ItineraryCard from "../../components/UI/ItineraryCard/ItineraryCard";
 import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome } from "@expo/vector-icons";
+
 
 export default function Group() {
 	useEffect(() => {
@@ -31,7 +34,8 @@ export default function Group() {
 		{ field: "destination", question: "Question 3", text: "Where are you planning to travel?" },
 		{ field: "dates", question: "Question 4", text: "What dates do you have in mind?" },
 		{ field: "budget", question: "Question 5", text: "What is your budget for this trip?" },
-		{ field: "departureAirport", question: "Question 6", text: "What airport do you plan to depart from?" },
+		{ field: "departureCity", question: "Question 6", text: "What city do you wish to depart from?" },
+		{ field: "departureAirport", question: "Question 7", text: "What airport do you plan to depart from?" },
 	];
 	const navigation = useNavigation();
 	const route = useRoute();
@@ -47,9 +51,17 @@ export default function Group() {
 	const groupId = route.params.groupId;
 	const [groupMembers, setGroupMembers] = useState([]);
 	const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
+	const [tripData, setTripData] = useState(null);
+
 	const [showShareModal, setShowShareModal] = useState(false);
 	const [inputValue, setInputValue] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+
+
+	const [accommodation, setAccommodation] = useState(null);
+	const [activities, setActivities] = useState(null);
+	const [flightInfoOut, setFlightInfoOut] = useState(null);
+	const [flightInfoBack, setFlightInfoBack] = useState(null);
 
 	const [answers, setAnswers] = useState(
 		QUESTIONS.map((question) => ({
@@ -59,7 +71,55 @@ export default function Group() {
 	);
 
 	const [testGroupMembers, setTestGroupMembers] = useState([]);
-	console.log("***CURRENT GROUP ID***", groupId);
+
+	const fetchTripData = async () => {
+		try {
+		  console.log("Calling getTripByGroupId...");
+		  const trip = await getTripByGroupId(groupId);
+		  console.log(trip);
+		  console.log("getTripByGroupId called.");
+		  if (trip === null) {
+			console.log("No trip found for group ID: ", groupId);
+			setTripData({});
+		  } else {
+			console.log("Trip found: ", trip);
+			setTripData(trip);
+			// Separate out the data
+			setAccommodation(trip.Accommodation);
+			
+			// Create a variable to hold the day keys that start with "Day"
+			let tripDays = Object.keys(trip).filter(key => key.startsWith("Day"));
+			
+			// Sort the days in order
+			tripDays.sort();
+			
+			// Create an array of day activities
+			let dayActivities = tripDays.map(dayKey => trip[dayKey]);
+			
+			setActivities(dayActivities);
+			setFlightInfoOut(trip.FlightInformationOut);
+			setFlightInfoBack(trip.FlightInformationBack);
+			//console.log("+_+_+_+_+_+_+_ "+trip.FlightInformationOut.Airline);
+		  }
+		} catch (error) {
+		  console.error("Error fetching trip data:", error);
+		}
+		//console.log("******THISISIT*************" + flightInfo.Airline);
+	  };	  
+	  useEffect(() => {
+		console.log("useEffect hook running");
+		fetchTripData();
+	  }, [groupId]);
+
+	  useEffect(() => {
+		async function fetchData() {
+		  //await addTestUsersToGroup();
+		  const members = await getGroupMembers("zd2NVCOdmjyXuuamF7sQ");
+		  setGroupMembers(members);
+		  // console.log("*******GROUP MEMBER FIRST NAME******: ", members);
+		}
+		fetchData();
+	  }, []);
 
 	// *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
 	// const copyToClipboard = () => {
@@ -77,7 +137,6 @@ export default function Group() {
 
 	//   fetchData();
 	// }, []);
-	const gradientColors = ["#21a167", "#00FFFF"];
 
 	useEffect(() => {
 		async function fetchGroupMembers() {
@@ -113,29 +172,34 @@ export default function Group() {
 		}
 	};
 
-	const handleSubmitButtonPress = () => {
+	const handleSubmitButtonPress = async () => {
 		console.log("ANSWER:", inputValue);
 		const tempAnswers = [...answers];
 		tempAnswers[currentQuestionIndex] = {
-			...tempAnswers[currentQuestionIndex],
-			[QUESTIONS[currentQuestionIndex].field]: inputValue,
+		  ...tempAnswers[currentQuestionIndex],
+		  [QUESTIONS[currentQuestionIndex].field]: inputValue,
 		};
+	
 		if (currentQuestionIndex < QUESTIONS.length - 1) {
-			setCurrentQuestionIndex(currentQuestionIndex + 1);
+		  setCurrentQuestionIndex(currentQuestionIndex + 1);
 		} else {
 			setIsLoading(true); // Start loading before making the request
-			console.log("Submitting answers...");
-			console.log(answers);
-			testGPT(answers).then((aiGeneratedResponse) => {
-				setAiGeneratedResponse(aiGeneratedResponse);
-				setIsNewGroup(false);
-				console.log(aiGeneratedResponse);
-				setIsLoading(false); // Stop loading after the request is complete
+		  console.log("Submitting answers...");
+		  console.log(answers);
+		  try {
+			await testGPT(answers).then(async (aiGeneratedResponse) => {
+			  await storeAiGeneratedResponse(groupId, aiGeneratedResponse);
+			  setIsNewGroup(false);
+			  await fetchTripData();
+			  setIsLoading(false);
 			});
+		  } catch (error) {
+			console.error("Error in handleSubmitButtonPress:", error);
+		  }
 		}
 		setAnswers(tempAnswers);
 		setInputValue(""); // Reset the input value for the next question
-	};
+	  };
 
 	function answerFieldChangeHandler(text) {
 		setInputValue(text);
@@ -172,6 +236,9 @@ export default function Group() {
 						<>
 							<View style={styles.destinationImgContainer}>
 								<Image source={DESTINATION_IMAGE} style={[styles.destinationsImg]} />
+								<TouchableOpacity onPress={() => navigation.goBack()}>
+										<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
+								</TouchableOpacity>
 							</View>
 							{isEditingGroupName ? (
 								<View style={styles.groupNameContainer}>
@@ -190,16 +257,19 @@ export default function Group() {
 										autoFocus={true}
 									/>
 								</View>
-							) : (
-								<Card additionalStyles={styles.groupMembersCard}>
+							) : (<>
+								<View style = {styles.groupNameContainerOuter}>
 									<View style={styles.groupNameContainer}>
 										<Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
+										{Platform.OS === "ios" ? "\u{1F9F3}" : "\u{F9F3}"}
 											{groupName}
 										</Text>
 										<TouchableOpacity onPress={handleEditGroupName}>
-											<Icon name="pencil" size={35} color="black" />
+											<Icon name="pencil" marginLeft={15}size={35} color="white" />
 										</TouchableOpacity>
 									</View>
+								</View>
+								<Card additionalStyles={styles.groupMembersCard}>
 									<View style={styles.groupMembersRow}>
 										{groupMembers.map((member, index) => (
 											<View key={index} style={styles.groupMember}>
@@ -215,23 +285,15 @@ export default function Group() {
 											</TouchableOpacity>
 										</View>
 									</View>
-								</Card>
+								</Card></>
 							)}
 
-							<Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
-								<TouchableOpacity
-									style={{ flexDirection: "row", alignItems: "center" }}
-									onPress={() => {
-										navigation.navigate("Itinerary", { aiGeneratedResponse: aiGeneratedResponse });
-									}}>
-									<Text style={styles.itineraryText}>Itinerary</Text>
-									<Ionicons name="arrow-forward-outline" size={30} color={"black"}></Ionicons>
-								</TouchableOpacity>
-							</Card>
 							<FlightHeadline />
-							<CardSwipeFlights />
+							<CardSwipeFlights flightInfoOut={flightInfoOut} flightInfoBack={flightInfoBack}/>
 							<HotelHeadline />
-							<HotelCard />
+							<HotelCard accommodation={accommodation}/>
+							<ItineraryCard navigation={navigation} activities={activities} />
+
 							<Button
 								textColor={"white"}
 								iconName={"chevron-forward-sharp"}
@@ -328,6 +390,7 @@ const windowHeight = Dimensions.get("window").height;
 
 const styles = {
 	destinationsImg: {
+		zIndex: 0,
 		width: "100%",
 		height: undefined,
 		aspectRatio: 0.9,
@@ -385,19 +448,10 @@ const styles = {
 		marginBottom: "10%",
 	},
 	groupName: {
-		color: "#2b2b2b",
-		fontSize: 42,
+		color: "white",
+		fontSize: 32,
+		marginLeft: 8,
 		fontWeight: "bold",
-		marginRight: "5%",
-		flexShrink: 1,
-		shadowColor: "#000000",
-		shadowOffset: {
-			width: 1,
-			height: 3,
-		},
-		shadowOpacity: 0.15,
-		shadowRadius: 2.62,
-		elevation: 4,
 	},
 	container: {
 		alignItems: "center",
@@ -492,8 +546,8 @@ const styles = {
 	},
 	groupMembersCard: {
 		alignItems: "center",
-		marginTop: 65,
-		width: "90%",
+		marginTop: 0,
+		width: "95%",
 		height: "12%",
 	},
 	itinerariesContainer: {
@@ -542,9 +596,25 @@ const styles = {
 		marginLeft: 2, // Adjust this value based on your requirements
 	},
 	groupNameContainer: {
+		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "flex-start",
-		flexDirection: "row", // Add this line
+		flex: 1,
+	},
+	groupNameContainerOuter: {
+		marginTop: "7%",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.4,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	containerProg: {
 		marginTop: "10%",

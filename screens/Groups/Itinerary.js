@@ -5,26 +5,26 @@ import Card from "../../components/UI/Card";
 
 export default function Itinerary() {
 	const route = useRoute();
-	const { aiGeneratedResponse } = route.params;
+	const { activities } = route.params;
 
 	// helper function to render each part of the day
-	const renderDayPart = (part, partData) => (
+	const renderDayPart = (part, activities) => (
 		<View>
 			<Text>{part}</Text>
-			<Text>{`Activity: ${partData.Activity}`}</Text>
-			<Text>{`Meal: ${partData.Meal}`}</Text>
-			<Text>{`Price: ${partData.Price}`}</Text>
-			<Text>{`Transportation: ${partData.Transportation}`}</Text>
+			<Text>{`Activity: ${activities.Activity}`}</Text>
+			<Text>{`Meal: ${activities.Meal}`}</Text>
+			<Text>{`Price: ${activities.Price}`}</Text>
+			<Text>{`Transportation: ${activities.Transportation}`}</Text>
 		</View>
 	);
 
 	// function to render each day's data
-	const renderDay = (day, dayData) => (
+	const renderDay = (day, activities) => (
 		<View key={day}>
 			<Text>{day}</Text>
-			{renderDayPart("Morning", dayData.Morning)}
-			{renderDayPart("Afternoon", dayData.Afternoon)}
-			{renderDayPart("Evening", dayData.Evening)}
+			{renderDayPart("Morning", activities.Morning)}
+			{renderDayPart("Afternoon", activities.Afternoon)}
+			{renderDayPart("Evening", activities.Evening)}
 		</View>
 	);
 
@@ -33,8 +33,8 @@ export default function Itinerary() {
 		let days = [];
 		for (let i = 1; i <= 5; i++) {
 			const day = `Day${i}`;
-			if (aiGeneratedResponse[day]) {
-				days.push(<Card key={day}>{renderDay(day, aiGeneratedResponse[day])}</Card>);
+			if (activities[day]) {
+				days.push(<Card key={day}>{renderDay(day, activities[day])}</Card>);
 			}
 		}
 		return days;

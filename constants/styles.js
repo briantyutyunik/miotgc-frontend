@@ -1,4 +1,4 @@
-export const PRIMARY_COLOR = "#FF5553";
+export const        PRIMARY_COLOR = "#FF5553";
 
 import { StyleSheet } from 'react-native';
 

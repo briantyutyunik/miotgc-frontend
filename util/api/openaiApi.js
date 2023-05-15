@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 const apiKey = Constants.manifest.extra.openaiApiKey;
 
 const configuration = new Configuration({
-	apiKey: "",
+	apiKey: apiKey,
 });
 const openai = new OpenAIApi(configuration);
 
@@ -35,9 +35,13 @@ export async function testResponse(data) {
 				role: "user",
 				content:
 					`3 people in the age group of 20-25 are going to Milan, Italy during May 5-10. Create a $$$/$$$ budget day by day detailed itinerary including the price of each activity, meal, and transportation field ` +
-					` They are coming from John F. Kennedy Airport(JFK).` +
+					` They are coming from JFK in New York City` +
 					`Your output should be returned as a JSON object with the exact same fields as this sample response model and add as` +
-					`many days as specified in the date range: ${itineraryModel}`,
+					`many days as specified in the date range: ${itineraryModel}` + 
+					`When referring to airports, make sure to always output them as 3 letter acronyms and when referring to dates, the year should be 2023 by default unless otherwise stated.
+					For the distance, please include the word "Miles" as it's shown here with first letter uppercase, and when giving duration, output as shown here "12 Hours", with the first letter uppercase.` +
+					`All time's should be given in a "12:30"-esque form. Hours and minutes only. Utilize 24 hour time.`
+
 			},
 			{ role: "assistant", content: `${sampleResponse}` },
 			{
@@ -45,17 +49,20 @@ export async function testResponse(data) {
 				content:
 					`${data.groupCount} people in the age group of ${data.ageGroup} are going to ${data.destination} during ${data.dates}.` +
 					` Create a ${data.budget}/$$$ budget day by day detailed itinerary including the price of each activity, meal, and transportation field exactly like the sample` +
-					`response provided. They are coming from ${data.departureAirport}.` +
+					`response provided. They are coming from ${data.departureAirport} in ${data.departureCity}.` +
 					`Your output should be returned as a JSON object with the exact same fields as this sample response model and add as` +
-					`many days as specified in the date range: ${itineraryModel}`,
-			},
-		],
+					`many days as specified in the date range: ${itineraryModel}` +
+					`When referring to airports, make sure to always output them as 3 letter acronyms and when referring to dates, the year should be 2023 by default unless otherwise stated.
+					For the distance, please include the word "Miles" as it's shown here with first letter uppercase, and when giving flight duration, output as shown here "12 Hours", with the first letter uppercase.`+
+					`All time's should be given in a "12:30"-esque form. Hours and minutes only. Utilize 24 hour time.
+					`},
+			],
 	});
 	return completion.data.choices[0].message;
 }
 
 export async function testGPT(answers) {
-	console.log("gpt loading...");
+	console.log("GPT LOADING...");
 	console.log(apiKey);
 	let data = {};
 	for (let answer of answers) {
