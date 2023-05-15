@@ -85,11 +85,7 @@ export function getCurrentUser(callback) {
   return onAuthStateChanged(authInstance, callback);
 }
 
-export async function getUser(uid) {
-  const docRef = doc(firestore.getFirestore(), "users", uid);
-  const docSnap = await getDoc(docRef);
-  return docSnap.data();
-}
+
 
 export async function getEmailByUsername(username) {
   const db = firestore.getFirestore();
@@ -358,7 +354,7 @@ export async function addUserToGroup(userId, groupId) {
 export async function addTestUsersToGroup() {
   const testUserId1 = 'GUz7LWZApIajKf2QHIm9t14SBNw2'; 
   const testUserId2 = 'HqKayQtQdwXv8zfHcUsggGCBjQS2'; 
-  const testGroupId = 'fCo0N3buHNjoKVSMOVJ7'; 
+  const testGroupId = 'zd2NVCOdmjyXuuamF7sQ'; 
 
   try {
     await addUserToGroup(testUserId1, testGroupId);
@@ -369,19 +365,109 @@ export async function addTestUsersToGroup() {
     console.error('Error adding test users to group:', error);
   }
 }
+
+
+
+
+export async function getUser(uid) {
+  const docRef = doc(firestore.getFirestore(), "users", uid);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+}
+
+export function cleanUpUser(user) {
+  if (!user) return null;
+  let { avatarUrl, dob, email, firstName, groupIds, groups } = user;
+
+  if (groups) {
+    groups = groups.map(group => group.id);
+  }
+
+  return { avatarUrl, dob, email, firstName, groupIds, groups };
+}
+
+
+
 export async function getGroupMembers(groupId) {
-  const groupRef = doc(firestore.getFirestore(), "groups", groupId);
+  const db = firestore.getFirestore();
+  const groupRef = doc(db, "groups", groupId);
   const membersCollectionRef = collection(groupRef, "members");
   const membersSnap = await getDocs(membersCollectionRef);
+
   const members = [];
-  membersSnap.forEach((memberDoc) => {
-    const memberData = memberDoc.data();
-    const { userRef, ...rest } = memberData;
-    members.push({ uid: memberDoc.id, ...rest });
-  });
-  console.log(members);
+
+  for (let memberDoc of membersSnap.docs) {
+    const memberId = memberDoc.id;  // this is the user ID
+    let userData = await getUser(memberId);
+    userData = cleanUpUser(userData);
+    members.push({ uid: memberId, ...userData });
+  }
+  
+  console.log("members list: " , members);
 
   return members;
+}
+
+
+
+export async function storeAiGeneratedResponse(groupId, aiGeneratedResponse) {
+  // Check if groupId and aiGeneratedResponse are valid
+  if (!groupId || !aiGeneratedResponse) {
+    throw new Error("Invalid input to storeAiGeneratedResponse: groupId and aiGeneratedResponse are required");
+  }
+
+  // Reference to the 'trips' subcollection inside the specific group
+  const tripsRef = collection(firestore.getFirestore(), "groups", groupId, "trips");
+
+  try {
+    // Add the response to Firestore and get the auto-generated ID
+    const tripDocRef = await addDoc(tripsRef, aiGeneratedResponse);
+    const tripId = tripDocRef.id;
+
+    console.log(`AI Generated Trip stored with ID: ${tripId}`);
+    return tripId;
+  } catch (error) {
+    console.error("Error storing AI Generated Trip:", error);
+    throw error;  // Re-throw the error to let the caller handle it
+  }
+}
+
+export async function getTripByGroupId(groupId) {
+  console.log("*********88getTripByGroupId***********: ")
+  // Check if groupId is valid
+  if (!groupId) {
+    throw new Error("Invalid input to getTripByGroupId: groupId is required");
+  }
+
+  // Reference to the 'trips' subcollection inside the specific group
+  const tripsRef = collection(firestore.getFirestore(), "groups", groupId, "trips");
+  
+  try {
+    // Query Firestore to get the documents in the 'trips' subcollection
+    const querySnapshot = await getDocs(tripsRef);
+
+    // Check if the group has a trip
+    if (querySnapshot.empty) {
+      console.log(`No trip found for group ID ${groupId}`);
+      return null; // No trip found for this group
+    } 
+    
+    // Get the first (and only) trip document
+    const tripDoc = querySnapshot.docs[0];
+    const tripData = tripDoc.data();
+    
+    console.log("******TRIP*******: ", trip)
+    const trip = {
+      id: tripDoc.id,
+      ...tripData, // This will spread all the fields from the document into the new object
+    };
+
+    console.log(`Retrieved trip for group ID ${groupId}`);
+    return trip;
+  } catch (error) {
+    console.error("Error retrieving trip:", error);
+    throw error;  // Re-throw the error to let the caller handle it
+  }
 }
 
 

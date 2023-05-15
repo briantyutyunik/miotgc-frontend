@@ -33,7 +33,6 @@
     "firebase": "^9.17.1",
     "openai": "^3.2.1",
     "react": "^18.2.0",
-    "react-native": "0.71.7",
     "react-native-btr": "^2.2.0",
     "react-native-collapsible": "^1.6.1",
     "react-native-config": "^1.5.0",

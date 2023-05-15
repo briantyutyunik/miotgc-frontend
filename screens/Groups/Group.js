@@ -10,10 +10,14 @@ import {
   Modal,
   Image,
 } from "react-native";
-import Accordion from "react-native-collapsible/Accordion";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-import { listenGroupName, getCurrentUserProfilePicture } from "../../firebase";
+import {
+  listenGroupName,
+  getCurrentUserProfilePicture,
+  storeAiGeneratedResponse,
+  getTripByGroupId,
+} from "../../firebase";
 import { useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
@@ -32,6 +36,7 @@ import Logo from "../../components/UI/Logo";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function Group() {
+  console.log("Group component rendered"); //
   const QUESTIONS = [
     {
       field: "groupCount",
@@ -70,6 +75,7 @@ export default function Group() {
   const groupId = route.params.groupId;
   const [groupMembers, setGroupMembers] = useState([]);
   const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
+  const [tripData, setTripData] = useState(null);
 
   const [showShareModal, setShowShareModal] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -82,7 +88,28 @@ export default function Group() {
   );
 
   const [testGroupMembers, setTestGroupMembers] = useState([]);
-  console.log("***CURRNET GROUP ID***", groupId);
+
+  const fetchTripData = async () => {
+    try {
+      console.log("Calling getTripByGroupId..."); // Add this line
+      const trip = await getTripByGroupId(groupId);
+      console.log(trip);
+      console.log("getTripByGroupId called."); // Add this line
+      if (trip === null) {
+        console.log("No trip found for group ID: ", groupId);
+        setTripData({});
+      } else {
+        console.log("Trip found: ", trip);
+        setTripData(trip);
+      }
+    } catch (error) {
+      console.error("Error fetching trip data:", error);
+    }
+  };
+  useEffect(() => {
+    console.log("useEffect hook running");
+    fetchTripData();
+  }, [groupId]);
 
   // *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
   // const copyToClipboard = () => {
@@ -90,35 +117,36 @@ export default function Group() {
   // };
 
   // *** THIS IS TO TEST THE GROUP MEMBERS FUNCTIONALITY ***
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     // await addTestUsersToGroup();
-  //     const members = await getGroupMembers("fCo0N3buHNjoKVSMOVJ7");
-  //     setTestGroupMembers(members);
-  //     console.log("*******GROUP MEMBER FIRST NAME******: ", members);
-  //   }
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
-    async function fetchGroupMembers() {
-      const members = await getGroupMembers(groupId);
-      const promises = members.map((member) =>
-        getCurrentUserProfilePicture(member.uid)
-      );
-      const pfpUrls = await Promise.all(promises);
-      console.log("PFP URLS:", pfpUrls);
-      const membersWithPfp = members.map((member, index) => ({
-        ...member,
-        pfpUrl: pfpUrls[index],
-      }));
-      console.log(membersWithPfp);
-      console;
-      setGroupMembers(membersWithPfp);
+    async function fetchData() {
+      //await addTestUsersToGroup();
+      const members = await getGroupMembers("zd2NVCOdmjyXuuamF7sQ");
+      setGroupMembers(members);
+      // console.log("*******GROUP MEMBER FIRST NAME******: ", members);
     }
-    fetchGroupMembers();
+  
+
+    fetchData();
   }, []);
+
+  // useEffect(() => {
+  //   async function fetchGroupMembers() {
+  //     const members = await getGroupMembers(groupId);
+  //     const promises = members.map((member) =>
+  //       getCurrentUserProfilePicture(member.uid)
+  //     );
+  //     const pfpUrls = await Promise.all(promises);
+  //     console.log("PFP URLS:", pfpUrls);
+  //     const membersWithPfp = members.map((member, index) => ({
+  //       ...member,
+  //       pfpUrl: pfpUrls[index],
+  //     }));
+  //     console.log(membersWithPfp);
+  //     console;
+  //     setGroupMembers(membersWithPfp);
+  //   }
+  //   fetchGroupMembers();
+  // }, []);
 
   const handleShare = async () => {
     // exp://exp.host/@yourusername/your-app-slug/some-path
@@ -137,7 +165,7 @@ export default function Group() {
       console.error("Error sharing link: ", error);
     }
   };
-  const handleSubmitButtonPress = () => {
+  const handleSubmitButtonPress = async () => {
     console.log("ANSWER:", inputValue);
     const tempAnswers = [...answers];
     tempAnswers[currentQuestionIndex] = {
@@ -148,14 +176,17 @@ export default function Group() {
     if (currentQuestionIndex < QUESTIONS.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // add loading spinner here
       console.log("Submitting answers...");
       console.log(answers);
-      testGPT(answers).then((aiGeneratedResponse) => {
-        setAiGeneratedResponse(aiGeneratedResponse);
-        setIsNewGroup(false);
-        console.log(aiGeneratedResponse);
-      });
+      try {
+        await testGPT(answers).then(async (aiGeneratedResponse) => {
+          await storeAiGeneratedResponse(groupId, aiGeneratedResponse);
+          setIsNewGroup(false);
+          await fetchTripData();
+        });
+      } catch (error) {
+        console.error("Error in handleSubmitButtonPress:", error);
+      }
     }
 
     setAnswers(tempAnswers);
@@ -242,7 +273,7 @@ export default function Group() {
                     {groupMembers.map((member, index) => (
                       <View key={index} style={styles.groupMember}>
                         <Image
-                          source={{ uri: member.pfpUrl }}
+                          source={{ uri: member.avatarUrl }}
                           style={styles.profilePhoto}
                         />
                         {/* <Text style={styles.groupMembersListText}>
@@ -266,17 +297,18 @@ export default function Group() {
                     </View>
                   </View>
                 </Card>
+
                 <Card
-                  additionalStyles={[
-                    styles.sectionsCard,
-                    styles.itineraryTextContainer,
-                  ]}
+                    additionalStyles = {[styles.sectionsCard,
+                    styles.itineraryTextContainer,]}
+                  
                 >
                   <TouchableOpacity
                     style={{ flexDirection: "row", alignItems: "center" }}
                     onPress={() => {
-                      navigation.navigate("Itinerary", { aiGeneratedResponse: aiGeneratedResponse });
-
+                      navigation.navigate("Itinerary", {
+                        aiGeneratedResponse: aiGeneratedResponse,
+                      });
                     }}
                   >
                     <Text style={styles.itineraryText}>Itinerary</Text>
@@ -287,52 +319,53 @@ export default function Group() {
                     ></Ionicons>
                   </TouchableOpacity>
                 </Card>
-                <Card additionalStyles={styles.sectionsCard}>
-                  <View>
-                    <Text style={styles.sectionsTitle}>Flight</Text>
-                    <Text style={styles.sectionsText}>
-                      {aiGeneratedResponse.FlightInformation.DepartureAirport} -
-                      {aiGeneratedResponse.FlightInformation.ArrivalAirport}
-                      {aiGeneratedResponse.FlightInformation.DepartureTime}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Flight Number:{" "}
-                      {aiGeneratedResponse.FlightInformation.FlightNumber}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Departure Date:{" "}
-                      {aiGeneratedResponse.FlightInformation.DepartureDate}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Arrival Time:{" "}
-                      {aiGeneratedResponse.FlightInformation.ArrivalTime}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Return Date:{" "}
-                      {aiGeneratedResponse.FlightInformation.ReturnDate}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Airline: {aiGeneratedResponse.FlightInformation.Airline}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Price: {aiGeneratedResponse.FlightInformation.Price}
-                    </Text>
-                  </View>
-                </Card>
-                <Card additionalStyles={styles.sectionsCard}>
-                  <View>
-                    <Text style={styles.sectionsTitle}>Hotel</Text>
-                    <Text style={styles.sectionsText}>
-                      {aiGeneratedResponse.Accommodation.Name}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Address: {aiGeneratedResponse.Accommodation.Address}
-                    </Text>
-                    <Text style={styles.sectionsText}>
-                      Price: {aiGeneratedResponse.Accommodation.Price}
-                    </Text>
-                  </View>
-                </Card>
+                {tripData && (
+                  <Card additionalStyles={styles.sectionsCard}>
+                    <View>
+                      <Text style={styles.sectionsTitle}>Flight</Text>
+                       <Text style={styles.sectionsText}>
+                        {tripData.FlightInformation.DepartureAirport} -
+                        {tripData.FlightInformation.ArrivalAirport}
+                        {tripData.FlightInformation.DepartureTime}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Flight Number: {tripData.FlightInformation.FlightNumber}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Departure Date:{" "}
+                        {tripData.FlightInformation.DepartureDate}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Arrival Time: {tripData.FlightInformation.ArrivalTime}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Return Date: {tripData.FlightInformation.ReturnDate}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Airline: {tripData.FlightInformation.Airline}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Price: {tripData.FlightInformation.Price}
+                      </Text>
+                    </View>
+                  </Card>
+                )}
+                {tripData && (
+                  <Card additionalStyles={styles.sectionsCard}>
+                    <View>
+                      <Text style={styles.sectionsTitle}>Hotel</Text>
+                      <Text style={styles.sectionsText}>
+                        {tripData.Accommodation.Name}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Address: {tripData.Accommodation.Address}
+                      </Text>
+                      <Text style={styles.sectionsText}>
+                        Price: {tripData.Accommodation.Price}
+                      </Text>
+                    </View>
+                  </Card>
+                )}
                 <Card additionalStyles={styles.sectionsCard}></Card>
                 <Card additionalStyles={styles.sectionsCard}></Card>
                 <Card additionalStyles={styles.sectionsCard}></Card>

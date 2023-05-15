@@ -95,6 +95,7 @@ export default function AuthenticationScreen() {
       <Logo additionalStyle={styles.logo} height={120} width={120} />
       <Slogan />
       <View style={styles.authButtonsContainer}>
+
       <Button
           containerStyle={styles.buttonContainer}
           title={"GPT"}
