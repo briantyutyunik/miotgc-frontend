@@ -10,6 +10,7 @@ import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import { testGPT } from "../../util/api/openaiApi";
+import { Easing } from 'react-native';
 
 export default function UserProfileScreen() {
 	const shakeAnimation = useRef(new Animated.Value(0)).current;
@@ -34,32 +35,53 @@ export default function UserProfileScreen() {
 		console.log("testGPT done.");
 	}
 
-	const startShaking = () => {
-		setShowDeleteIcon(true);
-		Animated.loop(
-			Animated.sequence([
-				Animated.timing(shakeAnimation, {
-					toValue: 2,
-					duration: 150,
-					useNativeDriver: true,
-				}),
-				Animated.timing(shakeAnimation, {
-					toValue: -2,
-					duration: 150,
-					useNativeDriver: true,
-				}),
-			])
-		).start();
-	};
+	const [isShaking, setIsShaking] = useState(false);
+let shakeLoop;
 
-	const stopShaking = () => {
-		setShowDeleteIcon(false);
-		Animated.timing(shakeAnimation, {
-			toValue: 0,
-			duration: 100,
-			useNativeDriver: true,
-		}).start();
-	};
+const startShaking = () => {
+	setShowDeleteIcon(true);
+	setIsShaking(true);
+	shakeLoop = Animated.loop(
+		Animated.sequence([
+			Animated.timing(shakeAnimation, {
+				toValue: 1, // vary the shake intensity
+				duration: 250,
+				useNativeDriver: true,
+				easing: Easing.elastic(1), // add easing
+			}),
+			Animated.delay(50), // introduce a delay
+			Animated.timing(shakeAnimation, {
+				toValue: -1, // vary the shake intensity
+				duration: 250,
+				useNativeDriver: true,
+				easing: Easing.elastic(1), // add easing
+			}),
+		])
+	).start();
+};
+
+const stopShaking = () => {
+	setShowDeleteIcon(false);
+	setIsShaking(false);
+	shakeLoop && shakeLoop.stop();
+	Animated.timing(shakeAnimation, {
+		toValue: 0,
+		duration: 100,
+		useNativeDriver: true,
+	}).start();
+};
+
+const toggleShaking = () => {
+	setIsShaking((currentIsShaking) => {
+	  if(currentIsShaking) {
+		stopShaking();
+	  } else {
+		startShaking();
+	  }
+	  return !currentIsShaking;
+	});
+  };
+  
 
 	const unsubscribe = getCurrentUser((user) => {
 		setCurrentUser(user);
@@ -118,14 +140,14 @@ export default function UserProfileScreen() {
 		}, [])
 	);
 
-	const EditProfileButton = ({ onPress }) => {
+	const EditProfileButton = () => {
 		return (
-			<TouchableOpacity onPress={() => navigation.navigate("EditProfile")} style={styles.button}>
+			<TouchableOpacity style={styles.button}>
 				<Icon name="pencil" size={20} color="black" />
 			</TouchableOpacity>
 		);
 	};
-
+	
 	const renderGroupCard = ({ item: group }) => {
 		if (group.id === "add-new-group") {
 			return (
@@ -168,7 +190,7 @@ export default function UserProfileScreen() {
 						style={{
 							transform: [{ translateX: shakeAnimation }],
 						}}>
-						<Image source={{ uri: group.image }} style={{ width: 150, height: 180, borderRadius: 10 }} />
+						<Image source={{ uri: group.image }} style={{ width: 150, height: 180, borderRadius: 10}}/>
 						{showDeleteIcon && (
 							<TouchableOpacity
 								onPress={() => deleteGroup(group.id)}
@@ -180,12 +202,23 @@ export default function UserProfileScreen() {
 									borderRadius: 50,
 									backgroundColor: "transparent", // Change this line
 								}}>
-								<Ionicons name="ios-remove-circle-outline" size={24} color="red" />
+								<Ionicons
+									name="ios-remove-circle"
+									size={40}
+									color={PRIMARY_COLOR}
+									style={{
+										shadowColor: '#000',
+										shadowOffset: { width: 0, height: 2 },
+										shadowOpacity: 0.,
+										shadowRadius: 3.84,
+										elevation: 5,
+									}}
+									/>
 							</TouchableOpacity>
 						)}
 					</Animated.View>
 				</TouchableOpacity>
-				<Text style={{ alignItems: "center", fontWeight: "bold", marginTop: 10, color: "black" }}>{group.name}</Text>
+				<Text style={styles.groupText}>{group.name}</Text>
 			</View>
 		);
 	};
@@ -197,7 +230,7 @@ export default function UserProfileScreen() {
 			<ScrollView contentContainerStyle={{ alignItems: "center" }}>
 				<View style={styles.profileScreenContainer}>
 					<View style={styles.logoutIcon}>
-						<EditProfileButton></EditProfileButton>
+						<EditProfileButton/>
 					</View>
 					<View style={styles.profilePictureContainer}>
 						<View style={styles.photoContainer}>
@@ -224,7 +257,9 @@ export default function UserProfileScreen() {
 									</View>
 									<View style={styles.dualCardRight}>
 										<TouchableOpacity onPress={startShaking}>
-											<Text style={styles.flatListTitleEdit}>
+											<Text 
+												style={styles.flatListTitleEdit}
+												onPress={toggleShaking}>
 												Edit {""}
 												<Icon name="plus-square-o" size={18} color="#FF5553" />{" "}
 											</Text>
@@ -286,23 +321,41 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 	},
 	dualCardRight: {
-		alignItems: "flex-end",
 		padding: 5,
+		justifyContent: "flex-end"
 	},
 	dualCardLeft: {
+		flex: 1,
 		alignItems: "flex-start",
 		padding: 5,
 	},
+	groupText: {
+		fontSize: 18, alignItems: "center", fontWeight: "500", paddingLeft: 3, marginTop: 10, color: "black", shadowColor: "#000", 
+		shadowOffset: {
+				width: 0,
+				height: 2,
+			},
+		shadowOpacity: 0.15,
+		shadowRadius: 3.84,
+		elevation: 5
+	},
 	flatListTitle: {
 		marginLeft: 10,
-		marginVertical: 10,
-		fontSize: 18,
-		fontWeight: "bold",
+		fontSize: 26,
+		fontWeight: "600",
 		color: "black",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	flatListTitleEdit: {
 		marginLeft: 10,
-		marginVertical: 10,
+		marginVertical: 5,
 		fontSize: 18,
 		fontWeight: "thin",
 		color: "#FF5553",
