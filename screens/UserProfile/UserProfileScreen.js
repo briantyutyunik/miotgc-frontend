@@ -85,6 +85,7 @@ const toggleShaking = () => {
 
 	const unsubscribe = getCurrentUser((user) => {
 		setCurrentUser(user);
+		console.log("**************CURRENT USER**************", currentUser);
 	});
 
 	useEffect(() => {
@@ -243,7 +244,7 @@ const toggleShaking = () => {
 								{image && <Image style={styles.profilePhoto} source={{ uri: `${image}` }} />}
 							</TouchableOpacity>
 							<View>
-								<Text style={styles.textName}>John Doe</Text>
+								<Text style={styles.textName}>{currentUser.email}</Text>
 							</View>
 						</View>
 					</View>

@@ -6,6 +6,7 @@ import CustomPicker from "../../components/UI/CustomPicker";
 import CardDarker from "../../components/UI/CardDarker";
 import Seperator from "../../components/UI/Seperator";
 import { Separator } from "react-native-btr";
+import { userSignOut } from "../../firebase";
 
 const languages = [
 	{ label: "English", value: "en" },
@@ -89,7 +90,7 @@ export default function Settings() {
 					<Separator />
 				</CardDarker>
 
-				<TouchableOpacity style={styles.logoutButton}>
+				<TouchableOpacity style={styles.logoutButton} onPress={userSignOut}>
 					<Text style={styles.logoutText}>Log Out</Text>
 				</TouchableOpacity>
 			</View>
