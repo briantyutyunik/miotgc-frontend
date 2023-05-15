@@ -132,7 +132,8 @@ export default function UserProfileScreen() {
 				<TouchableOpacity
 					onPress={async () => {
 						const initialGroupName = "Group name";
-						const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/miotgc-8e3f9.appspot.com/o/images%2Fgroups-default.jpg?alt=media&token=8b630f55-0a6b-4fce-ad68-db5ad585ddca";
+						const defaultImageUrl =
+							"https://firebasestorage.googleapis.com/v0/b/miotgc-8e3f9.appspot.com/o/images%2Fgroups-default.jpg?alt=media&token=8b630f55-0a6b-4fce-ad68-db5ad585ddca";
 						const groupId = await createGroup(initialGroupName, defaultImageUrl);
 						navigation.navigate("Group", {
 							isNewGroup: true,
@@ -184,15 +185,12 @@ export default function UserProfileScreen() {
 						)}
 					</Animated.View>
 				</TouchableOpacity>
-				<Text style={{ alignItems: "center",fontWeight: "bold", marginTop: 10, color: "black" }}>{group.name}</Text>
+				<Text style={{ alignItems: "center", fontWeight: "bold", marginTop: 10, color: "black" }}>{group.name}</Text>
 			</View>
 		);
 	};
 
-	const renderPastGroupCard = ({}) => {
-
-	};
-
+	const renderPastGroupCard = ({}) => {};
 
 	return (
 		<Background>

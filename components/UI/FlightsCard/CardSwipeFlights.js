@@ -4,17 +4,12 @@ import ReturningFlightComp from "./ReturningFlightComp";
 import React from "react";
 import Carousel, { Pagination } from "react-native-snap-carousel";
 
-
-const FlightCarousel = ({flightInfoOut, flightInfoBack }) => {
+const FlightCarousel = ({ flightInfoOut, flightInfoBack }) => {
 	const [activeIndex, setActiveIndex] = React.useState(0);
 	const carouselRef = React.useRef(null);
 
 	const renderItem = ({ item }) => {
-		return (
-			<View style={styles.slide}>
-				{item}
-			</View>
-		);
+		return <View style={styles.slide}>{item}</View>;
 	};
 
 	const handleSnapToItem = (index) => {
@@ -27,7 +22,7 @@ const FlightCarousel = ({flightInfoOut, flightInfoBack }) => {
 				layout={"stack"}
 				layoutCardOffset={`18`}
 				ref={carouselRef}
-				data={[<OutgoingFlightComp flightInfoOut={flightInfoOut}/>, <ReturningFlightComp flightInfoBack={flightInfoBack}/>]}
+				data={[<OutgoingFlightComp flightInfoOut={flightInfoOut} />, <ReturningFlightComp flightInfoBack={flightInfoBack} />]}
 				renderItem={renderItem}
 				sliderWidth={400}
 				itemWidth={400}

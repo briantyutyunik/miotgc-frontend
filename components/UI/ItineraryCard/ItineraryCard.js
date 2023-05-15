@@ -1,36 +1,36 @@
-import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import React from "react";
+import { View, TouchableOpacity, Text } from "react-native";
 import Card from "../CardDarker";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const ItineraryCard = ({ navigation, activities }) => {
-  const handlePress = () => {
-    navigation.navigate('Itinerary', {activities });
-  };
+	const handlePress = () => {
+		navigation.navigate("Itinerary", { activities });
+	};
 
-  return (
-    <>
-        <View style={styles.container}>
-                <View style={styles.leftContainer}>
-                    <Text style={styles.flightText}>
-                    {Platform.OS === 'ios' ? '\ud83d\udcdd' : '\ud83d\udcdd'}
-                        Itinerary
-                    </Text>
-                </View>
-            </View>
-        <Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={handlePress}>
-            <Text style={styles.itineraryText}>Tap</Text>
-            <Ionicons name="arrow-forward-outline" size={30} color="black" />
-        </TouchableOpacity>
-        </Card>
-    </>
-  );
+	return (
+		<>
+			<View style={styles.container}>
+				<View style={styles.leftContainer}>
+					<Text style={styles.flightText}>
+						{Platform.OS === "ios" ? "\ud83d\udcdd" : "\ud83d\udcdd"}
+						Itinerary
+					</Text>
+				</View>
+			</View>
+			<Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
+				<TouchableOpacity style={{ flexDirection: "row", alignItems: "center" }} onPress={handlePress}>
+					<Text style={styles.itineraryText}>Tap</Text>
+					<Ionicons name="arrow-forward-outline" size={30} color="black" />
+				</TouchableOpacity>
+			</Card>
+		</>
+	);
 };
 
 const styles = {
-    container: {
-        marginTop: "10%",
+	container: {
+		marginTop: "10%",
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingHorizontal: 16,
@@ -56,12 +56,12 @@ const styles = {
 		marginLeft: 8,
 		fontWeight: "bold",
 	},
-    sectionsCard: {
+	sectionsCard: {
 		marginVertical: "0%",
 		height: "auto",
 		width: "95%",
 	},
-    itineraryTextContainer: {
+	itineraryTextContainer: {
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -69,6 +69,6 @@ const styles = {
 		fontSize: 30,
 		color: "black",
 	},
-}
+};
 
 export default ItineraryCard;

@@ -9,7 +9,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
 import { testGPT } from "../../util/api/openaiApi";
-import {  updateGroupName, addTestUsersToGroup, getGroupMembers, storeAiGeneratedResponse, getTripByGroupId } from "../../firebase";
+import { updateGroupName, addTestUsersToGroup, getGroupMembers, storeAiGeneratedResponse, getTripByGroupId } from "../../firebase";
 import FlightHeadline from "../../components/UI/FlightsCard/FlightHeadline";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
@@ -22,7 +22,6 @@ import HotelCard from "../../components/UI/HotelCard/HotelCard";
 import ItineraryCard from "../../components/UI/ItineraryCard/ItineraryCard";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome } from "@expo/vector-icons";
-
 
 export default function Group() {
 	useEffect(() => {
@@ -57,7 +56,6 @@ export default function Group() {
 	const [inputValue, setInputValue] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
-
 	const [accommodation, setAccommodation] = useState(null);
 	const [activities, setActivities] = useState(null);
 	const [flightInfoOut, setFlightInfoOut] = useState(null);
@@ -74,52 +72,52 @@ export default function Group() {
 
 	const fetchTripData = async () => {
 		try {
-		  console.log("Calling getTripByGroupId...");
-		  const trip = await getTripByGroupId(groupId);
-		  console.log(trip);
-		  console.log("getTripByGroupId called.");
-		  if (trip === null) {
-			console.log("No trip found for group ID: ", groupId);
-			setTripData({});
-		  } else {
-			console.log("Trip found: ", trip);
-			setTripData(trip);
-			// Separate out the data
-			setAccommodation(trip.Accommodation);
-			
-			// Create a variable to hold the day keys that start with "Day"
-			let tripDays = Object.keys(trip).filter(key => key.startsWith("Day"));
-			
-			// Sort the days in order
-			tripDays.sort();
-			
-			// Create an array of day activities
-			let dayActivities = tripDays.map(dayKey => trip[dayKey]);
-			
-			setActivities(dayActivities);
-			setFlightInfoOut(trip.FlightInformationOut);
-			setFlightInfoBack(trip.FlightInformationBack);
-			//console.log("+_+_+_+_+_+_+_ "+trip.FlightInformationOut.Airline);
-		  }
+			console.log("Calling getTripByGroupId...");
+			const trip = await getTripByGroupId(groupId);
+			console.log(trip);
+			console.log("getTripByGroupId called.");
+			if (trip === null) {
+				console.log("No trip found for group ID: ", groupId);
+				setTripData({});
+			} else {
+				console.log("Trip found: ", trip);
+				setTripData(trip);
+				// Separate out the data
+				setAccommodation(trip.Accommodation);
+
+				// Create a variable to hold the day keys that start with "Day"
+				let tripDays = Object.keys(trip).filter((key) => key.startsWith("Day"));
+
+				// Sort the days in order
+				tripDays.sort();
+
+				// Create an array of day activities
+				let dayActivities = tripDays.map((dayKey) => trip[dayKey]);
+
+				setActivities(dayActivities);
+				setFlightInfoOut(trip.FlightInformationOut);
+				setFlightInfoBack(trip.FlightInformationBack);
+				//console.log("+_+_+_+_+_+_+_ "+trip.FlightInformationOut.Airline);
+			}
 		} catch (error) {
-		  console.error("Error fetching trip data:", error);
+			console.error("Error fetching trip data:", error);
 		}
 		//console.log("******THISISIT*************" + flightInfo.Airline);
-	  };	  
-	  useEffect(() => {
+	};
+	useEffect(() => {
 		console.log("useEffect hook running");
 		fetchTripData();
-	  }, [groupId]);
+	}, [groupId]);
 
-	  useEffect(() => {
+	useEffect(() => {
 		async function fetchData() {
-		  //await addTestUsersToGroup();
-		  const members = await getGroupMembers("zd2NVCOdmjyXuuamF7sQ");
-		  setGroupMembers(members);
-		  // console.log("*******GROUP MEMBER FIRST NAME******: ", members);
+			//await addTestUsersToGroup();
+			const members = await getGroupMembers("zd2NVCOdmjyXuuamF7sQ");
+			setGroupMembers(members);
+			// console.log("*******GROUP MEMBER FIRST NAME******: ", members);
 		}
 		fetchData();
-	  }, []);
+	}, []);
 
 	// *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
 	// const copyToClipboard = () => {
@@ -176,30 +174,30 @@ export default function Group() {
 		console.log("ANSWER:", inputValue);
 		const tempAnswers = [...answers];
 		tempAnswers[currentQuestionIndex] = {
-		  ...tempAnswers[currentQuestionIndex],
-		  [QUESTIONS[currentQuestionIndex].field]: inputValue,
+			...tempAnswers[currentQuestionIndex],
+			[QUESTIONS[currentQuestionIndex].field]: inputValue,
 		};
-	
+
 		if (currentQuestionIndex < QUESTIONS.length - 1) {
-		  setCurrentQuestionIndex(currentQuestionIndex + 1);
+			setCurrentQuestionIndex(currentQuestionIndex + 1);
 		} else {
 			setIsLoading(true); // Start loading before making the request
-		  console.log("Submitting answers...");
-		  console.log(answers);
-		  try {
-			await testGPT(answers).then(async (aiGeneratedResponse) => {
-			  await storeAiGeneratedResponse(groupId, aiGeneratedResponse);
-			  setIsNewGroup(false);
-			  await fetchTripData();
-			  setIsLoading(false);
-			});
-		  } catch (error) {
-			console.error("Error in handleSubmitButtonPress:", error);
-		  }
+			console.log("Submitting answers...");
+			console.log(answers);
+			try {
+				await testGPT(answers).then(async (aiGeneratedResponse) => {
+					await storeAiGeneratedResponse(groupId, aiGeneratedResponse);
+					setIsNewGroup(false);
+					await fetchTripData();
+					setIsLoading(false);
+				});
+			} catch (error) {
+				console.error("Error in handleSubmitButtonPress:", error);
+			}
 		}
 		setAnswers(tempAnswers);
 		setInputValue(""); // Reset the input value for the next question
-	  };
+	};
 
 	function answerFieldChangeHandler(text) {
 		setInputValue(text);
@@ -237,7 +235,7 @@ export default function Group() {
 							<View style={styles.destinationImgContainer}>
 								<Image source={DESTINATION_IMAGE} style={[styles.destinationsImg]} />
 								<TouchableOpacity onPress={() => navigation.goBack()}>
-										<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
+									<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
 								</TouchableOpacity>
 							</View>
 							{isEditingGroupName ? (
@@ -257,41 +255,43 @@ export default function Group() {
 										autoFocus={true}
 									/>
 								</View>
-							) : (<>
-								<View style = {styles.groupNameContainerOuter}>
-									<View style={styles.groupNameContainer}>
-										<Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
-										{Platform.OS === "ios" ? "\u{1F9F3}" : "\u{F9F3}"}
-											{groupName}
-										</Text>
-										<TouchableOpacity onPress={handleEditGroupName}>
-											<Icon name="pencil" marginLeft={15}size={35} color="white" />
-										</TouchableOpacity>
-									</View>
-								</View>
-								<Card additionalStyles={styles.groupMembersCard}>
-									<View style={styles.groupMembersRow}>
-										{groupMembers.map((member, index) => (
-											<View key={index} style={styles.groupMember}>
-												<Image source={{ uri: member.pfpUrl }} style={styles.profilePhoto} />
-											</View>
-										))}
-										<View style={styles.addNewGroupMemberContainer}>
-											<TouchableOpacity
-												onPress={() => {
-													setShowShareModal(true);
-												}}>
-												<Ionicons name="add" size={35} color={PRIMARY_COLOR} style={styles.icon} />
+							) : (
+								<>
+									<View style={styles.groupNameContainerOuter}>
+										<View style={styles.groupNameContainer}>
+											<Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
+												{Platform.OS === "ios" ? "\u{1F9F3}" : "\u{F9F3}"}
+												{groupName}
+											</Text>
+											<TouchableOpacity onPress={handleEditGroupName}>
+												<Icon name="pencil" marginLeft={15} size={35} color="white" />
 											</TouchableOpacity>
 										</View>
 									</View>
-								</Card></>
+									<Card additionalStyles={styles.groupMembersCard}>
+										<View style={styles.groupMembersRow}>
+											{groupMembers.map((member, index) => (
+												<View key={index} style={styles.groupMember}>
+													<Image source={{ uri: member.pfpUrl }} style={styles.profilePhoto} />
+												</View>
+											))}
+											<View style={styles.addNewGroupMemberContainer}>
+												<TouchableOpacity
+													onPress={() => {
+														setShowShareModal(true);
+													}}>
+													<Ionicons name="add" size={35} color={PRIMARY_COLOR} style={styles.icon} />
+												</TouchableOpacity>
+											</View>
+										</View>
+									</Card>
+								</>
 							)}
 
 							<FlightHeadline />
-							<CardSwipeFlights flightInfoOut={flightInfoOut} flightInfoBack={flightInfoBack}/>
+							<CardSwipeFlights flightInfoOut={flightInfoOut} flightInfoBack={flightInfoBack} />
 							<HotelHeadline />
-							<HotelCard accommodation={accommodation}/>
+							<HotelCard accommodation={accommodation} />
 							<ItineraryCard navigation={navigation} activities={activities} />
 
 							<Button

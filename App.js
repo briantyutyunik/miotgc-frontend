@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { auth } from "./firebase";
-import { View, StyleSheet} from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 // import Group from "./screens/Groups/Group";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -80,7 +80,7 @@ export default function App() {
 						position: "absolute",
 						borderTopWidth: 0,
 						justifyContent: "center",
-						... styles.shadow
+						...styles.shadow,
 					},
 					tabBarIcon: ({ focused, color, size }) => {
 						let iconName;
@@ -162,5 +162,5 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.5,
 		elevation: 5,
-	}
+	},
 });
