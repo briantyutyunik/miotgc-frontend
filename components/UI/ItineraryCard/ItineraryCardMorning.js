@@ -19,19 +19,25 @@ const ItineraryCardMorning = ({ activities }) => {
 				<View style={styles.row}>
 					<View style={styles.leftColumn}>
 						<Text style={styles.daytime}>Morning</Text>
-						<Separator size = {1} color="white"/>
+						<Separator size = {1} color="#373737"/>
 						<View style = {styles.spacer}/>
 						<View style={styles.inlineText}>
-							<Text style={styles.labelText}>Activity:</Text>
-							<Text style={styles.boldText}>{morningActivities.Activity}</Text>
+							<Text style={styles.labelText}>Activity</Text>
+							<View style={styles.boldTextContainer}>
+								<Text style={styles.boldText}>{morningActivities.Activity}</Text>
+							</View>
 						</View>
 						<View style={styles.inlineText}>
-							<Text style={styles.labelText}>Meal:</Text>
-							<Text style={styles.boldText}>{morningActivities.Meal}</Text>
+							<Text style={styles.labelText}>Meal</Text>
+							<View style={styles.boldTextContainer}>
+								<Text style={styles.boldText}>{morningActivities.Meal}</Text>
+							</View>
 						</View>
 						<View style={styles.inlineText}>
-							<Text style={styles.labelText}>Transportation:</Text>
-							<Text style={styles.boldText}>{morningActivities.Transportation}</Text>
+							<Text style={styles.labelText}>Transport</Text>
+							<View style={styles.boldTextContainer}>
+								<Text style={styles.boldText}>{morningActivities.Transportation}</Text>
+							</View>
 						</View>
 					</View>
 				</View>
@@ -42,11 +48,10 @@ const ItineraryCardMorning = ({ activities }) => {
 
 const styles = StyleSheet.create({
 	daytime: {
-		color: "black",
 		fontSize: 26,
 		fontWeight: "600",
 		paddingBottom: 5,
-		color: "white",
+		color: "#373737",
 
 	},
 	spacer: {
@@ -57,7 +62,7 @@ const styles = StyleSheet.create({
 		marginVertical: 0,
 		height: "100%",
 		width: "95%",
-		backgroundColor: PRIMARY_COLOR,
+		backgroundColor: "white",
 		borderRadius: 10,
 		padding: 16,
 		shadowColor: "black",
@@ -86,22 +91,26 @@ const styles = StyleSheet.create({
 	labelText: {
 		fontWeight: "300",
 		fontSize: 18,
-		color: "white",
+		color: "#373737",
 	},
 	boldText: {
 		fontWeight: "500",
 		fontSize: 18,
 		textAlign: "right",
-		color: "white",
+		color: "#373737",
 
 	},
 	inlineText: {
-		flexDirection: "row",
+		flexDirection: "row",			
 		justifyContent: "space-between",
-		alignItems: "center",
+		alignItems: "flex-start", // Align items to the start of their container
 		marginBottom: 10,
 		color: "white",
 
+	},
+	boldTextContainer: {
+		flex: 1,
+		alignItems: 'flex-end', // Right align the text
 	},
 });
 

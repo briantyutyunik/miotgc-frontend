@@ -5,6 +5,7 @@ import ItineraryCardMorning from "./ItineraryCardMorning";
 import ItineraryCardAfternoon from "./ItineraryCardAfternoon";
 import ItineraryCardEvening from "./ItineraryCardEvening";
 import { PRIMARY_COLOR } from "../../../constants/styles";
+import Background from "../BackgroundUnsafe";
 
 const ItinerarySwipe = ({ activities }) => {
 	const [activeIndex, setActiveIndex] = React.useState(0);
@@ -19,29 +20,29 @@ const ItinerarySwipe = ({ activities }) => {
 	};
 
 	return (
-		<View style={styles.container}>
-            
-			<Carousel
-				layout={"stack"}
-				layoutCardOffset={`18`}
-				ref={carouselRef}
-				data={[<ItineraryCardMorning activities={activities}/>, <ItineraryCardAfternoon activities={activities}/>, <ItineraryCardEvening activities={activities}/>]}
-				renderItem={renderItem}
-				sliderWidth={400}
-				itemWidth={400}
-				onSnapToItem={handleSnapToItem}
-			/>
-			<Pagination
-				dotsLength={3}
-				activeDotIndex={activeIndex}
-				carouselRef={carouselRef}
-				containerStyle={styles.paginationContainer}
-				dotStyle={styles.dotStyle}
-				inactiveDotStyle={styles.inactiveDotStyle}
-				inactiveDotOpacity={0.6}
-				inactiveDotScale={0.6}
-			/>
-		</View>
+            <View style={styles.container}>
+                <Carousel
+                    layout={"stack"}
+                    layoutCardOffset={`18`}
+                    ref={carouselRef}
+                    data={[<ItineraryCardMorning activities={activities}/>, <ItineraryCardAfternoon activities={activities}/>, <ItineraryCardEvening activities={activities}/>]}
+                    renderItem={renderItem}
+                    sliderWidth={400}
+                    itemWidth={400}
+                    onSnapToItem={handleSnapToItem}
+                />
+                <Pagination
+                    dotsLength={3}
+                    activeDotIndex={activeIndex}
+                    carouselRef={carouselRef}
+                    containerStyle={styles.paginationContainer}
+                    dotStyle={styles.dotStyle}
+                    inactiveDotStyle={styles.inactiveDotStyle}
+                    inactiveDotOpacity={0.6}
+                    inactiveDotScale={0.6}
+                />
+		    </View>
+		
 	);
 };
 

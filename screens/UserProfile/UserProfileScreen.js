@@ -228,7 +228,7 @@ const toggleShaking = () => {
 		);
 	};
 
-	const renderPastGroupCard = ({}) => {};
+	//const renderPastGroupCard = ({}) => {};
 
 	return (
 		<Background>
