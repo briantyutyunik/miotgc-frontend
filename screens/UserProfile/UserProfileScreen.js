@@ -25,17 +25,6 @@ export default function UserProfileScreen() {
 	const [currentUserData, setCurrentUserData] = useState(null);
 	const navigation = useNavigation();
 
-	async function anotherFunction() {
-		console.log("calling testGPT...");
-		const response = await testGPT(); // wait for the response from the OpenAI API
-		if (response.hasOwnProperty("error")) {
-			console.log("Error occurred:", response.error);
-		} else {
-			console.log("Response:", response);
-		}
-
-		console.log("testGPT done.");
-	}
 
 	const [isShaking, setIsShaking] = useState(false);
 let shakeLoop;
@@ -158,13 +147,15 @@ const toggleShaking = () => {
 				<TouchableOpacity
 					onPress={async () => {
 						const initialGroupName = "Group name";
-						const defaultImageUrl =
+						const groupName = group.name;
+						const defaultImageUrl = 
 							"https://firebasestorage.googleapis.com/v0/b/miotgc-8e3f9.appspot.com/o/images%2Fgroups-default.jpg?alt=media&token=8b630f55-0a6b-4fce-ad68-db5ad585ddca";
 						const groupId = await createGroup(initialGroupName, defaultImageUrl);
 						navigation.navigate("Group", {
 							isNewGroup: true,
 							groupId: groupId,
-							groupName: initialGroupName, // Pass the initial group name
+							initialGroupName: initialGroupName, // Pass the initial group name
+							groupName: groupName
 						});
 					}}
 					style={{
@@ -250,7 +241,7 @@ const toggleShaking = () => {
 								/>
 							
 							<View>
-								<Text style={styles.textName}>John DOe</Text>
+								<Text style={styles.textName}>{currentUser.email}</Text>
 							</View>
 						</View>
 					</View>

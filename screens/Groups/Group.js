@@ -40,13 +40,13 @@ export default function Group() {
 	const route = useRoute();
 	// const initialGroupName = route.params.groupName;
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const initialGroupName = "Group Name";
+	const initialGroupName = route.params.initialGroupName;
 	const isNewGroupParam = route.params?.isNewGroup || false;
 	const [isNewGroup, setIsNewGroup] = useState(isNewGroupParam);
 	const [isEditingGroupName, setIsEditingGroupName] = useState(false);
 	// const [groupName, setGroupName] = useState(initialGroupName);
 	// for testing. this groupName will be replaced with the one above
-	const [groupName, setGroupName] = useState("Group Name");
+	const [groupName, setGroupName] = useState(route.params.groupName);
 	const groupId = route.params.groupId;
 	const groupImage = route.params.groupImage
 	const [groupMembers, setGroupMembers] = useState([]);

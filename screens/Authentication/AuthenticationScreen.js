@@ -67,15 +67,15 @@ export default function AuthenticationScreen() {
 		}
 	}
 	// correct function - uncomment later
-	// function onSignIn() {
-	//   // console.log("HERE");
-	//   navigation.navigate("SignIn");
-	// }
-	async function onSignIn() {
-		// console.log("HERE");
-		// temporary to reduce sign in on refresh each time
-		const { error } = await userSignIn("tahirm", "Hello@123");
+	function onSignIn() {
+	  // console.log("HERE");
+	  navigation.navigate("SignIn");
 	}
+	// async function onSignIn() {
+	// 	// console.log("HERE");
+	// 	// temporary to reduce sign in on refresh each time
+	// 	const { error } = await userSignIn("tahirm", "Hello@123");
+	// }
 
 	function onSignUp() {
 		navigation.navigate("SignUp");
@@ -104,8 +104,8 @@ export default function AuthenticationScreen() {
 				/>
 				<Seperator />
 				<Button containerStyle={styles.buttonContainer} title={"Sign Up"} fontSize={20} onPress={onSignUp} />
-				<Button containerStyle={styles.signInContainer} textStyle={styles.signInText} textColor={"white"} fontSize={20} title="Sign In" onPress={onSignIn} />
 			</View>
+				<Button containerStyle={styles.signInContainer} textStyle={styles.signInText} textColor={"white"} fontSize={20} title="Sign In" onPress={onSignIn} />
 		</Background>
 	);
 }
