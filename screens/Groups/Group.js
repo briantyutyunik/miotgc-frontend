@@ -15,13 +15,13 @@ import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Logo from "../../components/UI/Logo";
 import LoadingMessage from "../../components/UI/LoadingMessage";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import CardSwipeFlights from "../../components/UI/FlightsCard/CardSwipeFlights";
 import HotelHeadline from "../../components/UI/HotelCard/HotelHeadline";
 import HotelCard from "../../components/UI/HotelCard/HotelCard";
 import ItineraryCard from "../../components/UI/ItineraryCard/ItineraryCard";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function Group() {
 	useEffect(() => {

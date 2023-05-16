@@ -4,11 +4,12 @@ import Carousel, { Pagination } from "react-native-snap-carousel";
 import ItineraryCardMorning from "./ItineraryCardMorning";
 import ItineraryCardAfternoon from "./ItineraryCardAfternoon";
 import ItineraryCardEvening from "./ItineraryCardEvening";
+import { PRIMARY_COLOR } from "../../../constants/styles";
 
-const ItinerarySwipe = ({ activites }) => {
+const ItinerarySwipe = ({ activities }) => {
 	const [activeIndex, setActiveIndex] = React.useState(0);
 	const carouselRef = React.useRef(null);
-
+	console.log("*****ACTIVITIES*****", activities)
 	const renderItem = ({ item }) => {
 		return <View style={styles.slide}>{item}</View>;
 	};
@@ -24,7 +25,7 @@ const ItinerarySwipe = ({ activites }) => {
 				layout={"stack"}
 				layoutCardOffset={`18`}
 				ref={carouselRef}
-				data={[<ItineraryCardMorning activites={activities}/>, <ItineraryCardAfternoon activites={activities}/>, <ItineraryCardEvening activites={activities}/>]}
+				data={[<ItineraryCardMorning activities={activities}/>, <ItineraryCardAfternoon activities={activities}/>, <ItineraryCardEvening activities={activities}/>]}
 				renderItem={renderItem}
 				sliderWidth={400}
 				itemWidth={400}
@@ -50,6 +51,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		paddingBottom: 10,
+
 	},
 	paginationContainer: {
 		paddingVertical: 0,
@@ -71,6 +73,7 @@ const styles = StyleSheet.create({
 		borderRadius: 4,
 		backgroundColor: "#A9A9A9",
 	},
+	
 });
 
 export default ItinerarySwipe;
