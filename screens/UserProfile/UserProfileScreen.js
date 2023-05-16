@@ -133,9 +133,9 @@ const toggleShaking = () => {
 		}, [])
 	);
 
-	const EditProfileButton = () => {
+	const EditProfileButton = ({ onPress }) => {
 		return (
-			<TouchableOpacity style={styles.button}>
+			<TouchableOpacity onPress={() => navigation.navigate("EditProfile")} style={styles.button}>
 				<Icon name="pencil" size={20} color="black" />
 			</TouchableOpacity>
 		);
@@ -241,7 +241,7 @@ const toggleShaking = () => {
 								/>
 							
 							<View>
-								<Text style={styles.textName}>{currentUser.email}</Text>
+								<Text style={styles.textName}>J</Text>
 							</View>
 						</View>
 					</View>
@@ -259,7 +259,7 @@ const toggleShaking = () => {
 												style={styles.flatListTitleEdit}
 												onPress={toggleShaking}>
 												Edit {""}
-												<Icon name="plus-square-o" size={18} color="#FF5553" />{" "}
+												<Icon name="plus-square-o" size={22} color="#FF5553" />{" "}
 											</Text>
 										</TouchableOpacity>
 									</View>
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
 	flatListTitleEdit: {
 		marginLeft: 10,
 		marginVertical: 5,
-		fontSize: 18,
+		fontSize: 24,
 		fontWeight: "thin",
 		color: "#FF5553",
 		marginRight: 10,

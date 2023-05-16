@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ActivityIndicator, KeyboardAvoidingView, ScrollView } from "react-native";
+import { StyleSheet, View, ActivityIndicator, KeyboardAvoidingView, ScrollView, TouchableOpacity } from "react-native";
 import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import Card from "../../../components/UI/Card";
@@ -10,8 +10,13 @@ import { userSignUp } from "../../../firebase";
 import UserAvatar from "../../../components/UI/UserAvatar";
 import ImageSelect from "../../../components/UI/ImageSelect";
 import { checkIfValueExists } from "../../../firebase";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
+
+
 const SignUpScreen = () => {
 	const [error, setError] = useState("");
+	const navigation = useNavigation();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [firstName, setFirstName] = useState("");
@@ -182,7 +187,13 @@ const SignUpScreen = () => {
 
 	return (
 		<Background additionalStyle={styles.container}>
-			<Logo additionalStyle={styles.logo} height={90} width={120} />
+			<View style={styles.container}>
+			<View style ={styles.alignRow}>
+				<TouchableOpacity onPress={() => navigation.goBack()}>
+					<FontAwesome name="arrow-left" marginTop={30} marginLeft={30} size={35} color="#ffffff" />
+				</TouchableOpacity>
+			</View>
+			<Logo additionalStyle={styles.logo}  height={90} width={120} />
 			<KeyboardAvoidingView behavior="padding" style={styles.authInputContainer}>
 				<Card additionalStyles={styles.cardContainer}>
 					<View style={styles.signUpHeaderContainer}>
@@ -226,6 +237,7 @@ const SignUpScreen = () => {
 					/>
 				)}
 			</KeyboardAvoidingView>
+			</View>
 		</Background>
 	);
 };
@@ -233,14 +245,20 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
 	container: {
 		alignItems: "center",
+		paddingBottom: 150,
+	},
+	alignRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		width: "100%",
 	},
 	logo: {
-		position: "absolute",
-		top: 10,
+		top: -50,
 	},
 	authInputContainer: {
 		alignItems: "center",
-		top: "17%",
+		top: "1%",
 		width: "90%",
 	},
 	disabledButton: {

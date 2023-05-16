@@ -12,7 +12,7 @@ const EditProfile = () => {
 	const [lastName, setLastName] = useState("");
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
-
+	
 	const handleDeleteUser = () => {
 		Alert.alert(
 			"Confirm Account Deletion",
@@ -32,6 +32,7 @@ const EditProfile = () => {
 		);
 	};
 
+
 	return (
 		<Background>
 			<View style={styles.outHeader}>
@@ -39,10 +40,9 @@ const EditProfile = () => {
 					<TouchableOpacity onPress={() => navigation.goBack()}>
 						<FontAwesome name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
 					</TouchableOpacity>
-					<Text style={styles.title}>Edit Profile</Text>
 				</View>
-				<View></View>
 			</View>
+			<Text style={styles.title}>Edit Profile</Text>
 			<View style={styles.container}>
 				<View style={styles.body}>
 					<CardDarker>
@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	title: {
+		marginTop: -20,
 		fontSize: 36,
 		fontWeight: "bold",
 		color: "white",
