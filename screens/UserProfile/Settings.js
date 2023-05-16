@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
 	},
 	settingHeading: {
 		color: "black",
-		fontSize: 15,
+		fontSize: 18,
 		fontWeight: "500",
 		marginBottom: 10,
 	},
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
 	label: {
 		color: "black",
 		padding: "2.5%",
-		fontSize: 17,
+		fontSize: 18,
 	},
 	picker: {
 		flex: 1,
@@ -151,12 +151,12 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		paddingVertical: 15,
 		paddingHorizontal: 30,
-		borderRadius: 5,
+		borderRadius: 10,
 		alignSelf: "center",
 		marginTop: 30,
 	},
 	logoutText: {
 		color: "black",
-		fontSize: 16,
+		fontSize: 20,
 	},
 });

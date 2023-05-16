@@ -114,7 +114,7 @@ export default function App() {
 					},
 				}}>
 				<Tab.Screen name="UserProfile" component={UserProfileScreen} />
-				<Tab.Screen name="TestScreen" component={TestScreen} />
+				{/*<Tab.Screen name="TestScreen" component={TestScreen} />*/}
 				<Tab.Screen name="Settings" component={Settings} />
 			</Tab.Navigator>
 		);
