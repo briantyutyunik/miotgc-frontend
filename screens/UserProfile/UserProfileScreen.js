@@ -140,6 +140,8 @@ const toggleShaking = () => {
 			</TouchableOpacity>
 		);
 	};
+
+	
 	
 	const renderGroupCard = ({ item: group }) => {
 		if (group.id === "add-new-group") {
