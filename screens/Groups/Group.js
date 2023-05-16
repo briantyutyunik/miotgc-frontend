@@ -315,7 +315,7 @@ export default function Group() {
 							<HotelHeadline />
 							<HotelCard accommodation={accommodation} />
 							<ItineraryCard navigation={navigation} activities={activities} />
-
+							{/*}
 							<Button
 								textColor={"white"}
 								iconName={"chevron-forward-sharp"}
@@ -324,7 +324,7 @@ export default function Group() {
 								fontSize={24}
 								containerStyle={styles.completeButton}
 								title={"Complete Trip"}
-							/>
+							/>*/}
 						</>
 					) : (
 						<View style={styles.containerProg}>
@@ -575,6 +575,7 @@ const styles = {
 	itinerariesContainer: {
 		width: "100%",
 		alignItems: "center",
+		paddingBottom: 160,
 	},
 	profilePhoto: {
 		width: 60,

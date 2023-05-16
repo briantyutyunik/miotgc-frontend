@@ -8,6 +8,8 @@ import AuthInput from "../../../components/Auth/Sign In/AuthInput";
 import Card from "../../../components/UI/Card";
 import { PRIMARY_COLOR } from "../../../constants/styles";
 import { userSignIn } from "../../../firebase";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 const SignInScreen = ({ navigation }) => {
 	const [email, setEmail] = useState("");
@@ -47,7 +49,13 @@ const SignInScreen = ({ navigation }) => {
 	};
 
 	return (
-		<Background additionalStyle={styles.container}>
+		<Background>
+		<View style = {styles.container}>
+		<View style = {styles.alignRow}>
+			<TouchableOpacity onPress={() => navigation.goBack()}>
+				<FontAwesome name="arrow-left" marginTop={30} marginLeft={30} size={35} color="#ffffff" />
+			</TouchableOpacity>
+		</View>
 			<Logo additionalStyle={styles.logo} height={120} width={120} />
 			<KeyboardAvoidingView behavior="padding" style={styles.authInputContainer}>
 				<Card additionalStyles={styles.cardContainer}>
@@ -64,13 +72,13 @@ const SignInScreen = ({ navigation }) => {
 							title="here"
 							onPress={() => navigation.navigate("SignUp")}
 							textStyle={{
-								color: PRIMARY_COLOR, // Custom text color
+								color: "#373737", // Custom text color
 								fontSize: 16, // Custom text size
 								textDecorationLine: "underline",
 								fontWeight: "normal",
 								shadowColor: "transparent",
 							}}
-							textColor={PRIMARY_COLOR}
+							textColor="#373737"
 							containerStyle={styles.noShadowSignUpHereButton}
 						/>
 					</View>
@@ -103,6 +111,7 @@ const SignInScreen = ({ navigation }) => {
 					</TouchableWithoutFeedback>
 				</Modal>
 			</KeyboardAvoidingView>
+			</View>
 		</Background>
 	);
 };
@@ -112,9 +121,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		// justifyContent: "flex-end",
 	},
+	alignRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		width: "100%",
+	},
 	logo: {
 		position: "absolute",
-		top: 50,
+		top: 0,
 	},
 	signInHeaderContainer: {
 		marginBottom: 40,
@@ -123,7 +138,7 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: "bold",
 		marginBottom: 30,
-		color: PRIMARY_COLOR,
+		color: "#373737",
 	},
 	authInputContainer: {
 		// marginBottom: "80%",
@@ -234,7 +249,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	signUpHereText: {
-		color: PRIMARY_COLOR,
+		color: "#373737",
 		fontSize: 16,
 	},
 	noShadowSignUpHereButton: {
