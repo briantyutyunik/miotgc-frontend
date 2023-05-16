@@ -16,6 +16,10 @@ import TestScreen from "./screens/UserProfile/TestScreen.js";
 import Itinerary from "./screens/Groups/Itinerary";
 import EditProfile from "./screens/UserProfile/EditProfile.js";
 import { PRIMARY_COLOR } from "./constants/styles";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator(); // Create the Tab variable

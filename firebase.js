@@ -182,6 +182,9 @@ export async function createInvite(groupId, inviterId) {
 export async function getSectionsByGroupId(groupId) {
 	const db = firestore.getFirestore();
 	const querySnapshot = await firestore.getDocs(firestore.query(firestore.collection(db, "Itineraries"), firestore.where("groupId", "==", groupId)));
+	
+	
+	
 	const sections = [];
 	// const db = firestore.getFirestore();
 	// const querySnapshot = await firestore.getDocs(
@@ -229,7 +232,6 @@ export async function fetchGroups() {
 			image: data.groupAvatar,
 		});
 	});
-
 	return groupData;
 }
 
@@ -252,6 +254,11 @@ export async function addUser(uid, data) {
 export async function updateUser(uid, data) {
 	const docRef = doc(firestore.getFirestore(), "users", uid);
 
+	await updateDoc(docRef, data);
+}
+
+export async function updateGroup(groupId, data) {
+	const docRef = doc(firestore.getFirestore(), 'groups', groupId);
 	await updateDoc(docRef, data);
 }
 

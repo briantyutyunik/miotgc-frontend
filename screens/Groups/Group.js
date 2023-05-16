@@ -48,6 +48,7 @@ export default function Group() {
 	// for testing. this groupName will be replaced with the one above
 	const [groupName, setGroupName] = useState("Group Name");
 	const groupId = route.params.groupId;
+	const groupImage = route.params.groupImage
 	const [groupMembers, setGroupMembers] = useState([]);
 	const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
 	const [tripData, setTripData] = useState(null);
@@ -71,6 +72,9 @@ export default function Group() {
 	const [testGroupMembers, setTestGroupMembers] = useState([]);
 
 	const fetchTripData = async () => {
+		console.log("********GROUPAVATAR*********", groupImage)
+		console.log("********GROUPID*********", groupId)
+
 		try {
 			console.log("Calling getTripByGroupId...");
 			const trip = await getTripByGroupId(groupId);
@@ -102,7 +106,7 @@ export default function Group() {
 		} catch (error) {
 			console.error("Error fetching trip data:", error);
 		}
-		//console.log("******THISISIT*************" + flightInfo.Airline);
+		console.log("********GROUPAVATAR*********")
 	};
 	useEffect(() => {
 		console.log("useEffect hook running");
@@ -118,6 +122,25 @@ export default function Group() {
 		}
 		fetchData();
 	}, []);
+
+	async function handleGroupImageUpload(image) {
+		const currUserUid = auth.getAuth().currentUser?.uid;
+		const imageName = generateImageName();
+		await uploadImage(image, imageName);
+		if (currUserUid) {
+		  try {
+			// upload image to firebase storage
+			// update user's avatar url
+			updateGroup(groupId, {groupUrl: imageName});
+		  } catch (err) {
+			console.log(err);
+		  }
+		} else if (image) {
+		  // callback to SignUpScreen in the case that a user is not yet Signed up but
+		  // their image needs to be uploaded to firebase
+		  setImageName(imageName);
+		}
+	  }
 
 	// *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
 	// const copyToClipboard = () => {
@@ -224,8 +247,7 @@ export default function Group() {
 	const closeModal = () => {
 		setShowShareModal(false);
 	};
-	const DESTINATION_IMAGE = require("../../assets/images/paris_night.jpg"); // replace with your destination image
-
+	
 	return (
 		<Background additionalStyle={styles.container}>
 			<ScrollView>
@@ -233,11 +255,11 @@ export default function Group() {
 					{!isNewGroup ? (
 						<>
 							<View style={styles.destinationImgContainer}>
-								<Image source={DESTINATION_IMAGE} style={[styles.destinationsImg]} />
-								<TouchableOpacity onPress={() => navigation.goBack()}>
-									<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
-								</TouchableOpacity>
-							</View>
+								<Image source={{uri: groupImage}} style={[styles.destinationsImg]} />
+									<TouchableOpacity onPress={() => navigation.goBack()}>
+										<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
+									</TouchableOpacity>
+								</View>
 							{isEditingGroupName ? (
 								<View style={styles.groupNameContainer}>
 									<TextInput
@@ -617,13 +639,13 @@ const styles = {
 		elevation: 5,
 	},
 	containerProg: {
-		marginTop: "10%",
+		marginTop: "25%",
 		width: windowWidth - 15,
 		height: windowHeight - 275,
 		flex: 1,
 	},
 	progressBarContainer: {
-		backgroundColor: "white",
+		backgroundColor: "#f9dbdb",
 		height: 8,
 		marginBottom: 30,
 		borderRadius: 100,

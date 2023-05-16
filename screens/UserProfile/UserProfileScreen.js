@@ -11,6 +11,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import { testGPT } from "../../util/api/openaiApi";
 import { Easing } from 'react-native';
+import UserAvatar from "../../components/UI/UserAvatar";
+
 
 export default function UserProfileScreen() {
 	const shakeAnimation = useRef(new Animated.Value(0)).current;
@@ -128,6 +130,7 @@ const toggleShaking = () => {
 			(async () => {
 				const fetchedGroups = await fetchGroups();
 				setGroups(fetchedGroups);
+				// console.log("******BABABOOOY******", groups)
 			})();
 
 			const unsubscribeGroups = listenGroupNames((groupId, groupName) => {
@@ -185,6 +188,7 @@ const toggleShaking = () => {
 						navigation.navigate("Group", {
 							groupName: group.name,
 							groupId: group.id,
+							groupImage: group.image
 						})
 					}>
 					<Animated.View
@@ -235,16 +239,18 @@ const toggleShaking = () => {
 					</View>
 					<View style={styles.profilePictureContainer}>
 						<View style={styles.photoContainer}>
-							<TouchableOpacity
-								onPress={() => {
-									setOpenImageSelect(!openImageSelect);
-								}}
-								style={styles.photoBackground}>
-								{!image && <Skeleton animation="wave" skeletonStyle={styles.skeletonContainer} height={100} circle />}
-								{image && <Image style={styles.profilePhoto} source={{ uri: `${image}` }} />}
-							</TouchableOpacity>
+							
+								{/* {!image && <Skeleton animation="wave" skeletonStyle={styles.skeletonContainer} height={100} circle />} */}
+								{/* {image && <Image style={styles.profilePhoto} source={{ uri: `${image}` }} />} */}
+								<UserAvatar
+									rounded
+									size={150}
+									containerStyle={styles.profilePhoto}
+									
+								/>
+							
 							<View>
-								<Text style={styles.textName}>{currentUser.email}</Text>
+								<Text style={styles.textName}>John DOe</Text>
 							</View>
 						</View>
 					</View>

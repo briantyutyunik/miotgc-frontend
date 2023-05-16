@@ -2,8 +2,11 @@ import React from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import Card from "../CardDarker";
 import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 
 const ItineraryCard = ({ navigation, activities }) => {
+
+
 	const handlePress = () => {
 		navigation.navigate("Itinerary", { activities });
 	};

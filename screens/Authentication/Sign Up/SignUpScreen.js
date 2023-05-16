@@ -191,7 +191,7 @@ const SignUpScreen = () => {
 					</View>
 					<UserAvatar
 						rounded
-						size={80}
+						size={100}
 						imageUri={image}
 						containerStyle={styles.avatarContainerStyle}
 						onPress={() => {

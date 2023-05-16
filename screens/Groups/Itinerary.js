@@ -2,7 +2,7 @@ import { useRoute } from "@react-navigation/native";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import Background from "../../components/UI/Background";
 import Card from "../../components/UI/Card";
-
+import ItinerarySwipe from "../../components/UI/ItineraryCard/ItinerarySwipe";
 
 export default function Itinerary() {
 	const route = useRoute();
@@ -42,6 +42,7 @@ export default function Itinerary() {
 			<ScrollView>
 				<View style={styles.container}>
 					<Text>Itinerary</Text>
+					<ItinerarySwipe activites={activities}/>
 				</View>
 				{renderAllDays()}
 			</ScrollView>

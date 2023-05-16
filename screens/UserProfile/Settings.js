@@ -102,15 +102,11 @@ const styles = StyleSheet.create({
 	cardStyle: {
 		marginBottom: 10,
 	},
-	safe: {
-		flex: 1,
-		backgroundColor: PRIMARY_COLOR,
-	},
 	settingsScreenContainer: {
 		flex: 1,
 		paddingVertical: 30,
 		paddingHorizontal: 20,
-		backgroundColor: PRIMARY_COLOR,
+		backgroundColor: "transparent",
 		width: "100%",
 		//borderTopLeftRadius: 20,
 		//borderTopRightRadius: 20,
