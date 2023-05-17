@@ -1,19 +1,23 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+
 import * as firebase from "firebase/app";
 import { initializeApp } from "firebase/app";
+
 import { getFirestore, query, where } from "firebase/firestore";
 import * as auth from "firebase/auth";
 import * as firestore from "firebase/firestore";
 import { arrayUnion } from "firebase/firestore";
+
 import { doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc, addDoc, collection } from "firebase/firestore";
 import * as storage from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { useContext, useState } from "react";
 import ErrorOverlay from "./components/UI/ErrorOverlay";
 import { getBlobFromUri } from "./util/ImageUtils";
-import { onAuthStateChanged } from "firebase/auth";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -63,10 +67,9 @@ export async function userSignIn(input, password) {
 	return { isLoading, error };
 }
 
-export async function getUser(uid) {
-	const docRef = doc(firestore.getFirestore(), "users", uid);
-	const docSnap = await getDoc(docRef);
-	return docSnap.data();
+export function getCurrentUser(callback) {
+	const authInstance = auth.getAuth();
+	return onAuthStateChanged(authInstance, callback);
 }
 
 export async function getEmailByUsername(username) {
@@ -148,16 +151,15 @@ export async function getCurrentUserProfilePicture(uid) {
 	}
 }
 
-export async function createGroup(groupName) {
+export async function createGroup(groupName, groupAvatar) {
 	const groupData = {
 		groupName: groupName,
 		createdAt: new Date(),
+		groupAvatar: groupAvatar, // Add the image URL to the group data
 	};
-
 	// Add the group to Firestore and get the auto-generated ID
 	const groupDocRef = await addDoc(collection(firestore.getFirestore(), "groups"), groupData);
 	const groupId = groupDocRef.id;
-
 	return groupId;
 }
 
@@ -180,6 +182,9 @@ export async function createInvite(groupId, inviterId) {
 export async function getSectionsByGroupId(groupId) {
 	const db = firestore.getFirestore();
 	const querySnapshot = await firestore.getDocs(firestore.query(firestore.collection(db, "Itineraries"), firestore.where("groupId", "==", groupId)));
+	
+	
+	
 	const sections = [];
 	// const db = firestore.getFirestore();
 	// const querySnapshot = await firestore.getDocs(
@@ -192,27 +197,6 @@ export async function getSectionsByGroupId(groupId) {
 			id: doc.id,
 			...data, // This will spread all the fields from the document into the new object
 		});
-	});
-
-	return sections;
-}
-
-export async function getSections() {
-	const sections = [];
-	const db = firestore.getFirestore();
-	const querySnapshot = await firestore.getDocs(firestore.collection(db, "Itinerary"));
-
-	querySnapshot.forEach((doc) => {
-		const data = doc.data();
-		let section = {
-			id: doc.id,
-		};
-
-		for (const key in data) {
-			section[key] = data[key];
-		}
-		console.log("\n\n\n\n\nAAAAAAAAAAAA" + section);
-		sections.push(section);
 	});
 
 	return sections;
@@ -248,7 +232,6 @@ export async function fetchGroups() {
 			image: data.groupAvatar,
 		});
 	});
-
 	return groupData;
 }
 
@@ -273,6 +256,12 @@ export async function updateUser(uid, data) {
 
 	await updateDoc(docRef, data);
 }
+
+export async function updateGroup(groupId, data) {
+	const docRef = doc(firestore.getFirestore(), 'groups', groupId);
+	await updateDoc(docRef, data);
+}
+
 // Image
 export function generateImageName() {
 	const imageName = `images/img-${new Date().getTime()}.jpg`;
@@ -283,11 +272,6 @@ export async function getImageUrl(uri) {
 	let ref = storage.ref(storage.getStorage(), uri);
 	const downloadUrl = await storage.getDownloadURL(ref);
 	return downloadUrl;
-}
-
-export function getCurrentUser(callback) {
-	const authInstance = auth.getAuth();
-	return onAuthStateChanged(authInstance, callback);
 }
 
 export async function uploadImage(uri, imageName) {
@@ -317,7 +301,7 @@ export async function addUserToGroup(userId, groupId) {
 export async function addTestUsersToGroup() {
 	const testUserId1 = "GUz7LWZApIajKf2QHIm9t14SBNw2";
 	const testUserId2 = "HqKayQtQdwXv8zfHcUsggGCBjQS2";
-	const testGroupId = "fCo0N3buHNjoKVSMOVJ7";
+	const testGroupId = "zd2NVCOdmjyXuuamF7sQ";
 
 	try {
 		await addUserToGroup(testUserId1, testGroupId);
@@ -328,19 +312,102 @@ export async function addTestUsersToGroup() {
 		console.error("Error adding test users to group:", error);
 	}
 }
+
+export async function getUser(uid) {
+	const docRef = doc(firestore.getFirestore(), "users", uid);
+	const docSnap = await getDoc(docRef);
+	return docSnap.data();
+}
+
+export function cleanUpUser(user) {
+	if (!user) return null;
+	let { avatarUrl, dob, email, firstName, groupIds, groups } = user;
+
+	if (groups) {
+		groups = groups.map((group) => group.id);
+	}
+
+	return { avatarUrl, dob, email, firstName, groupIds, groups };
+}
+
 export async function getGroupMembers(groupId) {
-	const groupRef = doc(firestore.getFirestore(), "groups", groupId);
+	const db = firestore.getFirestore();
+	const groupRef = doc(db, "groups", groupId);
 	const membersCollectionRef = collection(groupRef, "members");
 	const membersSnap = await getDocs(membersCollectionRef);
+
 	const members = [];
-	membersSnap.forEach((memberDoc) => {
-		const memberData = memberDoc.data();
-		const { userRef, ...rest } = memberData;
-		members.push({ uid: memberDoc.id, ...rest });
-	});
-	console.log(members);
+
+	for (let memberDoc of membersSnap.docs) {
+		const memberId = memberDoc.id; // this is the user ID
+		let userData = await getUser(memberId);
+		userData = cleanUpUser(userData);
+		members.push({ uid: memberId, ...userData });
+	}
+
+	console.log("members list: ", members);
 
 	return members;
+}
+
+export async function storeAiGeneratedResponse(groupId, aiGeneratedResponse) {
+	// Check if groupId and aiGeneratedResponse are valid
+	if (!groupId || !aiGeneratedResponse) {
+		throw new Error("Invalid input to storeAiGeneratedResponse: groupId and aiGeneratedResponse are required");
+	}
+
+	// Reference to the 'trips' subcollection inside the specific group
+	const tripsRef = collection(firestore.getFirestore(), "groups", groupId, "trips");
+
+	try {
+		// Add the response to Firestore and get the auto-generated ID
+		const tripDocRef = await addDoc(tripsRef, aiGeneratedResponse);
+		const tripId = tripDocRef.id;
+
+		console.log(`AI Generated Trip stored with ID: ${tripId}`);
+		return tripId;
+	} catch (error) {
+		console.error("Error storing AI Generated Trip:", error);
+		throw error; // Re-throw the error to let the caller handle it
+	}
+}
+
+export async function getTripByGroupId(groupId) {
+	console.log("*********88getTripByGroupId***********: ");
+	// Check if groupId is valid
+	if (!groupId) {
+		throw new Error("Invalid input to getTripByGroupId: groupId is required");
+	}
+
+	// Reference to the 'trips' subcollection inside the specific group
+	const tripsRef = collection(firestore.getFirestore(), "groups", groupId, "trips");
+
+	try {
+		// Query Firestore to get the documents in the 'trips' subcollection
+		const querySnapshot = await getDocs(tripsRef);
+
+		// Check if the group has a trip
+		if (querySnapshot.empty) {
+			console.log(`No trip found for group ID ${groupId}`);
+			return null; // No trip found for this group
+		}
+
+		// Get the first (and only) trip document
+		const tripDoc = querySnapshot.docs[0];
+		const tripData = tripDoc.data();
+
+		//console.log("******TRIP DATA*******: ", tripData) // Log tripData here
+		const trip = {
+			id: tripDoc.id,
+			...tripData, // This will spread all the fields from the document into the new object
+		};
+
+		console.log(`Retrieved trip for group ID ${groupId}`);
+		return trip;
+	} catch (error) {
+		console.error("Error retrieving trip:", error);
+		throw error; // Re-throw the error to let the caller handle it
+	}
 }
 
 export { firebase, auth, firestore, storage };

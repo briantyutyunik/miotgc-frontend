@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 	},
 	selectedValue: {
 		color: PRIMARY_COLOR,
-		fontSize: 16,
+		fontSize: 20,
 	},
 	modalOverlay: {
 		flex: 1,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
 		borderColor: "#eee",
 	},
 	itemText: {
-		fontSize: 16,
+		fontSize: 20,
 	},
 });
 

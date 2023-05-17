@@ -10,19 +10,9 @@ import { Skeleton } from "@rneui/themed";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import { testGPT } from "../../util/api/openaiApi";
+import { Easing } from 'react-native';
+import UserAvatar from "../../components/UI/UserAvatar";
 
-const menuStyles = StyleSheet.create({
-	menuContainer: {
-		flex: 1,
-		backgroundColor: "#fff",
-		paddingTop: 50,
-		paddingHorizontal: 20,
-	},
-	menuItem: {
-		fontSize: 18,
-		marginBottom: 10,
-	},
-});
 
 export default function UserProfileScreen() {
 	const shakeAnimation = useRef(new Animated.Value(0)).current;
@@ -30,51 +20,63 @@ export default function UserProfileScreen() {
 	const [image, setImage] = useState();
 	const [openImageSelect, setOpenImageSelect] = useState(false);
 	const [groups, setGroups] = useState([]);
+	const [pastGroups, setPastGroups] = useState([]);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [currentUserData, setCurrentUserData] = useState(null);
 	const navigation = useNavigation();
 
-	async function anotherFunction() {
-		console.log("calling testGPT...");
-		const response = await testGPT(); // wait for the response from the OpenAI API
-		if (response.hasOwnProperty("error")) {
-			console.log("Error occurred:", response.error);
-		} else {
-			console.log("Response:", response);
-		}
 
-		console.log("testGPT done.");
-	}
+	const [isShaking, setIsShaking] = useState(false);
+let shakeLoop;
 
-	const startShaking = () => {
-		setShowDeleteIcon(true);
-		Animated.loop(
-			Animated.sequence([
-				Animated.timing(shakeAnimation, {
-					toValue: 2,
-					duration: 150,
-					useNativeDriver: true,
-				}),
-				Animated.timing(shakeAnimation, {
-					toValue: -2,
-					duration: 150,
-					useNativeDriver: true,
-				}),
-			])
-		).start();
-	};
+const startShaking = () => {
+	setShowDeleteIcon(true);
+	setIsShaking(true);
+	shakeLoop = Animated.loop(
+		Animated.sequence([
+			Animated.timing(shakeAnimation, {
+				toValue: 1, // vary the shake intensity
+				duration: 250,
+				useNativeDriver: true,
+				easing: Easing.elastic(1), // add easing
+			}),
+			Animated.delay(50), // introduce a delay
+			Animated.timing(shakeAnimation, {
+				toValue: -1, // vary the shake intensity
+				duration: 250,
+				useNativeDriver: true,
+				easing: Easing.elastic(1), // add easing
+			}),
+		])
+	).start();
+};
 
-	const stopShaking = () => {
-		setShowDeleteIcon(false);
-		Animated.timing(shakeAnimation, {
-			toValue: 0,
-			duration: 100,
-			useNativeDriver: true,
-		}).start();
-	};
+const stopShaking = () => {
+	setShowDeleteIcon(false);
+	setIsShaking(false);
+	shakeLoop && shakeLoop.stop();
+	Animated.timing(shakeAnimation, {
+		toValue: 0,
+		duration: 100,
+		useNativeDriver: true,
+	}).start();
+};
+
+const toggleShaking = () => {
+	setIsShaking((currentIsShaking) => {
+	  if(currentIsShaking) {
+		stopShaking();
+	  } else {
+		startShaking();
+	  }
+	  return !currentIsShaking;
+	});
+  };
+  
 
 	const unsubscribe = getCurrentUser((user) => {
 		setCurrentUser(user);
+		console.log("**************CURRENT USER**************", currentUser);
 	});
 
 	useEffect(() => {
@@ -117,6 +119,7 @@ export default function UserProfileScreen() {
 			(async () => {
 				const fetchedGroups = await fetchGroups();
 				setGroups(fetchedGroups);
+				// console.log("******BABABOOOY******", groups)
 			})();
 
 			const unsubscribeGroups = listenGroupNames((groupId, groupName) => {
@@ -138,17 +141,23 @@ export default function UserProfileScreen() {
 		);
 	};
 
+	
+	
 	const renderGroupCard = ({ item: group }) => {
 		if (group.id === "add-new-group") {
 			return (
 				<TouchableOpacity
 					onPress={async () => {
 						const initialGroupName = "Group name";
-						const groupId = await createGroup(initialGroupName);
+						const groupName = group.name;
+						const defaultImageUrl = 
+							"https://firebasestorage.googleapis.com/v0/b/miotgc-8e3f9.appspot.com/o/images%2Fgroups-default.jpg?alt=media&token=8b630f55-0a6b-4fce-ad68-db5ad585ddca";
+						const groupId = await createGroup(initialGroupName, defaultImageUrl);
 						navigation.navigate("Group", {
 							isNewGroup: true,
 							groupId: groupId,
-							groupName: initialGroupName, // Pass the initial group name
+							initialGroupName: initialGroupName, // Pass the initial group name
+							groupName: groupName
 						});
 					}}
 					style={{
@@ -172,13 +181,14 @@ export default function UserProfileScreen() {
 						navigation.navigate("Group", {
 							groupName: group.name,
 							groupId: group.id,
+							groupImage: group.image
 						})
 					}>
 					<Animated.View
 						style={{
 							transform: [{ translateX: shakeAnimation }],
 						}}>
-						<Image source={{ uri: group.image }} style={{ width: 150, height: 180, borderRadius: 10 }} />
+						<Image source={{ uri: group.image }} style={{ width: 150, height: 180, borderRadius: 10}}/>
 						{showDeleteIcon && (
 							<TouchableOpacity
 								onPress={() => deleteGroup(group.id)}
@@ -190,40 +200,53 @@ export default function UserProfileScreen() {
 									borderRadius: 50,
 									backgroundColor: "transparent", // Change this line
 								}}>
-								<Ionicons name="ios-remove-circle-outline" size={24} color="red" />
+								<Ionicons
+									name="ios-remove-circle"
+									size={40}
+									color={PRIMARY_COLOR}
+									style={{
+										shadowColor: '#000',
+										shadowOffset: { width: 0, height: 2 },
+										shadowOpacity: 0.,
+										shadowRadius: 3.84,
+										elevation: 5,
+									}}
+									/>
 							</TouchableOpacity>
 						)}
 					</Animated.View>
 				</TouchableOpacity>
-				<Text style={{ fontWeight: "bold", marginTop: 10, color: "white" }}>{group.name}</Text>
+				<Text style={styles.groupText}>{group.name}</Text>
 			</View>
 		);
 	};
+
+	//const renderPastGroupCard = ({}) => {};
 
 	return (
 		<Background>
 			<ScrollView contentContainerStyle={{ alignItems: "center" }}>
 				<View style={styles.profileScreenContainer}>
 					<View style={styles.logoutIcon}>
-						<EditProfileButton></EditProfileButton>
+						<EditProfileButton/>
 					</View>
 					<View style={styles.profilePictureContainer}>
 						<View style={styles.photoContainer}>
-							<TouchableOpacity
-								onPress={() => {
-									setOpenImageSelect(!openImageSelect);
-								}}
-								style={styles.photoBackground}>
-								{!image && <Skeleton animation="wave" skeletonStyle={styles.skeletonContainer} height={100} circle />}
-								{image && <Image style={styles.profilePhoto} source={{ uri: `${image}` }} />}
-							</TouchableOpacity>
+							
+								{/* {!image && <Skeleton animation="wave" skeletonStyle={styles.skeletonContainer} height={100} circle />} */}
+								{/* {image && <Image style={styles.profilePhoto} source={{ uri: `${image}` }} />} */}
+								<UserAvatar
+									rounded
+									size={150}
+									containerStyle={styles.profilePhoto}
+									
+								/>
+							
 							<View>
-								<Text style={styles.textName}>John Doe</Text>
+								<Text style={styles.textName}>J</Text>
 							</View>
 						</View>
 					</View>
-
-					{/* <View style={styles.curve} /> */}
 
 					<View style={styles.parentListContainer}>
 						<View style={styles.flatListContainer}>
@@ -234,9 +257,11 @@ export default function UserProfileScreen() {
 									</View>
 									<View style={styles.dualCardRight}>
 										<TouchableOpacity onPress={startShaking}>
-											<Text style={styles.flatListTitleEdit}>
+											<Text 
+												style={styles.flatListTitleEdit}
+												onPress={toggleShaking}>
 												Edit {""}
-												<Icon name="plus-square-o" size={18} color="#FF5553" />{" "}
+												<Icon name="plus-square-o" size={22} color="#FF5553" />{" "}
 											</Text>
 										</TouchableOpacity>
 									</View>
@@ -251,12 +276,12 @@ export default function UserProfileScreen() {
 							</CardDarker>
 						</View>
 
-						<View style={styles.flatListContainer}>
+						{/*<View style={styles.flatListContainer}>
 							<CardDarker additionalStyles={styles.cardContainer}>
 								<Text style={styles.flatListTitle}>Trip History</Text>
-								<FlatList data={groups} renderItem={renderGroupCard} keyExtractor={(item) => item.id} horizontal showsHorizontalScrollIndicator={true} />
+								<FlatList data={pastGroups} renderItem={renderPastGroupCard} keyExtractor={(item) => item.id} horizontal showsHorizontalScrollIndicator={true} />
 							</CardDarker>
-						</View>
+						</View>*/}
 					</View>
 				</View>
 			</ScrollView>
@@ -288,33 +313,50 @@ const styles = StyleSheet.create({
 	},
 	flatListContainer: {
 		width: "100%",
-		height: "53%", //change this setting to give more room between the cards
+		height: "100%", //this used to be 50%
 		padding: 5,
-		backgroundColor: "#FF5553",
 	},
 	dualCardTitles: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 	},
 	dualCardRight: {
-		alignItems: "flex-end",
 		padding: 5,
+		justifyContent: "flex-end"
 	},
 	dualCardLeft: {
+		flex: 1,
 		alignItems: "flex-start",
 		padding: 5,
 	},
+	groupText: {
+		fontSize: 18, alignItems: "center", fontWeight: "500", paddingLeft: 3, marginTop: 10, color: "black", shadowColor: "#000", 
+		shadowOffset: {
+				width: 0,
+				height: 2,
+			},
+		shadowOpacity: 0.15,
+		shadowRadius: 3.84,
+		elevation: 5
+	},
 	flatListTitle: {
 		marginLeft: 10,
-		marginVertical: 10,
-		fontSize: 18,
-		fontWeight: "bold",
+		fontSize: 26,
+		fontWeight: "600",
 		color: "black",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	flatListTitleEdit: {
 		marginLeft: 10,
-		marginVertical: 10,
-		fontSize: 18,
+		marginVertical: 5,
+		fontSize: 24,
 		fontWeight: "thin",
 		color: "#FF5553",
 		marginRight: 10,
@@ -384,7 +426,7 @@ const styles = StyleSheet.create({
 	textName: {
 		color: "white",
 		fontWeight: "bold",
-		fontSize: "30pt",
+		fontSize: 30,
 		shadowColor: "black",
 		shadowOffset: {
 			width: 4,

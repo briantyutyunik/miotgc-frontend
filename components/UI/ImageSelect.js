@@ -57,7 +57,6 @@ export default function ImageSelect({ openImageSelect, setOpenImageSelect, setIm
 
 	return (
 		<View style={styles.container}>
-			<Button title="Select a Photo" onPress={() => setOpenImageSelect(true)} />
 			<Modal visible={openImageSelect} transparent={true} animationType="fade" onRequestClose={() => setOpenImageSelect(false)}>
 				<View style={styles.overlay}>
 					<View style={styles.bottomSheet}>

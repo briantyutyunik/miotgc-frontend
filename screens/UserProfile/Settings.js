@@ -6,6 +6,7 @@ import CustomPicker from "../../components/UI/CustomPicker";
 import CardDarker from "../../components/UI/CardDarker";
 import Seperator from "../../components/UI/Seperator";
 import { Separator } from "react-native-btr";
+import { userSignOut } from "../../firebase";
 
 const languages = [
 	{ label: "English", value: "en" },
@@ -89,7 +90,7 @@ export default function Settings() {
 					<Separator />
 				</CardDarker>
 
-				<TouchableOpacity style={styles.logoutButton}>
+				<TouchableOpacity style={styles.logoutButton} onPress={userSignOut}>
 					<Text style={styles.logoutText}>Log Out</Text>
 				</TouchableOpacity>
 			</View>
@@ -101,15 +102,11 @@ const styles = StyleSheet.create({
 	cardStyle: {
 		marginBottom: 10,
 	},
-	safe: {
-		flex: 1,
-		backgroundColor: PRIMARY_COLOR,
-	},
 	settingsScreenContainer: {
 		flex: 1,
 		paddingVertical: 30,
 		paddingHorizontal: 20,
-		backgroundColor: PRIMARY_COLOR,
+		backgroundColor: "transparent",
 		width: "100%",
 		//borderTopLeftRadius: 20,
 		//borderTopRightRadius: 20,
@@ -122,7 +119,7 @@ const styles = StyleSheet.create({
 	},
 	settingHeading: {
 		color: "black",
-		fontSize: 15,
+		fontSize: 18,
 		fontWeight: "500",
 		marginBottom: 10,
 	},
@@ -135,7 +132,7 @@ const styles = StyleSheet.create({
 	label: {
 		color: "black",
 		padding: "2.5%",
-		fontSize: 17,
+		fontSize: 18,
 	},
 	picker: {
 		flex: 1,
@@ -154,12 +151,12 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		paddingVertical: 15,
 		paddingHorizontal: 30,
-		borderRadius: 5,
+		borderRadius: 10,
 		alignSelf: "center",
 		marginTop: 30,
 	},
 	logoutText: {
 		color: "black",
-		fontSize: 16,
+		fontSize: 20,
 	},
 });

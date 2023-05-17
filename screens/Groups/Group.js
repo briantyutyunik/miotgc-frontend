@@ -9,17 +9,19 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Button from "../../components/UI/Button";
 import { getFirestore } from "firebase/firestore";
 import { testGPT } from "../../util/api/openaiApi";
-import { firestore, updateGroupName, addTestUsersToGroup, getGroupMembers } from "../../firebase";
+import { updateGroupName, addTestUsersToGroup, getGroupMembers, storeAiGeneratedResponse, getTripByGroupId } from "../../firebase";
 import FlightHeadline from "../../components/UI/FlightsCard/FlightHeadline";
 import AuthInput from "../../components/Auth/Sign In/AuthInput";
 import { PRIMARY_COLOR } from "../../constants/styles";
 import Logo from "../../components/UI/Logo";
 import LoadingMessage from "../../components/UI/LoadingMessage";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import CardSwipeFlights from "../../components/UI/FlightsCard/CardSwipeFlights";
 import HotelHeadline from "../../components/UI/HotelCard/HotelHeadline";
 import HotelCard from "../../components/UI/HotelCard/HotelCard";
+import ItineraryCard from "../../components/UI/ItineraryCard/ItineraryCard";
 import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function Group() {
 	useEffect(() => {
@@ -31,25 +33,34 @@ export default function Group() {
 		{ field: "destination", question: "Question 3", text: "Where are you planning to travel?" },
 		{ field: "dates", question: "Question 4", text: "What dates do you have in mind?" },
 		{ field: "budget", question: "Question 5", text: "What is your budget for this trip?" },
-		{ field: "departureAirport", question: "Question 6", text: "What airport do you plan to depart from?" },
+		{ field: "departureCity", question: "Question 6", text: "What city do you wish to depart from?" },
+		{ field: "departureAirport", question: "Question 7", text: "What airport do you plan to depart from?" },
 	];
 	const navigation = useNavigation();
 	const route = useRoute();
 	// const initialGroupName = route.params.groupName;
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const initialGroupName = "Group Name";
+	const initialGroupName = route.params.initialGroupName;
 	const isNewGroupParam = route.params?.isNewGroup || false;
 	const [isNewGroup, setIsNewGroup] = useState(isNewGroupParam);
 	const [isEditingGroupName, setIsEditingGroupName] = useState(false);
 	// const [groupName, setGroupName] = useState(initialGroupName);
 	// for testing. this groupName will be replaced with the one above
-	const [groupName, setGroupName] = useState("Group Name");
+	const [groupName, setGroupName] = useState(route.params.groupName);
 	const groupId = route.params.groupId;
+	const groupImage = route.params.groupImage
 	const [groupMembers, setGroupMembers] = useState([]);
 	const [aiGeneratedResponse, setAiGeneratedResponse] = useState({});
+	const [tripData, setTripData] = useState(null);
+
 	const [showShareModal, setShowShareModal] = useState(false);
 	const [inputValue, setInputValue] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [accommodation, setAccommodation] = useState(null);
+	const [activities, setActivities] = useState(null);
+	const [flightInfoOut, setFlightInfoOut] = useState(null);
+	const [flightInfoBack, setFlightInfoBack] = useState(null);
 
 	const [answers, setAnswers] = useState(
 		QUESTIONS.map((question) => ({
@@ -59,7 +70,77 @@ export default function Group() {
 	);
 
 	const [testGroupMembers, setTestGroupMembers] = useState([]);
-	console.log("***CURRENT GROUP ID***", groupId);
+
+	const fetchTripData = async () => {
+		console.log("********GROUPAVATAR*********", groupImage)
+		console.log("********GROUPID*********", groupId)
+
+		try {
+			console.log("Calling getTripByGroupId...");
+			const trip = await getTripByGroupId(groupId);
+			console.log(trip);
+			console.log("getTripByGroupId called.");
+			if (trip === null) {
+				console.log("No trip found for group ID: ", groupId);
+				setTripData({});
+			} else {
+				console.log("Trip found: ", trip);
+				setTripData(trip);
+				// Separate out the data
+				setAccommodation(trip.Accommodation);
+
+				// Create a variable to hold the day keys that start with "Day"
+				let tripDays = Object.keys(trip).filter((key) => key.startsWith("Day"));
+
+				// Sort the days in order
+				tripDays.sort();
+
+				// Create an array of day activities
+				let dayActivities = tripDays.map((dayKey) => trip[dayKey]);
+
+				setActivities(dayActivities);
+				setFlightInfoOut(trip.FlightInformationOut);
+				setFlightInfoBack(trip.FlightInformationBack);
+				//console.log("+_+_+_+_+_+_+_ "+trip.FlightInformationOut.Airline);
+			}
+		} catch (error) {
+			console.error("Error fetching trip data:", error);
+		}
+		console.log("********GROUPAVATAR*********")
+	};
+	useEffect(() => {
+		console.log("useEffect hook running");
+		fetchTripData();
+	}, [groupId]);
+
+	useEffect(() => {
+		async function fetchData() {
+			//await addTestUsersToGroup();
+			const members = await getGroupMembers("zd2NVCOdmjyXuuamF7sQ");
+			setGroupMembers(members);
+			// console.log("*******GROUP MEMBER FIRST NAME******: ", members);
+		}
+		fetchData();
+	}, []);
+
+	async function handleGroupImageUpload(image) {
+		const currUserUid = auth.getAuth().currentUser?.uid;
+		const imageName = generateImageName();
+		await uploadImage(image, imageName);
+		if (currUserUid) {
+		  try {
+			// upload image to firebase storage
+			// update user's avatar url
+			updateGroup(groupId, {groupUrl: imageName});
+		  } catch (err) {
+			console.log(err);
+		  }
+		} else if (image) {
+		  // callback to SignUpScreen in the case that a user is not yet Signed up but
+		  // their image needs to be uploaded to firebase
+		  setImageName(imageName);
+		}
+	  }
 
 	// *** THIS DOESN'T WORK FOR SOME REASON WILL FIX LATER ***
 	// const copyToClipboard = () => {
@@ -77,7 +158,6 @@ export default function Group() {
 
 	//   fetchData();
 	// }, []);
-	const gradientColors = ["#21a167", "#00FFFF"];
 
 	useEffect(() => {
 		async function fetchGroupMembers() {
@@ -113,25 +193,30 @@ export default function Group() {
 		}
 	};
 
-	const handleSubmitButtonPress = () => {
+	const handleSubmitButtonPress = async () => {
 		console.log("ANSWER:", inputValue);
 		const tempAnswers = [...answers];
 		tempAnswers[currentQuestionIndex] = {
 			...tempAnswers[currentQuestionIndex],
 			[QUESTIONS[currentQuestionIndex].field]: inputValue,
 		};
+
 		if (currentQuestionIndex < QUESTIONS.length - 1) {
 			setCurrentQuestionIndex(currentQuestionIndex + 1);
 		} else {
 			setIsLoading(true); // Start loading before making the request
 			console.log("Submitting answers...");
 			console.log(answers);
-			testGPT(answers).then((aiGeneratedResponse) => {
-				setAiGeneratedResponse(aiGeneratedResponse);
-				setIsNewGroup(false);
-				console.log(aiGeneratedResponse);
-				setIsLoading(false); // Stop loading after the request is complete
-			});
+			try {
+				await testGPT(answers).then(async (aiGeneratedResponse) => {
+					await storeAiGeneratedResponse(groupId, aiGeneratedResponse);
+					setIsNewGroup(false);
+					await fetchTripData();
+					setIsLoading(false);
+				});
+			} catch (error) {
+				console.error("Error in handleSubmitButtonPress:", error);
+			}
 		}
 		setAnswers(tempAnswers);
 		setInputValue(""); // Reset the input value for the next question
@@ -162,8 +247,7 @@ export default function Group() {
 	const closeModal = () => {
 		setShowShareModal(false);
 	};
-	const DESTINATION_IMAGE = require("../../assets/images/paris_night.jpg"); // replace with your destination image
-
+	
 	return (
 		<Background additionalStyle={styles.container}>
 			<ScrollView>
@@ -171,8 +255,11 @@ export default function Group() {
 					{!isNewGroup ? (
 						<>
 							<View style={styles.destinationImgContainer}>
-								<Image source={DESTINATION_IMAGE} style={[styles.destinationsImg]} />
-							</View>
+								<Image source={{uri: groupImage}} style={[styles.destinationsImg]} />
+									<TouchableOpacity onPress={() => navigation.goBack()}>
+										<FontAwesome zIndex={1} position="absolute" left={15} top={-370} name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
+									</TouchableOpacity>
+								</View>
 							{isEditingGroupName ? (
 								<View style={styles.groupNameContainer}>
 									<TextInput
@@ -191,47 +278,44 @@ export default function Group() {
 									/>
 								</View>
 							) : (
-								<Card additionalStyles={styles.groupMembersCard}>
-									<View style={styles.groupNameContainer}>
-										<Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
-											{groupName}
-										</Text>
-										<TouchableOpacity onPress={handleEditGroupName}>
-											<Icon name="pencil" size={35} color="black" />
-										</TouchableOpacity>
-									</View>
-									<View style={styles.groupMembersRow}>
-										{groupMembers.map((member, index) => (
-											<View key={index} style={styles.groupMember}>
-												<Image source={{ uri: member.pfpUrl }} style={styles.profilePhoto} />
-											</View>
-										))}
-										<View style={styles.addNewGroupMemberContainer}>
-											<TouchableOpacity
-												onPress={() => {
-													setShowShareModal(true);
-												}}>
-												<Ionicons name="add" size={35} color={PRIMARY_COLOR} style={styles.icon} />
+								<>
+									<View style={styles.groupNameContainerOuter}>
+										<View style={styles.groupNameContainer}>
+											<Text style={styles.groupName} numberOfLines={2} ellipsizeMode="tail">
+												{Platform.OS === "ios" ? "\u{1F9F3}" : "\u{F9F3}"}
+												{groupName}
+											</Text>
+											<TouchableOpacity onPress={handleEditGroupName}>
+												<Icon name="pencil" marginLeft={15} size={35} color="white" />
 											</TouchableOpacity>
 										</View>
 									</View>
-								</Card>
+									<Card additionalStyles={styles.groupMembersCard}>
+										<View style={styles.groupMembersRow}>
+											{groupMembers.map((member, index) => (
+												<View key={index} style={styles.groupMember}>
+													<Image source={{ uri: member.pfpUrl }} style={styles.profilePhoto} />
+												</View>
+											))}
+											<View style={styles.addNewGroupMemberContainer}>
+												<TouchableOpacity
+													onPress={() => {
+														setShowShareModal(true);
+													}}>
+													<Ionicons name="add" size={35} color={PRIMARY_COLOR} style={styles.icon} />
+												</TouchableOpacity>
+											</View>
+										</View>
+									</Card>
+								</>
 							)}
 
-							<Card additionalStyles={[styles.sectionsCard, styles.itineraryTextContainer]}>
-								<TouchableOpacity
-									style={{ flexDirection: "row", alignItems: "center" }}
-									onPress={() => {
-										navigation.navigate("Itinerary", { aiGeneratedResponse: aiGeneratedResponse });
-									}}>
-									<Text style={styles.itineraryText}>Itinerary</Text>
-									<Ionicons name="arrow-forward-outline" size={30} color={"black"}></Ionicons>
-								</TouchableOpacity>
-							</Card>
 							<FlightHeadline />
-							<CardSwipeFlights />
+							<CardSwipeFlights flightInfoOut={flightInfoOut} flightInfoBack={flightInfoBack} />
 							<HotelHeadline />
-							<HotelCard />
+							<HotelCard accommodation={accommodation} />
+							<ItineraryCard navigation={navigation} activities={activities} />
+							{/*}
 							<Button
 								textColor={"white"}
 								iconName={"chevron-forward-sharp"}
@@ -240,7 +324,7 @@ export default function Group() {
 								fontSize={24}
 								containerStyle={styles.completeButton}
 								title={"Complete Trip"}
-							/>
+							/>*/}
 						</>
 					) : (
 						<View style={styles.containerProg}>
@@ -328,6 +412,7 @@ const windowHeight = Dimensions.get("window").height;
 
 const styles = {
 	destinationsImg: {
+		zIndex: 0,
 		width: "100%",
 		height: undefined,
 		aspectRatio: 0.9,
@@ -385,19 +470,10 @@ const styles = {
 		marginBottom: "10%",
 	},
 	groupName: {
-		color: "#2b2b2b",
-		fontSize: 42,
+		color: "white",
+		fontSize: 32,
+		marginLeft: 8,
 		fontWeight: "bold",
-		marginRight: "5%",
-		flexShrink: 1,
-		shadowColor: "#000000",
-		shadowOffset: {
-			width: 1,
-			height: 3,
-		},
-		shadowOpacity: 0.15,
-		shadowRadius: 2.62,
-		elevation: 4,
 	},
 	container: {
 		alignItems: "center",
@@ -492,13 +568,14 @@ const styles = {
 	},
 	groupMembersCard: {
 		alignItems: "center",
-		marginTop: 65,
-		width: "90%",
+		marginTop: 0,
+		width: "95%",
 		height: "12%",
 	},
 	itinerariesContainer: {
 		width: "100%",
 		alignItems: "center",
+		paddingBottom: 160,
 	},
 	profilePhoto: {
 		width: 60,
@@ -542,18 +619,34 @@ const styles = {
 		marginLeft: 2, // Adjust this value based on your requirements
 	},
 	groupNameContainer: {
+		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "flex-start",
-		flexDirection: "row", // Add this line
+		flex: 1,
+	},
+	groupNameContainerOuter: {
+		marginTop: "7%",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.4,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	containerProg: {
-		marginTop: "10%",
+		marginTop: "25%",
 		width: windowWidth - 15,
 		height: windowHeight - 275,
 		flex: 1,
 	},
 	progressBarContainer: {
-		backgroundColor: "white",
+		backgroundColor: "#f9dbdb",
 		height: 8,
 		marginBottom: 30,
 		borderRadius: 100,

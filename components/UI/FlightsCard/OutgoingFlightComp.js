@@ -2,39 +2,60 @@ import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
-const OutgoingFlightComp = ({ topLeftText, topRightText, centerText }) => {
+const OutgoingFlightComp = ({ flightInfoOut }) => {
+	if (!flightInfoOut) {
+		return null;
+	}
+
 	return (
 		<View style={styles.sectionsCard}>
 			<View style={styles.container}>
 				<View style={styles.row}>
 					<View style={styles.leftColumn}>
-						<Text style={styles.text}>
-							Airline:{"\n"}
-							Flight #:{"\n"}
-							Gate:{"\n"}
-							Price:
-						</Text>
-					</View>
-					<View style={styles.rightColumn}>
-						<View style={styles.rowTwo}>
-							<Text style={styles.departureArrivalText}>DEP</Text>
-							<FontAwesome name="long-arrow-right" style={styles.icon} />
-							<Text style={styles.departureArrivalText}>ARR</Text>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Airport:</Text>
+							<Text style={styles.boldText}>
+								{flightInfoOut.DepartureAirport} to {flightInfoOut.ArrivalAirport}
+							</Text>
 						</View>
-						<Text style={styles.text}>
-							Airport:{"\n"}
-							Time:{"\n"}
-							Dates:
-						</Text>
-					</View>
-				</View>
-				<View style={styles.row}>
-					<View style={styles.centerColumn}>
-						<Text style={styles.text}>
-							Distance:{"\n"}
-							Duration:{"\n"}
-							Aircraft:
-						</Text>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Airline:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.Airline}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Flight #:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.FlightNumber}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Gate:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.FlightGate}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Price:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.Price}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Dates:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.DepartureDate}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Time:</Text>
+							<Text style={styles.boldText}>
+								{flightInfoOut.DepartureTime} to {flightInfoOut.ArrivalTime}
+							</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Duration:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.FlightDuration}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Distance:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.FlightDistance}</Text>
+						</View>
+						<View style={styles.inlineText}>
+							<Text style={styles.labelText}>Aircraft:</Text>
+							<Text style={styles.boldText}>{flightInfoOut.FlightAircraft}</Text>
+						</View>
 					</View>
 				</View>
 			</View>
@@ -47,7 +68,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		marginVertical: 0,
 		height: "auto",
-		width: "95%",
+		width: "92%",
 		backgroundColor: "#fff",
 		borderRadius: 10,
 		padding: 16,
@@ -72,38 +93,22 @@ const styles = StyleSheet.create({
 	},
 	leftColumn: {
 		flex: 1,
-		//backgroundColor: 'red',
 		padding: 5,
 	},
-	centerColumn: {
-		flex: 2,
-		//backgroundColor: 'green',
-		padding: 5,
+	labelText: {
+		fontWeight: "300",
+		fontSize: 18,
 	},
-	rightColumn: {
-		flex: 1,
-		//backgroundColor: 'blue',
-		padding: 10,
+	boldText: {
+		fontWeight: "500",
+		fontSize: 18,
+		textAlign: "right",
 	},
-	text: {
-		textAlign: "left",
-		lineHeight: 24,
-		fontSize: 22,
-	},
-	rowTwo: {
-		flex: 1,
+	inlineText: {
 		flexDirection: "row",
+		justifyContent: "space-between",
 		alignItems: "center",
-		paddingHorizontal: 0,
-	},
-	departureArrivalText: {
-		fontWeight: "bold",
-		fontSize: 20,
-		textTransform: "uppercase",
-		marginRight: 5,
-	},
-	icon: {
-		fontSize: 26,
+		marginBottom: 10,
 	},
 });
 

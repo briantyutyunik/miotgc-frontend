@@ -1,19 +1,44 @@
 export const itineraryModel = `{
-    FlightInformation: {
+    FlightInformationOut: {
       Airline: "",
       ArrivalAirport: "",
       DepartureAirport: "",
+      DepartureCity: "",
+      ArrivalCity:"",
       DepartureDate: "",
+      Price: "",
+      ArrivalTime: "",
+      DepartureTime: "",
+      FlightNumber: "",
+      FlightGate: "",
+      FlightDistance: "",
+      FlightDuration: "",
+      FlightAircraft: ""
+    },
+    FlightInformationBack: {
+      Airline: "",
+      ArrivalAirport: "",
+      DepartureAirport: "",
+      DepartureCity: "",
+      ArrivalCity:"",
       Price: "",
       ReturnDate: "",
       ArrivalTime: "",
       DepartureTime: "",
       FlightNumber: "",
+      FlightGate: "",
+      FlightDistance: "",
+      FlightDuration: "",
+      FlightAircraft: ""
     },
     Accommodation: {
       Name: "",
+      Room: "",
       Address: "",
-      Price: ""(Per night),
+      Price: ""(per night),
+      Website: "",
+      Phone: "",
+      Stars: "",
     },
     Day1: {
       Morning: {
@@ -35,21 +60,48 @@ export const itineraryModel = `{
   }`;
   
   export const sampleResponse = {
-    FlightInformation: {
-      Airline: "Delta Airlines or Alitalia",
+    FlightInformationOut: {
+      Airline: "Delta Airlines",
       ArrivalAirport: "MXP",
       DepartureAirport: "JFK",
+      DepartureCity: "New York City",
+      ArrivalCity: "Milan",
       DepartureDate: "May 5",
       Price: "Approximate $800 per person",
-      ReturnDate: "May 10",
+      //ReturnDate: "May 10",
       ArrivalTime: "09:00",
       DepartureTime: "12:00",
       FlightNumber: "ABC123",
+      FlightGate: "B12",
+      FlightDistance:"4014 Miles",
+      FlightDuration: "9 Hours",
+      FlightAircraft: "Boeing 767"
+    },
+    FlightInformationBack: {
+      Airline: "Delta Airlines ",
+      ArrivalAirport: "JFK",
+      DepartureAirport: "MXP",
+      DepartureCity: "Milan",
+      ArrivalCity: "New York City",
+      //DepartureDate: "May 5",
+      Price: "Approximate $800 per person",
+      ReturnDate: "May 10",
+      ArrivalTime: "01:00",
+      DepartureTime: "10:00",
+      FlightNumber: "DEF345",
+      FlightGate: "D9",
+      FlightDistance:"4014 Miles",
+      FlightDuration: "9 Hours",
+      FlightAircraft: "Boeing 747"
     },
     Accommodation: {
       Name: "Hotel Milano Scala",
+      Room: "36",
       Address: "Via dell'Orso, 7, 20121 Milano MI, Italy",
       Price: "$150 per night",
+      Website: "https://hotelmilanoscala.it/",
+      Phone: "+39 02 870961",
+      Stars: "4",
     },
     Day1: {
       Morning: {

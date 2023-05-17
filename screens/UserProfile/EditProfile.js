@@ -12,7 +12,7 @@ const EditProfile = () => {
 	const [lastName, setLastName] = useState("");
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
-
+	
 	const handleDeleteUser = () => {
 		Alert.alert(
 			"Confirm Account Deletion",
@@ -32,15 +32,18 @@ const EditProfile = () => {
 		);
 	};
 
+
 	return (
 		<Background>
-			<View style={styles.container}>
+			<View style={styles.outHeader}>
 				<View style={styles.header}>
 					<TouchableOpacity onPress={() => navigation.goBack()}>
-						<FontAwesome name="arrow-left" size={2} color="#333333" />
+						<FontAwesome name="arrow-left" size={35} color="#ffffff" paddingLeft="3%" />
 					</TouchableOpacity>
-					<Text style={styles.title}>Edit Profile</Text>
 				</View>
+			</View>
+			<Text style={styles.title}>Edit Profile</Text>
+			<View style={styles.container}>
 				<View style={styles.body}>
 					<CardDarker>
 						<TextInput style={styles.input} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
@@ -59,28 +62,37 @@ const EditProfile = () => {
 };
 
 const styles = StyleSheet.create({
-	safe: {
-		flex: 1,
-		backgroundColor: "white",
-	},
 	container: {
-		backgroundColor: PRIMARY_COLOR,
 		flex: 1,
+	},
+	outHeader: {
+		marginTop: "7%",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.4,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "center",
-		height: 50,
-		paddingBottom: 10,
-		backgroundColor: "white",
-		borderBottomWidth: 1,
-		borderBottomColor: "#CCCCCC",
+		justifyContent: "space-between",
+		flex: 1,
 	},
 	title: {
-		fontSize: 20,
+		marginTop: -20,
+		fontSize: 36,
 		fontWeight: "bold",
-		color: "#333333",
+		color: "white",
+		backgroundColor: "transparent",
+		textAlign: "center",
 	},
 	body: {
 		padding: 20,

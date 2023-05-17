@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 
-const HotelHeadline = ({ segmentNumber = 1 }) => {
+const HotelHeadline = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.leftContainer}>
@@ -35,23 +35,11 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-start",
 		flex: 1,
 	},
-	centerContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "flex-end",
-		flex: 1,
-	},
 	flightText: {
 		color: "white",
 		fontSize: 32,
 		marginLeft: 8,
 		fontWeight: "bold",
-	},
-	segmentText: {
-		color: "white",
-		fontWeight: "bold",
-		fontSize: 18,
-		marginRight: 20,
 	},
 });
 

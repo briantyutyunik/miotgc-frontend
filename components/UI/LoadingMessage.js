@@ -3,7 +3,7 @@ import { View, ActivityIndicator, Text } from "react-native";
 import Background from "./Background";
 
 export default function LoadingScreen() {
-	const [message, setMessage] = useState("Finishing this up for you...");
+	const [message, setMessage] = useState("Preparing you for the trip of a lifetime...");
 	const messages = ["Preparing you for the trip of a lifetime...", "Finishing this up for you...", "Wrapping things up...", "Its not boarding time yet...", "Dont fret!"];
 	let index = 0;
 
@@ -11,7 +11,7 @@ export default function LoadingScreen() {
 		const interval = setInterval(() => {
 			index = index + 1 === messages.length ? 0 : index + 1;
 			setMessage(messages[index]);
-		}, 5000);
+		}, 8500);
 
 		return () => clearInterval(interval);
 	}, []);
