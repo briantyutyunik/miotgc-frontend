@@ -32,7 +32,7 @@ To get started with MIOTGC on your local development environment, follow these s
 1. Clone the repository to your machine:
 
    ```bash
-   git clone https://github.com/your-username/make-it-out-the-group-chat.git
+   git clone https://github.com/briantyutyunik/miotgc-frontend
    ```
 
 2. Navigate to the project directory:
